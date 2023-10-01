@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "pomerium.proxy.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ template "pomerium.proxy.name" . }}
+    helm.sh/chart: {{ template "pomerium.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: proxy
+{{- if .Values.service.labels }}
+{{ toYaml .Values.service.labels | indent 4 }}
+{{- end }}
+{{- if or .Values.proxy.service.annotations .Values.service.annotations }}
+  annotations:
+  {{- if .Values.proxy.service.annotations }}
+    {{- range $key, $value := .Values.proxy.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- else if .Values.service.annotations }}
+    {{- range $key, $value := .Values.service.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+spec:
+  {{- if and .Values.ingressController.enabled (not .Values.ingressController.config.operatorMode ) }}
+  type: {{ coalesce .Values.proxy.service.type "LoadBalancer" }}
+  {{- else }}
+  type: {{ coalesce .Values.proxy.service.type "ClusterIP" }}
+  {{- end }}
+  {{- if .Values.proxy.service.externalIPs }}
+  externalIPs: {{ toYaml .Values.proxy.service.externalIPs | nindent 4}}
+  {{- end }}
+  {{- if .Values.proxy.service.externalTrafficPolicy }}
+  externalTrafficPolicy: {{ .Values.proxy.service.externalTrafficPolicy }}
+  {{- end }}
+  ports:
+    - port: {{ template "pomerium.proxy.trafficPort.number" . }}
+      targetPort: {{ template "pomerium.proxy.httpTrafficPort.scheme" . }}
+      protocol: TCP
+      name: {{ template "pomerium.proxy.httpTrafficPort.scheme" . }}
+{{- if and .Values.proxy.service.nodePort (eq .Values.proxy.service.type "NodePort" )}}
+      nodePort: {{ .Values.proxy.service.nodePort }}
+{{- end }}
+{{- if and .Values.proxy.redirectServer (not (include "pomerium.proxy.insecure" .)) }}
+    - name: http
+      targetPort: 80
+      protocol: TCP
+      port: 80
+{{- end }}
+{{- if .Values.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.metrics.port }}
+      protocol: TCP
+      targetPort: metrics
+{{- end }}
+  selector:
+    app.kubernetes.io/name: {{ template "pomerium.proxy.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

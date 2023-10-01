@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ template "pomerium.authorize.name" . }}
+    helm.sh/chart: {{ template "pomerium.chart" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: authorize
+  name: {{ template "pomerium.authorize.fullname" . }}
+{{- if or .Values.authorize.deployment.annotations .Values.annotations }}
+  annotations:
+  {{- if .Values.authorize.deployment.annotations }}
+    {{- range $key, $value := .Values.authorize.deployment.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- else if .Values.annotations }}
+    {{- range $key, $value := .Values.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+spec:
+  {{- if (ne .Values.authorize.autoscaling.enabled true) }}
+  replicas: {{ default .Values.replicaCount .Values.authorize.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ template "pomerium.authorize.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum: {{ include "pomerium.static.checksum" . }}
+{{- if .Values.podAnnotations }}
+{{ toYaml .Values.podAnnotations | indent 8 }}
+{{- end }}
+{{- if .Values.authorize.deployment.podAnnotations }}
+{{ toYaml .Values.authorize.deployment.podAnnotations | indent 8 }}
+{{- end }}
+      labels:
+        app.kubernetes.io/name: {{ template "pomerium.authorize.name" . }}
+        helm.sh/chart: {{ template "pomerium.chart" . }}
+        app.kubernetes.io/managed-by: {{ .Release.Service }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+{{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 8 }}
+{{- end }}
+    spec:
+{{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName }}
+{{- end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        args:
+          - --config=/etc/pomerium/config.yaml
+{{- range $key, $value := .Values.extraArgs }}
+{{- if $value }}
+          - --{{ $key }}={{ $value }}
+{{- else }}
+          - --{{ $key }}
+{{- end }}
+{{- end }}
+        env:
+{{- if or ( or ( and .Values.authorize.tls.cert .Values.authorize.tls.key ) .Values.authorize.existingTLSSecret ) .Values.config.generateTLS }}
+{{- include "pomerium.tls.internal.envVars" . | indent 8 }}
+{{- end }}
+        - name: SERVICES
+          value: authorize
+        - name: SIGNING_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "pomerium.signingKeySecret.name" . }}
+              key: signing-key
+{{- include "pomerium.metrics.envVars" . | indent 8}}
+{{- range $name, $value := .Values.extraEnv }}
+        - name: {{ $name }}
+          value: {{ quote $value }}
+{{- end }}
+{{- range $name, $value := .Values.authorize.deployment.extraEnv }}
+        - name: {{ $name }}
+          value: {{ quote $value }}
+{{- end }}
+        envFrom:
+          - secretRef:
+              name: {{ include "pomerium.sharedSecretName" . }}
+{{- if .Values.extraEnvFrom }}
+{{        toYaml .Values.extraEnvFrom | indent 10 }}
+{{- end }}
+        ports:
+          - containerPort: {{ template "pomerium.trafficPort.number" . }}
+            name: {{ template "pomerium.grpcTrafficPort.name" . }}
+            protocol: TCP
+          - containerPort: {{ .Values.metrics.port }}
+            name: metrics
+            protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: {{ template "pomerium.grpcTrafficPort.name" . }}
+          initialDelaySeconds: 15
+        readinessProbe:
+          tcpSocket:
+            port: {{ template "pomerium.grpcTrafficPort.name" . }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+{{ include "pomerium.volumeMounts" . | indent 10 }}
+      serviceAccountName: {{ template "pomerium.authorize.serviceAccountName" . }}
+      volumes:
+{{ include "pomerium.volumes.shared" . | indent 8 }}
+{{- $ctx := . }}
+{{- $_ := set $ctx "currentServiceName" "authorize" }}
+{{ include "pomerium.volumes.service" $ctx | indent 8 }}
+{{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 8 }}
+{{- end }}
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+{{- end }}
+{{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+{{- end }}
+{{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+{{- end }}

@@ -1,0 +1,41 @@
+{{- if eq (include "pomerium.providerOK" .) "true" }}
+{{- if .Values.ingress.enabled }}
+From outside the cluster, the route URL(s) are:
+{{- range .Values.config.routes }}
+    {{ .from | quote}}
+{{- end }}
+{{- end }}
+{{- else -}}
+##############################################################################
+####        ERROR: You did not set a valid identity provider              ####
+##############################################################################
+
+This deployment will be incomplete until you configure a valid identity provider.
+
+Currently supported providers:
+
+    - Auth0
+    - Azure Active Directory
+    - AWS Cognito
+    - GitHub
+    - GitLab
+    - Google
+    - Okta
+    - OneLogin
+    - Ping
+
+See the values.yaml file to see what values are required for each provider.
+
+If you are having trouble with the configuration of a provider please visit
+the official documentation:
+
+    https://www.pomerium.io/docs/identity-providers.html
+{{- end }}
+
+{{- if .Values.config.insecure }}
+##############################################################################
+####        DANGER: You have disabled TLS!
+####
+####        Please only do this if you absolutely know what you are doing.
+##############################################################################
+{{- end }}

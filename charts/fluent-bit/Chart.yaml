@@ -1,0 +1,26 @@
+apiVersion: v1
+name: fluent-bit
+description: Fast and lightweight log processor and forwarder or Linux, OSX and BSD family operating systems.
+keywords:
+  - logging
+  - fluent-bit
+  - fluentd
+version: 0.38.0
+appVersion: 2.1.9
+icon: https://raw.githubusercontent.com/cncf/artwork/master/projects/fluentd/fluentbit/icon/fluentbit-icon-color.svg
+home: https://fluentbit.io/
+sources:
+  - https://github.com/fluent/fluent-bit/
+maintainers:
+  - name: edsiper
+    email: eduardo@calyptia.com
+  - name: naseemkullah
+    email: naseem@transit.app
+  - name: Towmeykaw
+    email: towmeykaw@gmail.com
+  - name: stevehipwell
+    email: steve.hipwell@gmail.com
+annotations:
+  artifacthub.io/changes: |
+    - kind: - kind: changed
+      description: "Updated Fluent Bit OCI image to v2.1.9."

@@ -1,0 +1,38 @@
+{{- range $i, $job := .Values.cronJobs -}}
+{{- if $i -}}
+---
+{{ end -}}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $.Values.general.fullName }}-{{ .name }}
+  namespace:  {{ $.Values.general.namespace | default "default"}}
+  labels:
+    app: {{ $.Values.general.fullName }}
+spec:
+  timeZone: {{ .timeZone | default "Etc/GMT-7" }}
+  concurrencyPolicy: Forbid
+  schedule: {{ .schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ $.Values.general.fullName }}
+          containers:
+          - name: {{ .name }}
+            image: "{{ $.Values.general.repo }}:{{ $.Values.general.image }}"
+            env:
+            {{- range $key, $val := $.Values.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+            resources:
+              cpu: 10m
+              memory: 50Mi
+            limits:
+              cpu: 50m
+              memory: 200Mi
+            command:
+{{ toYaml .command |  indent 12 -}}
+          restartPolicy: OnFailure
+{{- end }}

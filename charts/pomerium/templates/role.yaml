@@ -1,0 +1,31 @@
+{{- $secretName := include "pomerium.secretName" . }}
+
+{{ if and .Values.rbac.create .Values.ingressController.enabled -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "pomerium.ingressController.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ template "pomerium.ingressController.name" . }}
+    helm.sh/chart: {{ template "pomerium.chart" . }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: ingressController
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+  - apiGroups:
+      - ""
+      - "apps"
+    resources:
+      - secrets
+    resourceNames:
+      - {{ $secretName | quote }}
+    verbs:
+      - get
+{{- end }}

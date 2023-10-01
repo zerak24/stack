@@ -1,0 +1,18 @@
+ingress:
+  enabled: false
+config:
+  routes:
+    - from: https://httpbin.corp.pomerium.io
+      to: http://httpbin
+      allowed_domains:
+        - pomerium.io
+    - from: https://external-httpbin.corp.pomerium.io
+      to: https://httpbin.org
+      allowed_domains:
+        - gmail.com
+    - from: https://weirdlyssl.corp.pomerium.io
+      to: http://neverssl.com
+      allowed_users:
+        - user@example.com
+    - from: https://hello.corp.pomerium.io
+      to: http://hello:8080

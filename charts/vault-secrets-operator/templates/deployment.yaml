@@ -1,0 +1,186 @@
+{{/*
+# Copyright (c) HashiCorp, Inc.
+# SPDX-License-Identifier: BUSL-1.1
+*/}}
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "chart.fullname" . }}-controller-manager
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+{{ include "imagePullSecrets" .}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chart.fullname" . }}-controller-manager
+  namespace: {{ .Release.Namespace }}
+  labels:
+    control-plane: controller-manager
+    app.kubernetes.io/component: controller-manager
+  {{- include "chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.controller.replicas }}
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+    {{- include "chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+      {{- if  .Values.controller.extraLabels }}
+        {{- toYaml .Values.controller.extraLabels | nindent 8 }}
+      {{- end }}
+      {{- include "chart.selectorLabels" . | nindent 8 }}
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      {{- if .Values.controller.annotations }}
+        {{- toYaml .Values.controller.annotations | nindent 8 }}
+      {{- end }}
+    spec:
+      containers:
+      - name: kube-rbac-proxy
+        args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v=0
+        env:
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ .Values.controller.kubernetesClusterDomain }}
+        image: {{ .Values.controller.kubeRbacProxy.image.repository }}:{{ .Values.controller.kubeRbacProxy.image.tag }}
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        resources: {{- toYaml .Values.controller.kubeRbacProxy.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.controller.securityContext | nindent 10 }}
+      - name: manager
+        args:
+        - --health-probe-bind-address=:8081
+        - --metrics-bind-address=127.0.0.1:8080
+        - --leader-elect
+        {{- if .Values.controller.manager.clientCache.persistenceModel }}
+        - --client-cache-persistence-model={{ .Values.controller.manager.clientCache.persistenceModel }}
+        {{- end }}
+        {{- if .Values.controller.manager.clientCache.cacheSize }}
+        - --client-cache-size={{ .Values.controller.manager.clientCache.cacheSize }}
+        {{- end }}
+        {{- if .Values.controller.manager.maxConcurrentReconciles }}
+        - --max-concurrent-reconciles-vds={{ .Values.controller.manager.maxConcurrentReconciles }}
+        {{- end }}
+        {{- if .Values.controller.manager.extraArgs }}
+        {{- toYaml .Values.controller.manager.extraArgs | nindent 8 }}
+        {{- end }}
+        command:
+        - /vault-secrets-operator
+        env:
+        - name: OPERATOR_POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: OPERATOR_POD_UID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.uid
+        - name: KUBERNETES_CLUSTER_DOMAIN
+          value: {{ .Values.controller.kubernetesClusterDomain }}
+        {{- range .Values.controller.manager.extraEnv }}
+        - name: {{ .name }}
+          value: {{ .value }}
+        {{- end }}
+        image: {{ .Values.controller.manager.image.repository }}:{{ .Values.controller.manager.image.tag }}
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources: {{- toYaml .Values.controller.manager.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.controller.securityContext | nindent 10 }}
+        volumeMounts:
+        - mountPath: /var/run/podinfo
+          name: podinfo
+      securityContext:
+        {{- toYaml .Values.controller.podSecurityContext | nindent 8 }}
+      serviceAccountName: {{ include "chart.fullname" . }}-controller-manager
+      terminationGracePeriodSeconds: {{ .Values.controller.terminationGracePeriodSeconds }}
+      {{- if .Values.controller.hostAliases }}
+      hostAliases:
+      {{- toYaml .Values.controller.hostAliases | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.nodeSelector }}
+      nodeSelector:
+      {{- toYaml .Values.controller.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.tolerations }}
+      tolerations:
+      {{- toYaml .Values.controller.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.affinity }}
+      affinity:
+      {{- toYaml .Values.controller.affinity | nindent 8 }}
+      {{- end }}
+      volumes:
+      - downwardAPI:
+          items:
+          - fieldRef:
+              fieldPath: metadata.name
+            path: name
+          - fieldRef:
+              fieldPath: metadata.uid
+            path: uid
+        name: podinfo
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "chart.fullname" . }}-pre-delete-controller-cleanup
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-delete
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: {{ include "chart.fullname" . }}-pre-delete-controller-cleanup
+    spec:
+      serviceAccountName: {{ include "chart.fullname" . }}-controller-manager
+      securityContext:
+        {{- toYaml .Values.controller.podSecurityContext | nindent 8 }}
+      containers:
+      - name: pre-delete-controller-cleanup
+        image: {{ .Values.controller.manager.image.repository }}:{{ .Values.controller.manager.image.tag }}
+        args:
+        - --uninstall
+        - --pre-delete-hook-timeout-seconds={{ .Values.controller.preDeleteHookTimeoutSeconds }}
+        command:
+        - /vault-secrets-operator
+        resources: {{- toYaml .Values.controller.manager.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.controller.securityContext | nindent 10 }}
+      restartPolicy: Never
+      {{- if .Values.controller.nodeSelector }}
+      nodeSelector:
+      {{- toYaml .Values.controller.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.controller.tolerations }}
+      tolerations:
+      {{- toYaml .Values.controller.tolerations | nindent 8 }}
+      {{- end }}

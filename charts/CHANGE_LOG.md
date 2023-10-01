@@ -1,0 +1,18 @@
+- vault secrets operator 0.3.1
+- kube prometheus stack 51.2.0
+- fluentbit 0.38.0
+- kong 2.28.0
+- redis 18.1.1
+- postgres 13.0.1
+- velero 5.0.2
+- pritunl 2.0.9
+- pomerium 34.0.1
+- cluster-autoscaler 9.29.3
+- aws load balancer controller 1.6.1
+- aws for fluent bit 0.1.30
+- internal registry 
+- hashicorp vault 0.25.0
+- chartmuseum 3.10.1
+- gitlab-runner 0.58.0-beta
+- jaeger 1.3.2
+- mongodb 14.0.3

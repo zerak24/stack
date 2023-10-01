@@ -1,0 +1,69 @@
+chart:
+  version: v1
+  repository: app-chart
+
+general:
+  fullName: app-test
+  repo: something
+  image: apptest:v1
+  namespace: default
+
+cronjobs:
+  - name: run-something
+    schedule: '* 12 * * *'
+    command:
+    - date
+
+env:
+  ENV_1: data-1
+  ENV_2: data-2
+
+replicaCount: 1
+
+rbac:
+  create: true
+
+service:
+  name: http
+  type: ClusterIP
+  port: 80
+  containerPort: 9000
+  containerGrpcPort: 10000
+
+no_healthcheck: true
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 100Mi
+  requests:
+    cpu: 200m
+    memory: 200Mi
+
+kongIngress:
+  enabled: true
+  class: "kong"
+  mode: "http"
+  routeMap:
+  - name: health
+    overridePath: /api/v1/appname/health
+    upstream_path: /health
+  - name: public
+    overridePath: /api/v1/appname/public
+    upstream_path: /public
+    plugins:
+    - cors
+    cors:
+      origins:
+      - "*"
+      methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+  ingress_config: {}
+
+kongIngressConfig:
+  domains:
+    - gw-dev.example.vn

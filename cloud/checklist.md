@@ -1,0 +1,10 @@
+- vpc
+- rds
+- eks
+- ec2
+- eks-identity-workers
+- route53
+- sqs
+- s3 + cloudfront
+- sg
+- gitlab
