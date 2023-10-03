@@ -51,7 +51,7 @@ metricsService:
 
 defaultVaultConnection:
   enabled: true
-  address: "https://vault.kafefin.net" #### config
+  address: "vault.default.svc.cluster.local.:8200" #### config
 
 defaultAuthMethod:
   enabled: false
