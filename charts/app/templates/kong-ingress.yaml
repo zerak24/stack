@@ -17,9 +17,9 @@ metadata:
   labels:
     app: {{ $.Values.general.fullName }}
 spec:
-  tls:
-  - hosts:
-{{ toYaml $.Values.kongIngressConfig.domains | indent 4 }}
+#   tls:
+#   - hosts:
+# {{ toYaml $.Values.kongIngressConfig.domains | indent 4 }}
   rules:
   {{- range $.Values.kongIngressConfig.domains }}
   - host: {{ . }}
@@ -40,7 +40,7 @@ metadata:
   name: kong-{{ $.Values.general.fullName }}-{{ $element.name }}
   annotations:
     konghq.com/protocol: http
-    konghq.com/path: /
+    konghq.com/path: {{ $element.upstream_path }}
     konghq.com/connect_timeout: "10000"
     konghq.com/retries: "10"
     konghq.com/read_timeout: "10000"

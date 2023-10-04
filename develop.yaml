@@ -67,4 +67,4 @@ kongIngress:
 
 kongIngressConfig:
   domains:
-    - localhost
+    - gw.example.info
