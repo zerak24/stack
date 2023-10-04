@@ -1,11 +1,11 @@
 chart:
   version: v1
-  repository: duyly
+  repository: zerak24
 
 general:
   fullName: app-test
   repo: something
-  image: login:latest
+  image: simple-go:v1
   namespace: default
 
 cronjobs:
@@ -17,6 +17,11 @@ cronjobs:
 env:
   ENV_1: data-1
   ENV_2: data-2
+  SOMETHING:
+    valueFrom:
+      secretKeyRef:
+        name: k8s-secret-env
+        key: something
 
 replicaCount: 1
 

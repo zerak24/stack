@@ -3,4 +3,11 @@
   - add postgresql charts to kong
   - notice in storageClass
   - add namespace cho kong
-
+## vso
+  - login to vault
+  - create approle
+  - create policy
+  - create role "vso"
+  - read role-id
+  - write secret-id
+  - decode base64 for secret-id

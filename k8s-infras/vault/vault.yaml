@@ -1,14 +1,8 @@
 global:
   enabled: false
   namespace: "default"
-
 server:
   enabled: "true"
-  image:
-    repository: "hashicorp/vault"
-    tag: "1.14.0"
-    pullPolicy: IfNotPresent
-  updateStrategyType: "OnDelete"
   logLevel: "WARN"
   resources:
     requests:
@@ -17,11 +11,8 @@ server:
     limits:
       memory: 300Mi
       cpu: 200m
-
   tolerations: []
-
   nodeSelector: {}
-
   dataStorage:
     enabled: true
     size: 1Gi
@@ -29,11 +20,9 @@ server:
     storageClass: standard
     accessMode: ReadWriteOnce
     annotations: {}
-
   dev:
     enabled: true
     devRootToken: "somethingsecure"
-
   serviceAccount:
     create: true
     name: "vault"

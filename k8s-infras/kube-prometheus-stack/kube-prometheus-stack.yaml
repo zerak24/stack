@@ -1,0 +1,1087 @@
+defaultRules:
+  additionalRuleAnnotations:
+    object: "{{ $labels.pod }}"
+  create: true
+  rules:
+    alertmanager: true
+    etcd: true
+    configReloaders: true
+    general: false
+    k8s: true
+    kubeApiserverAvailability: true
+    kubeApiserverBurnrate: true
+    kubeApiserverHistogram: true
+    kubeApiserverSlos: true
+    kubeControllerManager: false
+    kubelet: true
+    kubeProxy: true
+    kubePrometheusGeneral: true
+    kubePrometheusNodeRecording: true
+    kubernetesApps: true
+    kubernetesResources: true
+    kubernetesStorage: true
+    kubernetesSystem: true
+    kubeSchedulerAlerting: false
+    kubeSchedulerRecording: false
+    kubeStateMetrics: true
+    network: true
+    node: true
+    nodeExporterAlerting: true
+    nodeExporterRecording: true
+    prometheus: true
+    prometheusOperator: true
+additionalPrometheusRulesMap:
+  rule-name:
+    groups:
+    - name: KubestateExporter
+      rules:
+        - alert: KubernetesNodeReady
+          expr: 'kube_node_status_condition{condition="Ready",status="true"} == 0'
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes Node ready
+            description: "Node {{ $labels.node }} has been unready for a long time"
+
+        - alert: KubernetesMemoryPressure
+          expr: 'kube_node_status_condition{condition="MemoryPressure",status="true"} == 1'
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes memory pressure
+            description: "{{ $labels.node }} has MemoryPressure condition"
+
+        - alert: KubernetesDiskPressure
+          expr: 'kube_node_status_condition{condition="DiskPressure",status="true"} == 1'
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes disk pressure
+            description: "{{ $labels.node }} has DiskPressure condition"
+
+        - alert: KubernetesNetworkUnavailable
+          expr: 'kube_node_status_condition{condition="NetworkUnavailable",status="true"} == 1'
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes network unavailable
+            description: "{{ $labels.node }} has NetworkUnavailable condition"
+
+        - alert: KubernetesContainerOomKiller
+          expr: '(kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 10m >= 1) and ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[10m]) == 1'
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.pod }}"
+            summary: Kubernetes container oom killer
+            description: "Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has been OOMKilled {{ $value }} times in the last 10 minutes."
+
+        - alert: KubernetesCronjobSuspended
+          expr: 'kube_cronjob_spec_suspend != 0'
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.cronjob }}"
+            summary: Kubernetes CronJob suspended
+            description: "CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is suspended"
+
+        - alert: KubernetesPersistentvolumeError
+          expr: 'kube_persistentvolume_status_phase{phase=~"Failed|Pending", job="kube-state-metrics"} > 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes PersistentVolume error
+            description: "Persistent volume is in bad state"
+
+        - alert: KubernetesStatefulsetDown
+          expr: 'kube_statefulset_replicas != kube_statefulset_status_replicas_ready > 0'
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.statefulset }}"
+            summary: Kubernetes StatefulSet down
+            description: "A StatefulSet went down"
+
+        - alert: KubernetesHpaScalingAbility
+          expr: 'kube_horizontalpodautoscaler_status_condition{status="false", condition="AbleToScale"} == 1'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.pod }}"
+            summary: Kubernetes HPA scaling ability
+            description: "Pod is unable to scale"
+
+        - alert: KubernetesHpaMetricAvailability
+          expr: 'kube_horizontalpodautoscaler_status_condition{status="false", condition="ScalingActive"} == 1'
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes HPA metric availability
+            description: "HPA is not able to collect metrics"
+
+        - alert: KubernetesHpaUnderutilized
+          expr: 'max(quantile_over_time(0.5, kube_horizontalpodautoscaler_status_desired_replicas[1d]) == kube_horizontalpodautoscaler_spec_min_replicas) by (horizontalpodautoscaler) > 3'
+          for: 0m
+          labels:
+            severity: info
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes HPA underutilized
+            description: "HPA is constantly at minimum replicas for 50% of the time. Potential cost saving here."
+
+        - alert: KubernetesPodNotHealthy
+          expr: 'sum by (namespace, pod) (kube_pod_status_phase{phase=~"Pending|Unknown|Failed"}) > 0'
+          for: 15m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.pod }}"
+            summary: Kubernetes Pod not healthy
+            description: "Pod has been in a non-ready state for longer than 15 minutes."
+
+        - alert: KubernetesPodCrashLooping
+          expr: 'increase(kube_pod_container_status_restarts_total[1m]) > 3'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.pod }}"
+            summary: Kubernetes pod crash looping
+            description: "Pod {{ $labels.pod }} is crash looping"
+
+        - alert: KubernetesReplicassetMismatch
+          expr: 'kube_replicaset_spec_replicas != kube_replicaset_status_ready_replicas'
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.replicaset }}"
+            summary: Kubernetes ReplicasSet mismatch
+            description: "Deployment Replicas mismatch"
+
+        - alert: KubernetesDeploymentReplicasMismatch
+          expr: 'kube_deployment_spec_replicas != kube_deployment_status_replicas_available'
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.deployment }}"
+            summary: Kubernetes Deployment replicas mismatch
+            description: "Deployment Replicas mismatch"
+
+        - alert: KubernetesStatefulsetReplicasMismatch
+          expr: 'kube_statefulset_status_replicas_ready != kube_statefulset_status_replicas'
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.statefulset }}"
+            summary: Kubernetes StatefulSet replicas mismatch
+            description: "A StatefulSet does not match the expected number of replicas."
+
+        - alert: KubernetesDeploymentGenerationMismatch
+          expr: 'kube_deployment_status_observed_generation != kube_deployment_metadata_generation'
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes Deployment generation mismatch
+            description: "A Deployment has failed but has not been rolled back."
+
+        - alert: KubernetesStatefulsetGenerationMismatch
+          expr: 'kube_statefulset_status_observed_generation != kube_statefulset_metadata_generation'
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes StatefulSet generation mismatch
+            description: "A StatefulSet has failed but has not been rolled back."
+
+        - alert: KubernetesStatefulsetUpdateNotRolledOut
+          expr: 'max without (revision) (kube_statefulset_status_current_revision unless kube_statefulset_status_update_revision) * (kube_statefulset_replicas != kube_statefulset_status_replicas_updated)'
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes StatefulSet update not rolled out
+            description: "StatefulSet update has not been rolled out."
+
+        - alert: KubernetesDaemonsetRolloutStuck
+          expr: 'kube_daemonset_status_number_ready / kube_daemonset_status_desired_number_scheduled * 100 < 100 or kube_daemonset_status_desired_number_scheduled - kube_daemonset_status_current_number_scheduled > 0'
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes DaemonSet rollout stuck
+            description: "Some Pods of DaemonSet are not scheduled or not ready"
+
+        - alert: KubernetesDaemonsetMisscheduled
+          expr: 'kube_daemonset_status_number_misscheduled > 0'
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.daemonset }}"
+            summary: Kubernetes DaemonSet misscheduled
+            description: "Some DaemonSet Pods are running where they are not supposed to run"
+
+        - alert: KubernetesCronjobTooLong
+          expr: 'time() - kube_cronjob_next_schedule_time - 61200 > 3600'
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.cronjob }}"
+            summary: Kubernetes CronJob too long
+            description: "CronJob {{ $labels.namespace }}/{{ $labels.cronjob }} is taking more than 1h to complete."
+
+        - alert: KubernetesJobSlowCompletion
+          expr: 'kube_job_spec_completions - kube_job_status_succeeded > 0'
+          for: 12h
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.job_name }}"
+            summary: Kubernetes job slow completion
+            description: "Kubernetes Job {{ $labels.namespace }}/{{ $labels.job_name }} did not complete in time."
+
+        - alert: KubernetesApiServerErrors
+          expr: 'sum(rate(apiserver_request_total{job="apiserver",code=~"^(?:5..)$"}[1m])) / sum(rate(apiserver_request_total{job="apiserver"}[1m])) * 100 > 3'
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes API server errors
+            description: "Kubernetes API server is experiencing high error rate"
+
+        - alert: KubernetesClientCertificateExpiresSoon
+          expr: 'apiserver_client_certificate_expiration_seconds_count{job="apiserver"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="apiserver"}[5m]))) < 24*60*60'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Kubernetes client certificate expires soon
+            description: "A client certificate used to authenticate to the apiserver is expiring in less than 24.0 hours."
+
+        - alert: KubernetesApiServerLatency
+          expr: 'histogram_quantile(0.99, sum(rate(apiserver_request_latencies_bucket{subresource!="log",verb!~"^(?:CONNECT|WATCHLIST|WATCH|PROXY)$"} [10m])) WITHOUT (instance, resource)) / 1e+06 > 1'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.verb }} - {{ $labels.resource }}"
+            summary: Kubernetes API server latency
+            description: "Kubernetes API server has a 99th percentile latency of {{ $value }} seconds for {{ $labels.verb }} {{ $labels.resource }}."
+
+    - name: EmbeddedExporterV2
+      rules:
+        - alert: HaproxyHighHttp4xxErrorRateBackend
+          expr: '((sum by (proxy) (rate(haproxy_server_http_responses_total{code="4xx"}[1m])) / sum by (proxy) (rate(haproxy_server_http_responses_total[1m]))) * 100) > 5'
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.fqdn }} - {{ $labels.backend }}"
+            summary: HAProxy high HTTP 4xx error rate backend
+            description: "Too many HTTP requests with status 4xx (> 5%) on backend {{ $labels.fqdn }}/{{ $labels.backend }}"
+
+        - alert: HaproxyHighHttp5xxErrorRateBackend
+          expr: '((sum by (proxy) (rate(haproxy_server_http_responses_total{code="5xx"}[1m])) / sum by (proxy) (rate(haproxy_server_http_responses_total[1m]))) * 100) > 5'
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.fqdn }} - {{ $labels.backend }}"
+            summary: HAProxy high HTTP 5xx error rate backend
+            description: "Too many HTTP requests with status 5xx (> 5%) on backend {{ $labels.fqdn }}/{{ $labels.backend }}"
+
+        - alert: HaproxyHighHttp4xxErrorRateServer
+          expr: '((sum by (server) (rate(haproxy_server_http_responses_total{code="4xx"}[1m])) / sum by (server) (rate(haproxy_server_http_responses_total[1m]))) * 100) > 5'
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.server }}"
+            summary: HAProxy high HTTP 4xx error rate server
+            description: "Too many HTTP requests with status 4xx (> 5%) on server {{ $labels.server }}"
+
+        - alert: HaproxyHighHttp5xxErrorRateServer
+          expr: '((sum by (server) (rate(haproxy_server_http_responses_total{code="5xx"}[1m])) / sum by (server) (rate(haproxy_server_http_responses_total[1m]))) * 100) > 5'
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.server }}"
+            summary: HAProxy high HTTP 5xx error rate server
+            description: "Too many HTTP requests with status 5xx (> 5%) on server {{ $labels.server }}"
+
+        - alert: HaproxyServerResponseErrors
+          expr: '(sum by (server) (rate(haproxy_server_response_errors_total[1m])) / sum by (server) (rate(haproxy_server_http_responses_total[1m]))) * 100 > 5'
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.server }}"
+            summary: HAProxy server response errors
+            description: "Too many response errors to {{ $labels.server }} server (> 5%)."
+
+        - alert: HaproxyBackendConnectionErrors
+          expr: '(sum by (proxy) (rate(haproxy_backend_connection_errors_total[1m]))) > 100'
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.fqdn }} - {{ $labels.backend }}"
+            summary: HAProxy backend connection errors
+            description: "Too many connection errors to {{ $labels.fqdn }}/{{ $labels.backend }} backend (> 100 req/s). Request throughput may be too high."
+
+        - alert: HaproxyServerConnectionErrors
+          expr: '(sum by (proxy) (rate(haproxy_server_connection_errors_total[1m]))) > 100'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.server }}"
+            summary: HAProxy server connection errors
+            description: "Too many connection errors to {{ $labels.server }} server (> 100 req/s). Request throughput may be too high."
+
+        - alert: HaproxyBackendMaxActiveSession>80%
+          expr: '((haproxy_server_max_sessions >0) * 100) / (haproxy_server_limit_sessions > 0) > 80'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.server }} - {{ $labels.proxy }}"
+            summary: HAProxy backend max active session > 80%
+            description: "Session limit from backend {{ $labels.proxy }} to server {{ $labels.server }} reached 80% of limit - {{ $value | printf \"%.2f\"}}%"
+
+        - alert: HaproxyPendingRequests
+          expr: 'sum by (proxy) (rate(haproxy_backend_current_queue[2m])) > 0'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.proxy }}"
+            summary: HAProxy pending requests
+            description: "Some HAProxy requests are pending on {{ $labels.proxy }} - {{ $value | printf \"%.2f\"}}"
+
+        - alert: HaproxyHttpSlowingDown
+          expr: 'avg by (instance, proxy) (haproxy_backend_max_total_time_seconds) > 1'
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: HAProxy HTTP slowing down
+            description: "Average request time is increasing - {{ $value | printf \"%.2f\"}}"
+
+        - alert: HaproxyRetryHigh
+          expr: 'sum by (proxy) (rate(haproxy_backend_retry_warnings_total[1m])) > 10'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.proxy }}"
+            summary: HAProxy retry high
+            description: "High rate of retry on {{ $labels.proxy }} - {{ $value | printf \"%.2f\"}}"
+
+        - alert: HaproxyHasNoAliveBackends
+          expr: 'haproxy_backend_active_servers + haproxy_backend_backup_servers == 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.proxy }}"
+            summary: HAproxy has no alive backends
+            description: "HAProxy has no alive active or backup backends for {{ $labels.proxy }}"
+
+        - alert: HaproxyFrontendSecurityBlockedRequests
+          expr: 'sum by (proxy) (rate(haproxy_frontend_denied_connections_total[2m])) > 10'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: HAProxy frontend security blocked requests
+            description: "HAProxy is blocking requests for security reason"
+
+        - alert: HaproxyServerHealthcheckFailure
+          expr: 'increase(haproxy_server_check_failures_total[1m]) > 0'
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.server }}"
+            summary: HAProxy server healthcheck failure
+            description: "Some server healthcheck are failing on {{ $labels.server }}"
+
+    - name: Oliver006RedisExporter
+      rules:
+        - alert: RedisDown
+          expr: 'redis_up == 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis down
+            description: "Redis instance is down"
+
+        - alert: RedisTooManyMasters
+          expr: 'count(redis_instance_info{role="master"}) > 1'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis too many masters
+            description: "Redis cluster has too many nodes marked as master."
+
+        - alert: RedisDisconnectedSlaves
+          expr: 'count without (instance, job) (redis_connected_slaves) - sum without (instance, job) (redis_connected_slaves) - 1 > 1'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis disconnected slaves
+            description: "Redis not replicating for all slaves. Consider reviewing the redis replication status."
+
+        - alert: RedisReplicationBroken
+          expr: 'delta(redis_connected_slaves[1m]) < 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis replication broken
+            description: "Redis instance lost a slave"
+
+        - alert: RedisClusterFlapping
+          expr: 'changes(redis_connected_slaves[1m]) > 1'
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis cluster flapping
+            description: "Changes have been detected in Redis replica connection. This can occur when replica nodes lose connection to the master and reconnect (a.k.a flapping)."
+
+        - alert: RedisMissingBackup
+          expr: 'time() - redis_rdb_last_save_timestamp_seconds > 60 * 60 * 24'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis missing backup
+            description: "Redis has not been backuped for 24 hours"
+
+        - alert: RedisOutOfSystemMemory
+          expr: 'redis_memory_used_bytes / redis_total_system_memory_bytes * 100 > 90'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis out of system memory
+            description: "Redis is running out of system memory (> 90%)"
+
+        - alert: RedisOutOfConfiguredMaxmemory
+          expr: 'redis_memory_used_bytes / redis_memory_max_bytes * 100 > 90'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis out of configured maxmemory
+            description: "Redis is running out of configured maxmemory (> 90%)"
+
+        - alert: RedisTooManyConnections
+          expr: 'redis_connected_clients > 100'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis too many connections
+            description: "Redis instance has too many connections"
+
+        - alert: RedisNotEnoughConnections
+          expr: 'redis_connected_clients < 5'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis not enough connections
+            description: "Redis instance should have more connections (> 5)"
+
+        - alert: RedisRejectedConnections
+          expr: 'increase(redis_rejected_connections_total[1m]) > 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Redis rejected connections
+            description: "Some connections to Redis has been rejected"
+    - name: EmbeddedExporter
+      rules:
+        - alert: PrometheusTargetMissingWithWarmupTime
+          expr: 'sum by (instance, job) ((up == 0) * on (instance) group_right(job) (node_time_seconds - node_boot_time_seconds > 600))'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus target missing with warmup time
+            description: "Allow a job time to start up (10 minutes) before alerting that it's down."
+
+        - alert: PrometheusConfigurationReloadFailure
+          expr: 'prometheus_config_last_reload_successful != 1'
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus configuration reload failure
+            description: "Prometheus configuration reload error"
+
+        - alert: PrometheusTooManyRestarts
+          expr: 'changes(process_start_time_seconds{job=~"prometheus|pushgateway|alertmanager"}[15m]) > 2'
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus too many restarts
+            description: "Prometheus has restarted more than twice in the last 15 minutes. It might be crashlooping."
+
+        - alert: PrometheusAlertmanagerConfigurationReloadFailure
+          expr: 'alertmanager_config_last_reload_successful != 1'
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus AlertManager configuration reload failure
+            description: "AlertManager configuration reload error"
+
+        - alert: PrometheusAlertmanagerConfigNotSynced
+          expr: 'count(count_values("config_hash", alertmanager_config_hash)) > 1'
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus AlertManager config not synced
+            description: "Configurations of AlertManager cluster instances are out of sync"
+
+        - alert: PrometheusNotConnectedToAlertmanager
+          expr: 'prometheus_notifications_alertmanagers_discovered < 1'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus not connected to alertmanager
+            description: "Prometheus cannot connect the alertmanager"
+
+        - alert: PrometheusTemplateTextExpansionFailures
+          expr: 'increase(prometheus_template_text_expansion_failures_total[3m]) > 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus template text expansion failures
+            description: "Prometheus encountered {{ $value }} template text expansion failures"
+
+        - alert: PrometheusRuleEvaluationSlow
+          expr: 'prometheus_rule_group_last_duration_seconds > prometheus_rule_group_interval_seconds'
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus rule evaluation slow
+            description: "Prometheus rule evaluation took more time than the scheduled interval. It indicates a slower storage backend access or too complex query."
+
+        - alert: PrometheusNotificationsBacklog
+          expr: 'min_over_time(prometheus_notifications_queue_length[10m]) > 0'
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus notifications backlog
+            description: "The Prometheus notification queue has not been empty for 10 minutes"
+
+        - alert: PrometheusTargetEmpty
+          expr: 'prometheus_sd_discovered_targets == 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus target empty
+            description: "Prometheus has no target in service discovery"
+
+        - alert: PrometheusTargetScrapingSlow
+          expr: 'prometheus_target_interval_length_seconds{quantile="0.9"} / on (interval, instance, job) prometheus_target_interval_length_seconds{quantile="0.5"} > 1.05'
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus target scraping slow
+            description: "Prometheus is scraping exporters slowly since it exceeded the requested interval time. Your Prometheus server is under-provisioned."
+
+        - alert: PrometheusTsdbCheckpointCreationFailures
+          expr: 'increase(prometheus_tsdb_checkpoint_creations_failed_total[1m]) > 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus TSDB checkpoint creation failures
+            description: "Prometheus encountered {{ $value }} checkpoint creation failures"
+
+        - alert: PrometheusTsdbCheckpointDeletionFailures
+          expr: 'increase(prometheus_tsdb_checkpoint_deletions_failed_total[1m]) > 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus TSDB checkpoint deletion failures
+            description: "Prometheus encountered {{ $value }} checkpoint deletion failures"
+
+        - alert: PrometheusTsdbCompactionsFailed
+          expr: 'increase(prometheus_tsdb_compactions_failed_total[1m]) > 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus TSDB compactions failed
+            description: "Prometheus encountered {{ $value }} TSDB compactions failures"
+
+        - alert: PrometheusTsdbHeadTruncationsFailed
+          expr: 'increase(prometheus_tsdb_head_truncations_failed_total[1m]) > 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus TSDB head truncations failed
+            description: "Prometheus encountered {{ $value }} TSDB head truncation failures"
+
+        - alert: PrometheusTsdbReloadFailures
+          expr: 'increase(prometheus_tsdb_reloads_failures_total[1m]) > 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus TSDB reload failures
+            description: "Prometheus encountered {{ $value }} TSDB reload failures"
+
+        - alert: PrometheusTsdbWalCorruptions
+          expr: 'increase(prometheus_tsdb_wal_corruptions_total[1m]) > 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus TSDB WAL corruptions
+            description: "Prometheus encountered {{ $value }} TSDB WAL corruptions"
+
+        - alert: PrometheusTsdbWalTruncationsFailed
+          expr: 'increase(prometheus_tsdb_wal_truncations_failed_total[1m]) > 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Prometheus TSDB WAL truncations failed
+            description: "Prometheus encountered {{ $value }} TSDB WAL truncation failures"
+    - name: GoogleCadvisor
+      rules:
+        - alert: ContainerAbsent
+          expr: 'absent(container_last_seen)'
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Container absent
+            description: "A container is absent for 5 min"
+
+        - alert: ContainerCpuUsage
+          expr: '(sum(rate(container_cpu_usage_seconds_total{name!="", pod!="clickhouse-log-shard0-0"}[3m])) BY (pod) * 100) > 80'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.pod }}"
+            summary: Container CPU usage
+            description: "Container CPU usage is above 80%"
+
+        - alert: ContainerMemoryUsage
+          expr: '(sum(container_memory_working_set_bytes{name!=""}) BY (pod) / sum(container_spec_memory_limit_bytes > 0) BY (pod) * 100) > 80'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.pod }}"
+            summary: Container Memory usage
+            description: "Container Memory usage is above 80%"
+
+        - alert: ContainerVolumeUsage
+          expr: '(1 - (sum(container_fs_inodes_free{name!=""}) BY (pod) / sum(container_fs_inodes_total) BY (pod))) * 100 > 80'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.pod }}"
+            summary: Container Volume usage
+            description: "Container Volume usage is above 80%"
+
+        - alert: ContainerHighThrottleRate
+          expr: 'rate(container_cpu_cfs_throttled_seconds_total[3m]) > 1'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: Container high throttle rate
+            description: "Container is being throttled"
+
+    - name: MysqldExporter
+      rules:
+        - alert: MysqlDown
+          expr: 'mysql_up == 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: MySQL down
+            description: "MySQL instance is down on {{ $labels.instance }}"
+
+        - alert: MysqlTooManyConnections(>80%)
+          expr: 'max_over_time(mysql_global_status_threads_connected[1m]) / mysql_global_variables_max_connections * 100 > 80'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: MySQL too many connections (> 80%)
+            description: "More than 80% of MySQL connections are in use on {{ $labels.instance }}"
+
+        - alert: MysqlHighThreadsRunning
+          expr: 'max_over_time(mysql_global_status_threads_running[1m]) / mysql_global_variables_max_connections * 100 > 60'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: MySQL high threads running
+            description: "More than 60% of MySQL connections are in running state on {{ $labels.instance }}"
+
+        - alert: MysqlSlaveIoThreadNotRunning
+          expr: '( mysql_slave_status_slave_io_running and ON (instance) mysql_slave_status_master_server_id > 0 ) == 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: MySQL Slave IO thread not running
+            description: "MySQL Slave IO thread not running on {{ $labels.instance }}"
+
+        - alert: MysqlSlaveSqlThreadNotRunning
+          expr: '( mysql_slave_status_slave_sql_running and ON (instance) mysql_slave_status_master_server_id > 0) == 0'
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: MySQL Slave SQL thread not running
+            description: "MySQL Slave SQL thread not running on {{ $labels.instance }}"
+
+        - alert: MysqlSlaveReplicationLag
+          expr: '( (mysql_slave_status_seconds_behind_master - mysql_slave_status_sql_delay) and ON (instance) mysql_slave_status_master_server_id > 0 ) > 30'
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: MySQL Slave replication lag
+            description: "MySQL replication lag on {{ $labels.instance }}"
+
+        - alert: MysqlSlowQueries
+          expr: 'increase(mysql_global_status_slow_queries[1m]) > 0'
+          for: 2m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: MySQL slow queries
+            description: "MySQL server mysql has some new slow query."
+
+        - alert: MysqlInnodbLogWaits
+          expr: 'rate(mysql_global_status_innodb_log_waits[15m]) > 10'
+          for: 0m
+          labels:
+            severity: warning
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: MySQL InnoDB log waits
+            description: "MySQL innodb log writes stalling"
+
+        - alert: MysqlRestarted
+          expr: 'mysql_global_status_uptime < 60'
+          for: 0m
+          labels:
+            severity: info
+          annotations:
+            timestamp: >
+              {{ with query "time()" }}{{ . | first | value | humanizeTimestamp }}{{ end }}
+            object: "{{ $labels.node }}"
+            summary: MySQL restarted
+            description: "MySQL has just been restarted, less than one minute ago on {{ $labels.instance }}."
+alertmanager:
+  config:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['...']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 4h
+    #   receiver: telegram
+    #   routes:
+    #   - receiver: telegram
+    #     group_wait: 1m
+    #     group_interval: 5m #5m
+    #     repeat_interval: 4h #4h
+    #     continue: true
+    # receivers:
+    #   - name: 'telegram'
+    #     telegram_configs:
+    #       - api_url: 'https://api.telegram.org'
+    #         bot_token: '6346867025:AAGprz0L0KQvCkla5ruqNXFzEwY1LjvcUWQ'
+    #         chat_id: -4097081356
+    #         message: '{{ template "alert" .}}'
+    #         parse_mode: HTML
+    templates:
+    - '/etc/alertmanager/config/template_1.tmpl'
+  templateFiles:
+    template_1.tmpl: |-
+        {{ define "alert" }}
+        {{- range .Alerts }}
+          {{ if eq .Status "firing" }} 🔥 {{- if eq .Labels.severity "Critical" }} 🚨 {{ else }} ⚠️ {{ end -}} {{ else }} ✅ {{ end }}
+          <b>Alert:</b> {{ .Annotations.summary }}
+          {{- if .Annotations.object }}
+          <b>Object:</b> <code>{{ .Annotations.object }}</code>
+          {{ end -}}
+          {{- if .Annotations.timestamp }}
+          <b>Time:</b> {{ .Annotations.timestamp }}
+          {{ end -}}
+          <b>Description:</b> {{ .Annotations.description }}
+        {{ end -}}
+        {{ end -}}
+grafana:
+  enabled: true
+  defaultDashboardsTimezone: Asia/Saigon
+  adminPassword: 79b4dfa1d213d37746521bd59224aa2f8c7ed127
+kubeControllerManager:
+  enabled: false

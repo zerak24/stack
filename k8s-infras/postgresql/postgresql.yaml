@@ -1,0 +1,7 @@
+global:
+  storageClass: "standard"
+  postgresql:
+    auth:
+      postgresPassword: "4c47081795cf0fae385636c4bffba501c58e476b"
+      username: "backend"
+      password: "f35dcba9c3cfabda740d6a979b4eb8949405b7a1"
