@@ -4,8 +4,8 @@ chart:
 
 general:
   fullName: app-test
-  repo: something
-  image: simple-go:v1
+  repo: docker.io/zerak24
+  image: simple-go:v1.0.1
   namespace: default
 
 cronjobs:
@@ -26,7 +26,7 @@ env:
 replicaCount: 1
 
 rbac:
-  create: true
+  enabled: true
 
 service:
   type: ClusterIP
@@ -38,23 +38,20 @@ no_healthcheck: true
 
 resources:
   limits:
-    cpu: 100m
-    memory: 100Mi
-  requests:
     cpu: 200m
     memory: 200Mi
+  requests:
+    cpu: 10m
+    memory: 10Mi
 
 kongIngress:
   enabled: true
   class: "kong"
   mode: "http"
   routeMap:
-  - name: health
-    overridePath: /api/v1/appname/health
-    upstream_path: /health
   - name: public
-    overridePath: /api/v1/appname/public
-    upstream_path: /public
+    overridePath: /hi
+    upstream_path: /hi
     plugins:
     - cors
     cors:
@@ -70,4 +67,4 @@ kongIngress:
 
 kongIngressConfig:
   domains:
-    - gw-dev.example.vn
+    - localhost

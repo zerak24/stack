@@ -1,5 +1,5 @@
 - apply all CRDs
-## kong install
+## kong
   - add postgresql charts to kong
   - notice in storageClass
   - add namespace cho kong
@@ -11,3 +11,13 @@
   - read role-id
   - write secret-id
   - decode base64 for secret-id
+## kube-prometheus-stack
+  - remove some alert rules
+  - unstash receiver alertmanager
+## postgresql
+  - hide password
+## vault
+  - hide root's token
+## redis
+## mongodb
+  - if remove mongodb to re-release should delete pvc of mongodb to void authen conflict

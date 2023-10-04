@@ -4,7 +4,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    konghq.com/override: {{ $.Values.general.fullName }}-kong-ingress-configuration-http-{{ $element.name }}
     konghq.com/strip-path: "true"
     konghq.com/method: "POST,GET,PUT,DELETE,OPTIONS,PATCH"
     konghq.com/regex-priority: "0"
@@ -40,7 +39,6 @@ kind: Service
 metadata:
   name: kong-{{ $.Values.general.fullName }}-{{ $element.name }}
   annotations:
-    konghq.com/override: {{ $.Values.general.fullName }}-kong-ingress-configuration-http-{{ $element.name }}
     konghq.com/protocol: http
     konghq.com/path: /
     konghq.com/connect_timeout: "10000"

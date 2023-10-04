@@ -22,7 +22,7 @@ spec:
       serviceAccountName: {{ $.Values.general.fullName }}
       containers:
         - name: {{ $.Values.general.fullName }}
-          image: "{{ $.Values.general.repo }}:{{ $.Values.general.image }}"
+          image: {{ $.Values.general.repo }}/{{ $.Values.general.image }}
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
