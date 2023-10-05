@@ -1081,7 +1081,21 @@ alertmanager:
         {{ end -}}
 grafana:
   enabled: true
+  grafana.ini:
+    server:
+      domain: grafana.example.info
+      root_url: http://grafana.example.info
   defaultDashboardsTimezone: Asia/Saigon
   adminPassword: 79b4dfa1d213d37746521bd59224aa2f8c7ed127
+  ingress:
+    enabled: true
+    annotations: {}
+      # kubernetes.io/ingress.class: alb
+      # alb.ingress.kubernetes.io/group.name: "ingress-external"
+      # alb.ingress.kubernetes.io/scheme: "internet-facing"
+      # alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    hosts:
+      - grafana.example.info
+    path: /
 kubeControllerManager:
   enabled: false

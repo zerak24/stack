@@ -24,4 +24,8 @@
 ## chartmuseum
   - access with port 8080
   - need to add DISABLE_API: false to helm cm-push
-## 
+## clickhouse
+  - hide password
+  - can change compress algorithm
+## fluentbit
+  - custom config for log (need to read more)
