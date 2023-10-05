@@ -1,5 +1,6 @@
 - apply all CRDs
 ## kong
+  * need to read more
   - add postgresql charts to kong
   - notice in storageClass
   - add namespace cho kong
@@ -25,7 +26,9 @@
   - access with port 8080
   - need to add DISABLE_API: false to helm cm-push
 ## clickhouse
+  * need to read more
   - hide password
   - can change compress algorithm
 ## fluentbit
-  - custom config for log (need to read more)
+  * need to read more
+  - custom config for log
