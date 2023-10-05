@@ -1,0 +1,7 @@
+mongodb:
+  enabled: true
+  auth:
+    enabled: true
+    password: foobartest
+service:
+  type: NodePort

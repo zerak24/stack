@@ -21,3 +21,7 @@
 ## redis
 ## mongodb
   - if remove mongodb to re-release should delete pvc of mongodb to void authen conflict
+## chartmuseum
+  - access with port 8080
+  - need to add DISABLE_API: false to helm cm-push
+## 
