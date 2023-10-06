@@ -8,7 +8,7 @@
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
-  name: {{ $.Values.general.fullName }}-cors-plugin
+  name: {{ $.Values.general.fullName }}-{{ $element.name }}-cors-plugin
 consumerRef: {{ $.Values.general.fullName }}-consumer-plugin-{{ $.Values.general.namespace }}
 plugin: cors
 config:

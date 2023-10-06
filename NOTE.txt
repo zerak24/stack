@@ -32,3 +32,8 @@
 ## fluentbit
   * need to read more
   - custom config for log
+## jaeger
+  - just config not test yet
+## gitlab-runner
+  * need to read more toml format config
+  

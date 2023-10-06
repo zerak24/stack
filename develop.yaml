@@ -5,7 +5,7 @@ chart:
 general:
   fullName: app-test
   repo: docker.io/zerak24
-  image: simple-go:v1.0.1
+  image: simple-go:v1.0.4
   namespace: default
 
 cronjobs:
@@ -50,8 +50,22 @@ kongIngress:
   mode: "http"
   routeMap:
   - name: public
-    overridePath: /hi
-    upstream_path: /hi
+    overridePath: /api/v1/public
+    upstream_path: /public
+    plugins:
+    - cors
+    cors:
+      origins:
+      - "*"
+      methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+  - name: user
+    overridePath: /api/v1/user
+    upstream_path: /user
     plugins:
     - cors
     cors:
