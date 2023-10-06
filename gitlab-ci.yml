@@ -1,0 +1,16 @@
+image: docker.io/alpine:latest
+
+variables:
+  TEST_ENV: halo
+
+.echo_test: &echo_test
+  - |
+    echo $TEST_ENV
+
+build:
+  stage: build
+  scripts:
+    - *echo_test
+
+stages:
+  - build
