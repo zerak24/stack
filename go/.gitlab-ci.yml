@@ -9,8 +9,10 @@ variables:
 
 build:
   stage: build
-  scripts:
+  script:
     - *echo_test
+  tags:
+    - gitlab-build-runner
 
 stages:
   - build

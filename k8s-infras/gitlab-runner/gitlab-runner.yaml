@@ -1,6 +1,6 @@
 replicas: 1
 gitlabUrl: http://gitlab.example.info/
-runnerToken: "glrt-6tMvKK_X7a6zYbFwKDy_"
+runnerToken: "glrt-yF3AL_5Yis6S4bSCuZEi"
 concurrent: 5
 checkInterval: 1
 runners:
@@ -14,14 +14,23 @@ runners:
         memory_request = "100Mi"
         cpu_limit = "1500m"
         cpu_request = "20m"
+        service_account = "gitlab-runner"
         [[runners.kubernetes.volumes.pvc]]
           name = "gitlab-cache-pvc"
           mount_path = "/cache"
         [runners.kubernetes.node_selector]
-          "node-role.kubernetes.io/build" = "build"
+          "kubernetes.io/role" = "build"
         [runners.kubernetes.node_tolerations]
-          "node-role.kubernetes.io/build" = "build"
+          "build=true" = ""
 envVars:
   - name: RUNNER_EXECUTOR
     value: kubernetes
-
+rbac:
+  create: true
+  serviceAccountName: gitlab-runner
+  rules:
+    - resources: ["configmaps", "events", "pods", "pods/attach", "pods/exec", "secrets", "services"]
+      verbs: ["get", "list", "watch", "create", "patch", "update", "delete"]
+    - apiGroups: [""]
+      resources: ["pods/exec"]
+      verbs: ["create", "patch", "delete"]
