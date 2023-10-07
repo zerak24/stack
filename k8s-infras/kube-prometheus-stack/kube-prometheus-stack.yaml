@@ -1079,6 +1079,12 @@ alertmanager:
           <b>Description:</b> {{ .Annotations.description }}
         {{ end -}}
         {{ end -}}
+  alertmanagerSpec:
+    # nodeSelector: {}
+    # tolerations:
+    #   - key: "tools"
+    #     operator: "Equal"
+    #     value: "true"
 grafana:
   enabled: true
   grafana.ini:
@@ -1097,5 +1103,48 @@ grafana:
     hosts:
       - grafana.example.info
     path: /
+  # nodeSelector: {}
+  # tolerations:
+  #   - key: "tools"
+  #     operator: "Equal"
+  #     value: "true"
 kubeControllerManager:
   enabled: false
+# prometheusOperator:
+#   nodeSelector: {}
+#   tolerations:
+#     - key: "tools"
+#       operator: "Equal"
+#       value: "true"
+#   admissionWebhooks:
+#     patch:
+#       nodeSelector: {}
+#       tolerations:
+#         - key: "tools"
+#           operator: "Equal"
+#           value: "true"
+# prometheus-node-exporter:
+#   nodeSelector: {}
+#   tolerations:
+#     - key: "tools"
+#       operator: "Equal"
+#       value: "true"
+#     - key: "app"
+#       operator: "Equal"
+#       value: "true"
+# prometheus:
+#   prometheusSpec:
+#     nodeSelector: {}
+#     tolerations:
+#       - key: "tools"
+#         operator: "Equal"
+#         value: "true"
+# kube-state-metrics:
+#   nodeSelector: {}
+#   tolerations:
+#     - key: "tools"
+#       operator: "Equal"
+#       value: "true"
+#     - key: "app"
+#       operator: "Equal"
+#       value: "true"

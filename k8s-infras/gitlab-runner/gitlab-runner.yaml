@@ -34,3 +34,8 @@ rbac:
     - apiGroups: [""]
       resources: ["pods/exec"]
       verbs: ["create", "patch", "delete"]
+# nodeSelector: {}
+# tolerations:
+#   - key: "tools"
+#     operator: "Equal"
+#     value: "true"

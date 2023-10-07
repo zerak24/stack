@@ -28,6 +28,16 @@ postgresql:
   primary:
     persistence:
       storageClass: "standard"
+    nodeSelector:
+    tolerations:
+      - key: "tools"
+        operator: "Equal"
+        value: "true"
 readinessProbe:
   httpGet:
     path: "/status"
+# nodeSelector: {}
+# tolerations:
+#   - key: "tools"
+#     operator: "Equal"
+#     value: "true"

@@ -36,4 +36,7 @@
   - just config not test yet
 ## gitlab-runner
   * need to read more toml format config
-  
+
+
+gitlab:
+  - root:z3rak@24

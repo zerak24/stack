@@ -10,6 +10,11 @@ resources:
 auth:
   username: default
   password: "cf13d373b2e8c30bb4216e63c549d71f8e784b62"
+# nodeSelector: {}
+# tolerations:
+#   - key: "tools"
+#     operator: "Equal"
+#     value: "true"
 defaultConfigurationOverrides: |
   <clickhouse>
     <!-- Macros -->

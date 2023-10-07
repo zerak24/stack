@@ -7,13 +7,18 @@ image:
   pullPolicy: IfNotPresent
 testFramework:
   enabled: false
+# nodeSelector: {}
+# tolerations:
+#   - key: "tools"
+#     operator: "Equal"
+#     value: "true"
 config:
   outputs: |
     [OUTPUT]
         Name http
         tls off
         Match kube.*
-        Host clickhouse.default.svc.cluster.local.
+        Host clickhouse.tools.svc.cluster.local.
         Port 8123
         URI /?query=INSERT+INTO+fluentbit.kube+FORMAT+JSONEachRow
         format json_stream
