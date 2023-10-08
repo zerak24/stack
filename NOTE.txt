@@ -36,6 +36,7 @@
   - just config not test yet
 ## gitlab-runner
   * need to read more toml format config
+## velero
 
 
 gitlab:
