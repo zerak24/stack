@@ -35,9 +35,17 @@
 ## jaeger
   - just config not test yet
 ## gitlab-runner
-  * need to read more toml format config
+  - toml format config
 ## velero
-
+  - use for cloud provider storage
+## pritunl
+  - https://rtfm.co.ua/en/pritunl-running-vpn-in-kubernetes/
+  - need high resource
+  - exec to pritunl to get admin password "pritunl default-password"
+  - connect to pritunl-web
+  - add group + add user
+  - add server + attach group (dns ip of k8s dns)
+  - port is the port of pritunl loadbalancer
 
 gitlab:
   - root:z3rak@24

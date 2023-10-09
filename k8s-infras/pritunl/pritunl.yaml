@@ -1,0 +1,39 @@
+serviceAccount:
+  create: true
+service:
+  type: LoadBalancer
+  protocol: TCP
+  port: 1194
+  annotations: {}
+ingress:
+  enabled: true
+  hostname: vpn.example.info
+  path: /*
+  tls: true
+  selfSigned: true
+resources:
+  limits:
+    cpu: 500m
+    memory: 1000Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+nodeSelector: {}
+tolerations: []
+mongodb:
+  enabled: true
+  auth:
+    enabled: true
+    username: pritunl
+    database: pritunl
+    password: pritunl
+
+conf:
+  host_id: ffd7a38db01042cf806760c211ff4a41
+  log_path: /var/log/pritunl.log
+  static_cache: true
+  temp_path: /tmp/pritunl_%r
+  bind_addr: "0.0.0.0"
+  www_path: /usr/share/pritunl/www
+  local_address_interface: auto
+  port: 443
