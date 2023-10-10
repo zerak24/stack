@@ -1,10 +1,3 @@
-# For detailed explanation of each of the configuration settings see
-# https://www.pomerium.io/reference/
-
-nameOverride: ''
-fullnameOverride: ''
-
-# settings that are shared by all services
 config:
   # routes under this wildcard domain are handled by pomerium
   rootDomain: corp.beyondperimeter.com
@@ -34,32 +27,12 @@ config:
   extraSharedSecretLabels: {}
 
 authenticate:
-  name: ''
-  fullnameOverride: ''
-  nameOverride: ''
-  existingTLSSecret: ''
-  existingExternalTLSSecret: ''
-  proxied: true
-  # see https://www.pomerium.io/docs/identity-providers.html
   idp:
-    provider: google
-    clientID: 'REPLACE_ME'
-    clientSecret: 'REPLACE_ME'
-    url: ''
-    scopes: ''
-    serviceAccount: ''
-  tls:
-    cert: ''
-    key: ''
-    defaultSANList: []
-    defaultIPList: []
-  replicaCount: 1
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 5
-    targetCPUUtilizationPercentage: 50
-    targetMemoryUtilizationPercentage: 50
+    provider: oidc
+    clientID: '8723ca4a529764e953df96d32296cb59b9357f339cdcebd1694559e27f512fd6'
+    clientSecret: 'gloas-d15aa5ab509ea08841b6c9d4a0419244a667675cdcde9e9ae56e9f9690680329'
+    url: 'http://gitlab.example.info'
+    scopes: 'openid,profile,email'
   pdb:
     enabled: false
     minAvailable: 1
@@ -71,9 +44,6 @@ authenticate:
     annotations: {}
     extraEnv: {}
     podAnnotations: {}
-  serviceAccount:
-    annotations: {}
-    nameOverride: ''
   ingress:
     # cert-manager example
     # annotations:
@@ -183,49 +153,6 @@ proxy:
     annotations: {}
     nameOverride: ''
   redirectServer: true
-
-apiProxy:
-  enabled: false
-  ingress: true
-  fullNameOverride: ''
-  name: 'kubernetes'
-
-ingressController:
-  enabled: false
-  ingressClassResource:
-    enabled: true
-    default: false
-    name: pomerium
-    controllerName: pomerium.io/ingress-controller
-    parameters: {}
-    defaultCertSecret: ''
-  fullnameOverride: ''
-  nameOverride: ''
-  image:
-    repository: 'pomerium/ingress-controller'
-    tag: 'sha-54e3ddc'
-    pullPolicy: IfNotPresent
-  deployment:
-    annotations: {}
-    extraEnv: {}
-    podAnnotations: {}
-  serviceAccount:
-    annotations: {}
-    nameOverride: ''
-  config:
-    namespaces: []
-    ingressClass: pomerium.io/ingress-controller
-    updateStatus: true
-    operatorMode: false
-  service:
-    annotations: {}
-    type: ClusterIP
-
-forwardAuth:
-  name: ''
-  enabled: false
-  # Will not create an ingress. ForwardAuth is ony accessible as internal service.
-  internal: false
 
 service:
   # externalPort defaults to 80 or 443 depending on config.insecure
