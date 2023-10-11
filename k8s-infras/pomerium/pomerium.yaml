@@ -9,8 +9,8 @@ config:
   insecureProxy: true
   extraOpts: {}
   routes:
-  - from: http://vpn.example.info
-    to: http://pritunl-web.default.svc.cluster.local.
+  - from: https://vpn.example.info
+    to: https://pritunl-web.default.svc.cluster.local.
     preserve_host_header: true
     pass_identity_headers: true
     allow_websockets: true
@@ -22,12 +22,15 @@ authenticate:
   name: authenticate
   idp:
     provider: oidc
-    clientID: '8723ca4a529764e953df96d32296cb59b9357f339cdcebd1694559e27f512fd6'
-    clientSecret: 'gloas-d15aa5ab509ea08841b6c9d4a0419244a667675cdcde9e9ae56e9f9690680329'
+    # clientID: '8723ca4a529764e953df96d32296cb59b9357f339cdcebd1694559e27f512fd6'
+    # clientSecret: 'gloas-d15aa5ab509ea08841b6c9d4a0419244a667675cdcde9e9ae56e9f9690680329'
+    clientID: '34ab017c7ca69e4367023d5cf210d5071597311db8be5d19663d2d2d38fd7209'
+    clientSecret: 'gloas-f0e2d19d864468e20f4b919147a81aa3fdbd073a7d1906269e47911aab830495'
     url: 'http://gitlab.example.info'
     scopes: 'openid,profile,email'
   service:
     type: NodePort
+    nodePort: 31888
 
 authorize:
   deployment:
