@@ -1,172 +1,48 @@
 config:
   # routes under this wildcard domain are handled by pomerium
-  rootDomain: corp.beyondperimeter.com
-  existingSecret: ''
-  existingCASecret: ''
-  ca:
-    cert: ''
-    key: ''
+  rootDomain: example.info
   sharedSecret: ''
   cookieSecret: ''
-  forceGenerateServiceSecrets: false
-  existingSharedSecret: ''
-  generateTLS: true
-  generateTLSAnnotations: {}
-  forceGenerateTLS: false
+  generateTLS: false
   generateSigningKey: true
-  forceGenerateSigningKey: false
+  insecure: true
+  insecureProxy: true
   extraOpts: {}
-  existingPolicy: ''
-  insecure: false
-  insecureProxy: false
-  administrators: ''
-  routes: []
+  routes:
+  - from: http://vpn.example.info
+    to: http://pritunl-web.default.svc.cluster.local.
+    preserve_host_header: true
+    pass_identity_headers: true
+    allow_websockets: true
+    allowed_users:
+    - zerak24
   existingSigningKeySecret: ''
-  signingKey: ''
-  extraSecretLabels: {}
-  extraSharedSecretLabels: {}
 
 authenticate:
+  name: authenticate
   idp:
     provider: oidc
     clientID: '8723ca4a529764e953df96d32296cb59b9357f339cdcebd1694559e27f512fd6'
     clientSecret: 'gloas-d15aa5ab509ea08841b6c9d4a0419244a667675cdcde9e9ae56e9f9690680329'
     url: 'http://gitlab.example.info'
     scopes: 'openid,profile,email'
-  pdb:
-    enabled: false
-    minAvailable: 1
   service:
-    annotations: {}
-    nodePort: ''
-    type: ClusterIP
-  deployment:
-    annotations: {}
-    extraEnv: {}
-    podAnnotations: {}
-  ingress:
-    # cert-manager example
-    # annotations:
-    #   cert-manager.io/cluster-issuer: letsencrypt-prod
-    annotations: {}
-    tls:
-      secretName: ''
-      # secretName: authenticate-ingress-tls
+    type: NodePort
 
 authorize:
-  fullnameOverride: ''
-  nameOverride: ''
-  existingTLSSecret: ''
-  tls:
-    cert: ''
-    key: ''
-    defaultSANList: []
-    defaultIPList: []
-  replicaCount: 1
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 5
-    targetCPUUtilizationPercentage: 50
-    targetMemoryUtilizationPercentage: 50
-  pdb:
-    enabled: false
-    minAvailable: 1
-  service:
-    annotations: {}
-    type: ClusterIP
-    clusterIP: None
   deployment:
-    annotations: {}
     extraEnv: {}
-    podAnnotations: {}
-  serviceAccount:
-    annotations: {}
-    nameOverride: ''
 
 databroker:
-  fullnameOverride: ''
-  nameOverride: ''
-  existingTLSSecret: ''
-  tls:
-    cert: ''
-    key: ''
-    defaultSANList: []
-    defaultIPList: []
-  replicaCount: 1
-  pdb:
-    enabled: false
-    minAvailable: 1
   service:
-    annotations: {}
     type: ClusterIP
     clusterIP: None
   deployment:
-    annotations: {}
     extraEnv: {}
-    podAnnotations: {}
-  serviceAccount:
-    annotations: {}
-    nameOverride: ''
-  storage:
-    type: 'memory'
-    connectionString: ''
-    tlsSkipVerify: false
-    clientTLS:
-      existingSecretName: ''
-      existingCASecretKey: ''
-      cert: ''
-      key: ''
-      ca: ''
 
 proxy:
-  fullnameOverride: ''
-  nameOverride: ''
-  existingTLSSecret: ''
-  tls:
-    cert: ''
-    key: ''
-    defaultSANList: []
-    defaultIPList: []
-  replicaCount: 1
-  autoscaling:
-    enabled: false
-    minReplicas: 1
-    maxReplicas: 5
-    targetCPUUtilizationPercentage: 50
-    targetMemoryUtilizationPercentage: 50
-  pdb:
-    enabled: false
-    minAvailable: 1
-  authenticateServiceUrl: ''
-  authorizeInternalUrl: ''
   service:
-    annotations: {}
-    nodePort: ''
-    type: ''
-    externalIPs: []
-  deployment:
-    annotations: {}
-    extraEnv: {}
-    podAnnotations: {}
-  serviceAccount:
-    annotations: {}
-    nameOverride: ''
-  redirectServer: true
-
-service:
-  # externalPort defaults to 80 or 443 depending on config.insecure
-  externalPort: ''
-  annotations:
-    {}
-    # ===  GKE load balancer tweaks; default on until I can figure out
-    # how the hell to escape this string from the helm CLI
-    # cloud.google.com/app-protocols: '{"https":"HTTPS"}'
-  labels: {}
-  grpcTrafficPort:
-    nameOverride: ''
-  httpTrafficPort:
-    nameOverride: ''
+    type: ClusterIP
 
 ingress:
   secretName: ''
@@ -174,103 +50,16 @@ ingress:
     name: 'pomerium-tls'
     cert: ''
     key: ''
-  tls:
-    hosts: []
-  enabled: true
-  hosts: []
-  # Sets Ingress/ingressClassName. This way ingress resources are able to bound specific ingress-controllers. Kubernetes version >=1.18 required.
-  # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class
-  # className: ""
-  annotations:
-    {}
-    # === nginx tweaks
-    # kubernetes.io/ingress.class: nginx
-    # nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-    # nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-    # ===  GKE load balancer tweaks; default on until I can figure out
-    # how the hell to escape this string from the helm CLI
-    # kubernetes.io/ingress.allow-http: "false"
-  # Ingress pathType (e.g. ImplementationSpecific, Prefix, .. etc.) might also be required by some Ingress Controllers
-  pathType: ImplementationSpecific
+  annotations: 
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/group.name: "ingress-external"
+    alb.ingress.kubernetes.io/scheme: "internet-facing"
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
 
 resources:
-  {}
-  # limits:
-  #   cpu: 1
-  #   memory: 600Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 300Mi
-
-priorityClassName: ''
-
-# Affinity for pod assignment
-# Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-affinity: {}
-
-# Tolerations for pod assignment
-# Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-tolerations: []
-
-# Node labels for pod assignment
-# Ref: https://kubernetes.io/docs/user-guide/node-selection/
-nodeSelector: {}
-
-podAnnotations: {}
-podLabels: {}
-replicaCount: 1
-
-# For any other settings that are optional. for a complete listing see:
-# https://www.pomerium.io/docs/config-reference.html
-extraEnv: {}
-extraEnvFrom: []
-extraArgs: {}
-extraVolumes: []
-extraVolumeMounts: []
-extraTLSSecrets: []
-
-annotations: {}
-imagePullSecrets: ''
-
-image:
-  repository: 'pomerium/pomerium'
-  tag: 'v0.22.1'
-  pullPolicy: IfNotPresent
-
-metrics:
-  enabled: false
-  port: 9090
-
-tracing:
-  enabled: false
-  provider: ''
-  debug: false
-  jaeger:
-    collector_endpoint: ''
-    agent_endpoint: ''
-
-serviceMonitor:
-  enabled: false
-  namespace: ''
-  labels:
-    release: prometheus
-
-rbac:
-  create: true
-
-redis:
-  enabled: false
-  auth:
-    existingSecret: pomerium-redis-password
-    existingSecretPasswordKey: password
-    createSecret: true
-  generateTLS: true
-  forceGenerateTLS: false
-  replica:
-    replicaCount: 1
-  tls:
-    enabled: true
-    certificatesSecret: pomerium-redis-tls
-    certFilename: tls.crt
-    certKeyFilename: tls.key
-    certCAFilename: ca.crt
+  limits:
+    cpu: 1
+    memory: 600Mi
+  requests:
+    cpu: 100m
+    memory: 300Mi

@@ -6,7 +6,7 @@ service:
   port: 1194
   annotations: {}
 ingress:
-  enabled: true
+  enabled: false
   hostname: vpn.example.info
   path: /*
   tls: true
