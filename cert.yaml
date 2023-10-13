@@ -1,0 +1,18 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: pomerium-cert
+spec:
+  secretName: pomerium-tls
+  issuerRef:
+    name: pomerium-issuer
+    kind: Issuer
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - pomerium-proxy.default.svc.cluster.local
+    - pomerium-authorize.default.svc.cluster.local
+    - pomerium-databroker.default.svc.cluster.local
+    - pomerium-authenticate.default.svc.cluster.local
+    - authenticate.example.info

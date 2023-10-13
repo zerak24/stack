@@ -1079,12 +1079,12 @@ alertmanager:
           <b>Description:</b> {{ .Annotations.description }}
         {{ end -}}
         {{ end -}}
-  alertmanagerSpec:
-    # nodeSelector: {}
-    # tolerations:
-    #   - key: "tools"
-    #     operator: "Equal"
-    #     value: "true"
+  # alertmanagerSpec:
+  #   nodeSelector: {}
+  #   tolerations:
+  #     - key: "tools"
+  #       operator: "Equal"
+  #       value: "true"
 grafana:
   enabled: true
   grafana.ini:
@@ -1094,7 +1094,7 @@ grafana:
   defaultDashboardsTimezone: Asia/Saigon
   adminPassword: 79b4dfa1d213d37746521bd59224aa2f8c7ed127
   ingress:
-    enabled: true
+    enabled: false
     annotations: {}
       # kubernetes.io/ingress.class: alb
       # alb.ingress.kubernetes.io/group.name: "ingress-external"
