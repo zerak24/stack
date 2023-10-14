@@ -1,15 +1,16 @@
 config:
   # routes under this wildcard domain are handled by pomerium
   rootDomain: example.info
-  sharedSecret: ''
-  cookieSecret: ''
+  # sharedSecret: ''
+  # cookieSecret: ''
   generateTLS: false
   existingCASecret: pomerium-tls
-  generateSigningKey: true
-  existingSigningKeySecret: ''
-  insecure: false
-  insecureProxy: true
-  extraOpts: {}
+  generateSigningKey: false
+  # existingSigningKeySecret: ''
+  # insecure: false
+  # insecureProxy: true
+  # insecure_server: true
+  # extraOpts: {}
   routes:
   - from: https://grafana.example.info
     to: http://prometheus-grafana.default.svc.cluster.local.
@@ -54,9 +55,6 @@ ingress:
     name: 'pomerium-tls'
     cert: ''
     key: ''
-  tls:
-    hosts:
-      - authenticate.example.info
   # annotations:
   #   kubernetes.io/ingress.class: alb
   #   alb.ingress.kubernetes.io/group.name: "ingress-external"

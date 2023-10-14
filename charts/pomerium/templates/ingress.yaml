@@ -43,6 +43,7 @@ spec:
               serviceName: {{ template "pomerium.proxy.fullname" $ }}
               servicePort: {{ template "pomerium.httpTrafficPort.name" $ }}
               {{- end }}
+            path: /*
             {{- if $ingressSupportsPathType }}
             pathType: {{ $ingressPathType }}
             {{- end }}
@@ -63,6 +64,15 @@ spec:
               serviceName: {{ template "pomerium.proxy.fullname" $ }}
               servicePort: {{ template "pomerium.httpTrafficPort.name" $ }}
               {{- end }}
+            {{ if or (.path) (.prefix) }}
+            {{ if .path }}
+            path: {{ .path }}/*
+            {{ else }}
+            {{ end }}
+            path: {{ .prefix }}/*
+            {{ else }}
+            path: /*
+            {{ end }}
             {{- if $ingressSupportsPathType }}
             pathType: {{ $ingressPathType }}
             {{- end }}
@@ -83,6 +93,7 @@ spec:
               serviceName: {{ template "pomerium.proxy.fullname" $ }}
               servicePort: {{ template "pomerium.httpTrafficPort.name" $ }}
               {{- end }}
+            path: /*
             {{- if $ingressSupportsPathType }}
             pathType: {{ $ingressPathType }}
             {{- end }}
@@ -101,6 +112,7 @@ spec:
               serviceName: {{ template "pomerium.authorize.fullname" $ }}
               servicePort: {{ template "pomerium.httpTrafficPort.name" $ }}
               {{- end }}
+            path: /*
             {{- if $ingressSupportsPathType }}
             pathType: {{ $ingressPathType }}
             {{- end }}
@@ -118,6 +130,7 @@ spec:
               serviceName: {{ template "pomerium.authenticate.fullname" $ }}
               servicePort: {{ template "pomerium.httpTrafficPort.name" $ }}
               {{- end }}
+            path: /*
             {{- if $ingressSupportsPathType }}
             pathType: {{ $ingressPathType }}
             {{- end }}
