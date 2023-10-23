@@ -1,0 +1,30 @@
+chart:
+  version: v1
+  repository: zerak24
+
+general:
+  fullName: registry
+  repo: docker.io
+  image: registry:2
+  namespace: default
+
+replicaCount: 1
+
+rbac:
+  enabled: true
+
+service:
+  type: ClusterIP
+  port: 80
+  containerPort: 5000
+
+no_healthcheck: true
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 500Mi
+  requests:
+    cpu: 200m
+    memory: 200Mi
+
