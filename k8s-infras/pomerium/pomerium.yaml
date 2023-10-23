@@ -1,22 +1,14 @@
 config:
   # routes under this wildcard domain are handled by pomerium
   rootDomain: example.info
-  # sharedSecret: ''
-  # cookieSecret: ''
-  generateTLS: false
-  existingCASecret: pomerium-tls
-  generateSigningKey: false
-  # existingSigningKeySecret: ''
-  # insecure: false
-  # insecureProxy: true
-  # insecure_server: true
-  # extraOpts: {}
+  generateTLS: true
+  generateSigningKey: true
+  insecure: true
+  insecureProxy: true
   routes:
-  - from: https://grafana.example.info
-    to: http://prometheus-grafana.default.svc.cluster.local.
-    preserve_host_header: true
-    pass_identity_headers: true
-    allow_any_authenticated_user: true
+    - from: http://grafana.example.info
+      to: http://prometheus-grafana.default.svc.cluster.local
+      allow_any_authenticated_user: true
 
 authenticate:
   name: authenticate
@@ -29,37 +21,27 @@ authenticate:
     url: 'http://gitlab.example.info'
     scopes: 'openid,profile,email'
   service:
-    type: NodePort
+    type: LoadBalancer
     nodePort: 31888
+  proxied: true
 
-authorize:
-  existingTLSSecret: pomerium-tls
-  deployment:
-    extraEnv: {}
+# authorize:
+#   deployment:
+#     extraEnv: {}
 
-databroker:
-  existingTLSSecret: pomerium-tls
-  service:
-    type: ClusterIP
-  deployment:
-    extraEnv: {}
+# databroker:
+#   service:
+#     type: ClusterIP
 
 proxy:
-  existingTLSSecret: pomerium-tls
   service:
-    type: NodePort
+    type: LoadBalancer
 
 ingress:
-  secretName: ''
-  secret:
-    name: 'pomerium-tls'
-    cert: ''
-    key: ''
-  # annotations:
-  #   kubernetes.io/ingress.class: alb
-  #   alb.ingress.kubernetes.io/group.name: "ingress-external"
-  #   alb.ingress.kubernetes.io/scheme: "internet-facing"
-  #   alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+  enabled: false
+  # secret:
+  #   name: 'pomerium-wildcard-tls'
+
 
 resources:
   limits:
@@ -68,3 +50,6 @@ resources:
   requests:
     cpu: 100m
     memory: 300Mi
+
+extraEnv:
+  AUTHENTICATE_INTERNAL_SERVICE_URL: http://pomerium-authenticate.default.svc.cluster.local
