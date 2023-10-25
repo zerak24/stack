@@ -46,6 +46,12 @@
   - add group + add user
   - add server + attach group (dns ip of k8s dns)
   - port is the port of pritunl loadbalancer
+## registry
+## proxysql
+  - https://hevodata.com/learn/proxysql/
+  - change mysql mechanism to mysql_native_password with mysql 8.0
+    * ALTER USER myuser IDENTIFIED WITH mysql_native_password BY 'mypassword';
+
 
 gitlab:
   - root:z3rak@24

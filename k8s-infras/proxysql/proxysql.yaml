@@ -1,0 +1,53 @@
+replicas: 1
+
+image:
+  registry: docker.io
+  repository: proxysql/proxysql
+  tag: "2.4.4"
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+
+service:
+  type: ClusterIP
+  proxyPort: 3306
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+ssl:
+  auto: false
+
+secret:
+  admin_user: "admin"
+  admin_password: "admin"
+
+mysql_variables:
+  threads: 4
+  max_connections: 800
+
+mysql_users:
+  - username: "root"
+    password: "secret"
+    default_hostgroup: 0
+    max_connections: 800
+    default_schema: "mysql"
+    active: 1
+
+mysql_servers:
+  - address: "192.168.49.3"
+    port: 3306
+    max_connections: 800
+    hostgroup: 0

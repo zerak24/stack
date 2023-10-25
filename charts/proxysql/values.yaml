@@ -1,0 +1,396 @@
+# Default values for proxysql.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicas: 1
+
+image:
+  registry: docker.io
+  repository: proxysql/proxysql
+  tag: "2.4.4"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 999
+  runAsUser: 999
+  runAsGroup: 999
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+## ProxySQL service configuration
+service:
+  ## ProxySQL service type
+  type: ClusterIP
+  # clusterIP: None
+
+  ## SQL proxying port
+  proxyPort: 6033
+
+  ## Specify the >proxy< NodePort value for the LoadBalancer and NodePort service types.
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+  ##
+  # proxyNodePort:
+
+  ## Admin and clustering port
+  adminPort: 6032
+
+  ## Specify the >admin< NodePort value for the LoadBalancer and NodePort service types.
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+  ##
+  # adminNodePort:
+
+  ## Admin Web UI port
+  webPort: 6080
+
+  ## Specify the >web< NodePort value for the LoadBalancer and NodePort service types.
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
+  ##
+  # webNodePort:
+
+  ## Provide any additional annotations which may be required.
+  ## The value is evaluated as a template, so, for example, the value can depend on .Release or .Chart
+  annotations: {}
+  ## Set the LoadBalancer service type to internal only.
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#internal-load-balancer
+  ##
+  # loadBalancerIP:
+
+  ## Load Balancer sources
+  ## https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
+  ##
+  # loadBalancerSourceRanges:
+  # - 10.10.10.0/24
+
+# Default pod resource allocation.
+# Will be applied if not specified otherwise.
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# Default node selectors.
+# Will be applied if not specified otherwise.
+nodeSelector: {}
+
+# Default pod tolerations.
+# Will be applied if not specified otherwise.
+tolerations: []
+
+# Default node affinity.
+# Will be applied if not specified otherwise.
+affinity: {}
+
+# Common annotations to add to all resources (sub-charts are not considered).
+# Evaluated as a template
+commonAnnotations: {}
+
+# Common labels to add to all resources (sub-charts are not considered).
+# Evaluated as a template
+commonLabels: {}
+
+# Default pod annotations.
+# Will be applied if not specified otherwise.
+podAnnotations: {}
+
+# Default pod labels.
+# If labels are same as commonLabels , this will take precedence
+podLabels: {}
+
+## Specify pod disruption budget
+## ref: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+##
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  # maxUnavailable: 1
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  ##
+  ## Default Kubernetes values
+  periodSeconds: 10
+  timeoutSeconds: 1
+  successThreshold: 1
+  failureThreshold: 3
+
+# Enable SSL communication with the backend MySQL servers
+ssl:
+  ## When a cert and a key or fromSecret are provided use_ssl is be enabled automaticaly (in mysql_servers items)
+  #  if use_ssl is not specified.
+  auto: true
+
+  ## Sets the values for the SSL CA, Cert and private Key in PEM format.
+  ca: ""
+  cert: ""
+  key: ""
+
+  sslDir: "/etc/proxysql"   # ProxySQL SSL directory
+  ca_file: "ca.pem"         # Name of the CA file
+  cert_file: "cert.pem"     # Name of the Cert file
+  key_file: "key.pem"       # Name of the private Key file
+
+  ## Loads ca.pem, cert.pem, and key.pem from an existingSecret
+  fromSecret: ""
+
+secret:
+  # This are the variables to set `admin_credentials`
+  # WARNING: Set the `admin_credentials` variable to a non-default user other than admin`.
+  #          ProxySQL reserves the default `admin` user for local connection via localhost only.
+  admin_user: "proxysql-admin"
+  admin_password: "proxysql"
+
+admin_variables:
+  debug: false
+
+  # admin/clustering listening interfaces
+  # NOTE:
+  #   The mysql_ifaces parameter (e.g. interfaces="0.0.0.0:6032") is
+  #   configured by default based on `.Values.service.adminPort`
+  # mysql_ifaces: "0.0.0.0:6032"
+
+  # refresh_interval: 2000
+
+mysql_variables:
+  ## ref: https://github.com/sysown/proxysql/wiki/Global-variables
+  #
+
+  # Listening IP and port for proxy connections
+  # NOTE:
+  #   The interfaces parameter (e.g. interfaces="0.0.0.0:6033") is
+  #   configured by default based on `.Values.service.proxyPort`
+  # interfaces: "0.0.0.0:6033"
+
+  ## The number of background threads that ProxySQL uses in order to process MySQL traffic
+  threads: 4
+  ## The maximum number of client connections that the proxy can handle.
+  max_connections: 2048
+  default_query_delay: 0
+  ## Mechanism for specifying the maximal duration of queries to the backend MySQL (in ms)
+  default_query_timeout: 3600000
+  ## Enables or disables MySQL Monitor.
+  #  ref: https://github.com/sysown/proxysql/wiki/Monitor-Module
+  monitor_enabled: false
+  # monitor_username: "monitor"
+  # monitor_password: "monitor"
+  # monitor_history: 600000
+
+## Configures ProxySQL mysql users.
+#  For MySQL 8.0 paswords must be mysql_native_password.
+#  ref: https://github.com/sysown/proxysql/wiki/MySQL-8.0
+#
+mysql_users:
+  # - username: "user"
+  #   password: "password"
+  #   default_hostgroup: 0
+  #   max_connections: 200
+  #   default_schema: "information_schema"
+  #   active: 1
+
+## Define MySQL backend servers
+#
+mysql_servers:
+  # - address: "172.17.0.1"
+  #   port: 3306
+  #   hostgroup: 0
+  #   max_connections: 200
+
+## Defines MySQL Query Rules (routing)
+#
+mysql_query_rules:
+  ##  Note that rule_id is not required! Since it's automaticaly set
+  #   based on the array index.
+  #
+  # - active: 1
+  #   match_pattern: "^SELECT .* FOR UPDATE$"
+  #   destination_hostgroup: 0
+  #   apply: 1
+
+
+## If enabled, generate automagically a list of proxysql servers based on the
+#    the number statefullset 'proxysql-core' replicas (default 3).
+use_default_proxysql_servers: true
+
+## Defines an additional list of ProxySQL peers (clustering).
+#   For example, externally hosted proxysql core servers.
+#   ref: https://proxysql.com/documentation/proxysql-cluster/
+additional_proxysql_servers:
+  # - hostname : peer’s hostname/IP
+  #   port : peer’s port
+  #   weight : currently unused, but in the roadmap for future enhancements
+  #   comment : free form comment field
+
+proxysql_cluster:
+  enabled: false
+
+  secret:
+    # This are the variables to set `admin_credentials` and corresponding `cluster_` variables
+    cluster_username: "proxysql-cluster"
+    cluster_password: "proxysql"
+
+  core:
+    ## DNS Example:
+    #   headless-svc:                 proxysql-core.<namespace>.svc.cluster.local
+    #   sts-pod:      proxysql-core-0.proxysql-core.<namespace>.svc.cluster.local
+    enabled: true
+
+    # Number of core/main ProxySQL nodes to listen for changes on AdminPort
+    #   It is recommended to use one of the following number of replicas: 3, 5, 7, or 9.
+    replicas: 3
+
+    # Restart ProxySQL if crashes
+    exit_on_error: false
+
+    statefullset:
+      nodeSelector: {}
+      tolerations: []
+      affinity: {}
+      podAnnotations: {}
+
+      resources: {}
+      #  limits:
+      #    cpu: 100m
+      #    memory: 128Mi
+      #  requests:
+      #    cpu: 100m
+      #    memory: 128Mi
+
+    service:
+      # Override default core service name
+      name:
+
+  satellite:
+    # Select the Kubernetes Resource type for the Satellite nodes,
+    #   either "DaemonSet" or "Deployment"
+    kind: "DaemonSet"
+
+    enabled: true
+
+    # Only applies if kind=Deployment
+    replicas: 3
+
+    # Restart ProxySQL if crashes
+    exit_on_error: false
+
+    daemonset:
+      nodeSelector: {}
+      tolerations: []
+      affinity: {}
+      #  See ref: https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/#scheduled-by-default-scheduler
+      #  nodeAffinity:
+      #    requiredDuringSchedulingIgnoredDuringExecution:
+      #      nodeSelectorTerms:
+      #        - matchFields:
+      #          - key: metadata.name
+      #            operator: In
+      #            values:
+      #              - target-host-name
+      podAnnotations: {}
+
+      resources: {}
+      #  limits:
+      #    cpu: 100m
+      #    memory: 128Mi
+      #  requests:
+      #    cpu: 100m
+      #    memory: 128Mi
+
+    service:
+      # Override default satellite service name
+      name:
+
+  # Cluster Init job
+  #   Execute SQL operations/transactions to force proxysql
+  #   to update the internal runtime_checksums_values, in order for satellites
+  #   to pick up any changes.
+  #   This is necessary because on each update the cluster config versioning
+  #   starts at version/checksum = 0. As per specification the satellites won't sync the changes
+  #   until the version/checksum is not 0.
+  job:
+
+    image:
+      registry: docker.io
+      repository: mysql
+      tag: "8"
+      pullPolicy: IfNotPresent
+
+    enabled: true
+
+    # Retry 3 times until failed
+    backoffLimit: 3
+
+    # delete the job resource after given seconds
+    ttlSecondsAfterFinished: 3600
+
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    podAnnotations: {}
+
+    resources: {}
+    #  limits:
+    #    cpu: 100m
+    #    memory: 128Mi
+    #  requests:
+    #    cpu: 100m
+    #    memory: 128Mi
+
+  healthcheck:
+    sidecar:
+      # inject a healthcheck sidecar container to all proxysql clustering Pods
+      enabled: false
+      image: mysql:debian
+      command:
+        - /usr/local/bin/proxysql_cluster_healthcheck.sh
+      config:
+        psql_user: monitor
+        psql_pass: monitor
+        psql_host: 127.0.0.1  # The listening core host/pod
+        psql_host_port: 6032  # The admin port
+
+        diff_check_limit: 10  # How many diff_check errors are tolerated before the healthcheck fails
+        kill_if_healthcheck_failed: true  # Kill proxysql daemon if the healthcheck fails the test
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
+
+# Enable debugging container along the proxysql instance
+#   It may be usefull to access the proxysql admin interface locally to debug issues
+debug:
+  sidecar:
+    # inject a debug sidecar container to all proxysql Pods
+    enabled: false
+    image: mysql:debian
+    command:
+      - /bin/sleep
+      - infinity
+    securityContext:
+      runAsUser: 999
+      runAsGroup: 999
+
+terminationGracePeriodSeconds: 60
