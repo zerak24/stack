@@ -51,7 +51,9 @@
 ## proxysql
   - change mysql mechanism to mysql_native_password with mysql 8.0
     * ALTER USER myuser IDENTIFIED WITH mysql_native_password BY 'mypassword';
-
+## cluster-autoscaler
+  - https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md
+  - https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/FAQ.md#what-are-the-parameters-to-ca
 
 gitlab:
   - root:z3rak@24
