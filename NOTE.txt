@@ -3,7 +3,7 @@
   * need to read more
   - add postgresql charts to kong
   - notice in storageClass
-  - add namespace cho kong
+  - add namespace kong
 ## vso
   - login to vault
   - create approle
@@ -26,11 +26,9 @@
   - access with port 8080
   - need to add DISABLE_API: false to helm cm-push
 ## clickhouse
-  * need to read more
   - hide password
   - can change compress algorithm
 ## fluentbit
-  * need to read more
   - custom config for log
 ## jaeger
   - just config not test yet

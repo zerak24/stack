@@ -7,7 +7,7 @@
 - velero 5.0.2
 - pritunl 2.0.9
 - pomerium 34.0.1
-- cluster-autoscaler 9.29.3
+- cluster autoscaler 9.29.3
 - aws load balancer controller 1.6.1
 - aws for fluent bit 0.1.30
 - internal registry 
