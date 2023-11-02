@@ -10,7 +10,7 @@
 - cluster autoscaler 9.29.3
 - aws load balancer controller 1.6.1
 - aws for fluent bit 0.1.30
-- internal registry 
+- internal registry 2
 - hashicorp vault 0.25.0
 - chartmuseum 3.10.1
 - gitlab-runner 0.58.0-beta
