@@ -27,11 +27,12 @@ spec:
               value: {{ $val | quote }}
             {{- end }}
             resources:
-              cpu: 10m
-              memory: 50Mi
-            limits:
-              cpu: 50m
-              memory: 200Mi
+              requests:
+                cpu: 50m
+                memory: 100Mi
+              limits:
+                cpu: 100m
+                memory: 200Mi
             command:
 {{ toYaml .command |  indent 12 -}}
           restartPolicy: OnFailure
