@@ -1,0 +1,106 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  namespace: default
+  name: nodes-terminate-monitor
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "pods"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nodes-terminate-monitor
+subjects:
+- kind: ServiceAccount
+  name: nodes-terminate-monitor
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: nodes-terminate-monitor
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nodes-terminate-monitor
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: node-monitor
+spec:
+  automountServiceAccountToken: true
+  serviceAccountName: nodes-terminate-monitor
+  containers:
+  - name: node-monitor
+    image: nomo:v1
+    tty: true
+    stdin: true
+    command:
+      - sleep
+      - "3600"
+    env:
+      - name: WEBHOOK
+        value: "https://tenxtenx.webhook.office.com/webhookb2/602c091f-647b-403b-8992-c4603cc9ad21@c275c628-eb6c-40da-8d0b-deee475c14c8/IncomingWebhook/a7f22c8c2d2c4b0383bfbe7cafa10465/ce811eab-7388-4a49-bc46-715d6f34bb7b"
+      - name: NODE_FLAG
+        value: "/mnt/flag/node"
+      - name: KONG_FLAG
+        value: "/mnt/flag/kong"
+    volumeMounts:
+      - name: flag-mount
+        mountPath: /mnt/flag
+  volumes:
+    - name: flag-mount
+      persistentVolumeClaim:
+        claimName: flag-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: flag-pvc
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Mi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: node-monitor
+spec:
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  startingDeadlineSeconds: 100
+  concurrencyPolicy: Forbid
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: nodes-terminate-monitor
+          containers:
+          - name: monitor
+            image: nomo:v1
+            imagePullPolicy: IfNotPresent
+            command:
+            - ./node-monitor.sh
+            env:
+              - name: WEBHOOK
+                value: "https://tenxtenx.webhook.office.com/webhookb2/602c091f-647b-403b-8992-c4603cc9ad21@c275c628-eb6c-40da-8d0b-deee475c14c8/IncomingWebhook/a7f22c8c2d2c4b0383bfbe7cafa10465/ce811eab-7388-4a49-bc46-715d6f34bb7b"
+              - name: NODE_FLAG
+                value: "/mnt/flag/node"
+              - name: KONG_FLAG
+                value: "/mnt/flag/kong"
+            volumeMounts:
+              - name: flag-mount
+                mountPath: /mnt/flag
+          restartPolicy: Never
+          volumes:
+            - name: flag-mount
+              persistentVolumeClaim:
+                claimName: flag-pvc

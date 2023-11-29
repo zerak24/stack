@@ -1,0 +1,18 @@
+{
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "XXXCOLORXXX",
+    "summary": "XXXSUMMARYXXX",
+    "sections": [{
+        "activityTitle": "[XXXALERTXXX] XXXSUMMARYXXX",
+        "activityImage": "https://adaptivecards.io/content/cats/3.png",
+        "facts": [{
+            "name": "Time",
+            "value": "XXXDATEXXX"
+        }, {
+            "name": "Status",
+            "value": "XXXSUMMARYXXX"
+        }],
+        "markdown": true
+    }]
+}
