@@ -81,4 +81,4 @@ kongIngress:
 
 kongIngressConfig:
   domains:
-    - gw.example.info
+    - localhost

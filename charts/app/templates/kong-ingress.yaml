@@ -9,7 +9,7 @@ metadata:
     konghq.com/regex-priority: "0"
     konghq.com/preserve_host: "true"
     konghq.com/protocols: "http,https"
-    konghq.com/plugins: {{ include "app.kongpluginingress" $ }}
+    konghq.com/plugins: {{ $.Values.general.fullName }}-{{ $element.name }}-cors-plugin
     configuration.konghq.com: {{ $.Values.general.fullName }}-kong-ingress-configuration-http-{{ $element.name }}
     kubernetes.io/ingress.class: {{ default $.Values.kongIngress.class $element.kongClass }}
   name: {{ $.Values.general.fullName }}-kong-ingress-http-{{ $element.name }}

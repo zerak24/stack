@@ -10,7 +10,7 @@ module "vpc" {
             subnet_name = sub.subnet_name
             subnet_ip = sub.subnet_ip
             subnet_region = var.project.region
-            subnet_private_access = true
+            subnet_private_access = false
         }]
 
     secondary_ranges = var.inputs.secondary_ranges

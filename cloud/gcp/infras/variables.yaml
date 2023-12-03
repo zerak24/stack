@@ -1,6 +1,6 @@
 inputs:
   project:
-    project_id:  playground-s-11-00790391
+    project_id: playground-s-11-2f6aa18e
     region: us-east5
   vpc:
     network_name: olympus
@@ -38,20 +38,20 @@ inputs:
     subnet: subnet-01
     pod_cidr: subnet-01-pods
     svc_cidr: subnet-01-services
-    service_account_name: tf-gke-olympus@playground-s-11-00790391.iam.gserviceaccount.com
+    service_account_name: tf-gke-olympus@playground-s-11-2f6aa18e.iam.gserviceaccount.com
     node_pools:
       - pool_name: zeus
         machine_type: e2-medium
         min_nodes: 1
-        max_nodes: 1
+        max_nodes: 2
         spot_plan: true
-      - pool_name: hades
-        machine_type: e2-medium
-        min_nodes: 1
-        max_nodes: 1
-        spot_plan: true
-      - pool_name: poseidon
-        machine_type: e2-medium
-        min_nodes: 1
-        max_nodes: 1
-        spot_plan: true
+      # - pool_name: hades
+      #   machine_type: e2-medium
+      #   min_nodes: 1
+      #   max_nodes: 1
+      #   spot_plan: true
+      # - pool_name: poseidon
+      #   machine_type: e2-medium
+      #   min_nodes: 1
+      #   max_nodes: 1
+      #   spot_plan: true
