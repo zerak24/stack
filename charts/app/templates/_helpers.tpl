@@ -4,7 +4,7 @@
 {{- $finalRoutes := $.Values.kongIngress.routeMap }}
 {{- range $finalRoutes -}}
 {{- range .plugins -}}
-{{- $kongplugins = printf "%s-%s-%s" $fullname . "plugin" | append $kongplugins -}}
+{{- $kongplugins = printf "%s-%s-%s" $fullname . "cors-plugin" | append $kongplugins -}}
 {{- end -}}
 {{- end -}}
 {{- join "," $kongplugins }}
