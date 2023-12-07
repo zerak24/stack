@@ -1,5 +1,5 @@
 #! /bin/bash
-while getopts a:p: flag
+while getopts :a:p: flag
 do
   case "${flag}" in
     a) action=${OPTARG};;
