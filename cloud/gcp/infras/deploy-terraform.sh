@@ -12,7 +12,7 @@ if [ -z ${action} ] || [ -z ${part} ]; then
   exit 1
 fi
 
-if [ "${action}" != "plan" ] && [ "${action}" != "apply" ];then
+if [ "${action}" != "plan" ] && [ "${action}" != "apply" ] && [ "${action}" != "destroy" ];then
   echo "wrong action"
   exit 1
 fi

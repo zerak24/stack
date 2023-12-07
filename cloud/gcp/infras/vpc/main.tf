@@ -15,15 +15,7 @@ module "vpc" {
 
     secondary_ranges = var.inputs.secondary_ranges
 
-    routes = [
-        {
-            name                   = "egress-internet"
-            description            = "route through IGW to access internet"
-            destination_range      = "0.0.0.0/0"
-            tags                   = "egress-inet"
-            next_hop_internet      = "true"
-        }
-    ]
+    routes = []
 
     ingress_rules = var.inputs.ingress_rules
 
