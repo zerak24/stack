@@ -1,0 +1,48 @@
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: busybox
+#   labels:
+#     app: debug
+# spec:
+#   containers:
+#   - image: busybox
+#     tty: true
+#     # command:
+#     #   - /bin/sh
+#     #   - -c
+#     # args:
+#     #   - |
+#     #     sleep 3600
+#     imagePullPolicy: IfNotPresent
+#     name: busybox
+#   restartPolicy: Never
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox
+  labels:
+    app: debug
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: debug
+  template:
+    metadata:
+      labels:
+        app: debug
+    spec:
+      containers:
+        - image: alpine
+          tty: true
+          imagePullPolicy: IfNotPresent
+          name: busybox
+          resources:
+            requests:
+              memory: 50Mi
+              cpu: 10m
+            limits:
+              memory: 50Mi
+              cpu: 20m
+      restartPolicy: Always
