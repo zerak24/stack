@@ -1,0 +1,76 @@
+app:
+  ingress:
+    hosts:
+    # Keep 'localhost' host only if you want to access Dashboard using 'kubectl port-forward ...' on:
+    # https://localhost:8443
+    # - localhost
+    - example.info
+    # - kubernetes.dashboard.domain.com
+    ingressClassName: nginx
+    pathType: ImplementationSpecific
+    secretName: kubernetes-dashboard-certs
+    # issuer: selfsigned
+    issuer: ""
+    labels: {}
+    annotations: {}
+    paths:
+      web: /
+      api: /api
+
+# API deployment configuration
+api:
+  role: api
+
+# WEB UI deployment configuration
+web:
+  role: web
+
+### Metrics Scraper
+### Container to scrape, store, and retrieve a window of time from the Metrics Server.
+### refs: https://github.com/kubernetes-sigs/dashboard-metrics-scraper
+metricsScraper:
+  enabled: true
+  role: metrics-scraper
+
+metrics-server:
+  enabled: false
+
+## Optional Cert Manager sub-chart configuration
+## Enable this if you don't already have cert-manager enabled on your cluster.
+cert-manager:
+  enabled: false
+  installCRDs: false
+
+nginx:
+  enabled: false
+
+## Extra configurations:
+## - manifests
+## - predefined roles
+## - prometheus
+## - etc...
+extras:
+  # Extra Kubernetes manifests to be deployed
+  # manifests:
+  # - apiVersion: v1
+  #   kind: ConfigMap
+  #   metadata:
+  #     name: additional-configmap
+  #   data:
+  #     mykey: myvalue
+  manifests: []
+  # Start in ReadOnly mode.
+  # Specifies whether cluster-wide RBAC resources (ClusterRole, ClusterRolebinding) with read only permissions to all resources listed inside the cluster should be created
+  # Only dashboard-related Secrets and ConfigMaps will still be available for writing.
+  #
+  # The basic idea of the clusterReadOnlyRole
+  # is not to hide all the secrets and sensitive data but more
+  # to avoid accidental changes in the cluster outside the standard CI/CD.
+  #
+  # It is NOT RECOMMENDED to use this version in production.
+  # Instead, you should review the role and remove all potentially sensitive parts such as
+  # access to persistentvolumes, pods/log etc.
+  clusterReadOnlyRole: false
+  # It is possible to add additional rules if read only role is enabled.
+  # This can be useful, for example, to show CRD resources.
+  clusterReadOnlyRoleAdditionalRules: []
