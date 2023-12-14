@@ -4,7 +4,7 @@ app:
     # Keep 'localhost' host only if you want to access Dashboard using 'kubectl port-forward ...' on:
     # https://localhost:8443
     # - localhost
-    - example.info
+    - dashboard.example.info
     # - kubernetes.dashboard.domain.com
     ingressClassName: nginx
     pathType: ImplementationSpecific

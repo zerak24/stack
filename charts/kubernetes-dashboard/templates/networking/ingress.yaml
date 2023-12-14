@@ -48,14 +48,14 @@ spec:
             pathType: {{ $.Values.app.ingress.pathType }}
             backend:
               service:
-                name: {{ template "kubernetes-dashboard.name" $ }}-{{ $.Values.web.role }}
+                name: {{ $.Release.Name }}-{{ template "kubernetes-dashboard.name" $ }}-{{ $.Values.web.role }}
                 port:
                   name: {{ $.Values.web.role }}
           - path: {{ $.Values.app.ingress.paths.api }}
             pathType: {{ $.Values.app.ingress.pathType }}
             backend:
               service:
-                name: {{ template "kubernetes-dashboard.name" $ }}-{{ $.Values.api.role }}
+                name: {{ $.Release.Name }}-{{ template "kubernetes-dashboard.name" $ }}-{{ $.Values.api.role }}
                 port:
                   name: {{ $.Values.api.role }}
     {{- end }}
@@ -66,14 +66,14 @@ spec:
             pathType: {{ .Values.app.ingress.pathType }}
             backend:
               service:
-                name: {{ template "kubernetes-dashboard.name" . }}-{{ .Values.web.role }}
+                name: {{ $.Release.Name }}-{{ template "kubernetes-dashboard.name" . }}-{{ .Values.web.role }}
                 port:
                   name: {{ .Values.web.role }}
           - path: {{ .Values.app.ingress.paths.api }}
             pathType: {{ .Values.app.ingress.pathType }}
             backend:
               service:
-                name: {{ template "kubernetes-dashboard.name" . }}-{{ .Values.api.role }}
+                name: {{ $.Release.Name }}-{{ template "kubernetes-dashboard.name" . }}-{{ .Values.api.role }}
                 port:
                   name: {{ .Values.api.role }}
     {{- end }}
