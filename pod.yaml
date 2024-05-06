@@ -35,6 +35,8 @@ spec:
     spec:
       containers:
         - image: alpine
+          command:
+            - /bin/sh
           tty: true
           imagePullPolicy: IfNotPresent
           name: busybox
