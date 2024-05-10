@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.name }}
+    spec:
+      containers:
+      - name: {{ .Values.name }}
+        image: debezium/server
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: {{ .Values.name }}-config
+          mountPath: /debezium/conf
+        - name: {{ .Values.name }}-data
+          mountPath: /debezium/data
+      volumes:
+        - name: {{ .Values.name }}-config
+          configMap:
+            name: {{ .Values.name }}-configmap
+        - name: {{ .Values.name }}-data
+          persistentVolumeClaim:
+            claimName: {{ .Values.name }}-data

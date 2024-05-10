@@ -1,0 +1,10 @@
+auth:
+  rootPassword: "SuperSecret"
+  createDatabase: true
+  database: "my_database"
+  username: "mysql_backend_user"
+  password: "something"
+
+primary:
+  startupProbe:
+    initialDelaySeconds: 60

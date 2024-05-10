@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.name }}-data
+  namespace: {{ .Values.deploy_config.namespace | default "default" }}
+spec:
+  resources:
+    requests:
+      storage: {{ .Values.storage.capacity }}
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ .Values.storage.storageClassName | default "gp3" }}

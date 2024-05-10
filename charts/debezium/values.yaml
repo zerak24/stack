@@ -1,0 +1,52 @@
+deploy_config:
+  namespace: default
+  helm_version: v3
+
+chart:
+  repository: saladin/debezium
+  version: 0.1.0
+
+name: debezium
+
+storage:
+  storageClassName: standard
+  capacity: 2G
+
+configuration:
+  application.properties: |-
+    debezium.sink.type=redis
+    debezium.sink.redis.message.format=extended
+    debezium.sink.redis.db.index=15
+    debezium.sink.redis.address=redis-master.default.svc.cluster.local.:6379
+    debezium.sink.redis.memory.limit.mb=80
+
+    debezium.source.connector.class=io.debezium.connector.mysql.MySqlConnector
+    debezium.source.database.server.id=1
+    debezium.source.offset.storage=io.debezium.storage.redis.offset.RedisOffsetBackingStore
+    debezium.source.topic.prefix=debezium
+
+    debezium.source.database.hostname=mysql.default.svc.cluster.local.
+    debezium.source.database.port=3306
+    debezium.source.database.user=root
+    debezium.source.database.password=SuperSecret
+    debezium.source.include.schema.changes=false
+    debezium.source.skip.messages.without.change=true
+    debezium.source.offset.flush.interval.ms=1000
+    debezium.source.tombstones.on.delete=false
+    debezium.source.schema.history.internal=io.debezium.storage.redis.history.RedisSchemaHistory
+
+    debezium.source.schema.history.internal.store.only.captured.tables.ddl=true
+
+    debezium.source.key.converter.schemas.enable=false
+    debezium.source.value.converter.schemas.enable=false
+    debezium.source.decimal.handling.mode=string
+
+    debezium.transforms=AddPrefix
+    debezium.transforms.AddPrefix.type=org.apache.kafka.connect.transforms.RegexRouter
+    debezium.transforms.AddPrefix.regex=.*
+    debezium.transforms.AddPrefix.replacement=data:$0
+
+    quarkus.log.min-level=TRACE
+    quarkus.log.level=INFO
+    quarkus.log.console.json=false
+    quarkus.http.port=8088
