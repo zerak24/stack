@@ -17,3 +17,4 @@
 - jaeger 1.3.2
 - mongodb 14.0.3
 - clickhouse 4.0.4
+- debezium 0.1.0
