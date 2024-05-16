@@ -1,0 +1,57 @@
+# -- Backstage parameters
+# @default -- See below
+# -- Backstage parameters
+# @default -- See below
+backstage:
+  replicas: 1
+  command: ["node", "packages/backend"]
+  
+  appConfig:
+    app:
+      title: Saladin Backstage App
+      baseUrl: http://localhost:7007
+    backend:
+      baseUrl: http://localhost:7007
+      listen:
+        port: 7007
+    techdocs:
+      builder: 'local'
+      generator:
+        runIn: 'local'
+      publisher:
+        type: 'local'
+    database:
+      client: pg
+      connection:
+        host: ${POSTGRES_HOST}
+        port: ${POSTGRES_PORT}
+        user: ${POSTGRES_USER}
+        password: ${POSTGRES_PASSWORD}
+    auth:
+      environment: development
+      providers:
+        guest: {}
+        # gitlab:
+        #   development:
+        #     clientId: aeb7857237ef741f6ff07ab907bcbc24ee15333429a2082cac905723a61294c0
+        #     clientSecret: 5f659484e649f0f9f44e0bf554aad25dda0bf1673857884213c2fc40310060fe
+        #     audience: https://git.kafefin.net
+        #     callbackUrl: http://localhost:7007/api/auth/gitlab/handler/frame
+    catalog:
+      locations: []
+
+
+  extraEnvVars:
+    - name: NODE_ENV
+      value: development
+
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "something"
+    username: bn_backstage
+    password: "something"
+    secretKeys:
+      adminPasswordKey: "postgres-password"
+      userPasswordKey: password
+  architecture: standalone
