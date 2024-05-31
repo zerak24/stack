@@ -2,66 +2,118 @@
 
 ## Tool's Flag
 
-while getopts :a:p:c:i:t: flag
+while (( "$#" ))
 do
-  case "${flag}" in
-    a) action=${OPTARG};;
-    c) cluster=${OPTARG};;
-    p) provider=${OPTARG};;
-    i) item=${OPTARG};;
-    t) targets=${OPTARG};;
+  case "$1" in
+    -a|--action)
+      ACTION=$2
+      shift 2
+      ;;
+    -c|--cluster)
+      CLUSTER=$2
+      shift 2
+      ;;
+    --ci)
+      CI=true
+      AUTO="-auto-approve"
+      shift 1
+      ;;
+    -p|--provider)
+      PROVIDER=$2
+      shift 2
+      ;;
+    -i|--item)
+      ITEM=$2
+      shift 2
+      ;;
+    -t|--targets)
+      TARGETS=$2
+      shift 2
+      ;;
   esac
 done
 
 ## Global Variables
-
 ROOT_CLOUD="."
 PROVIDER_PATH="${ROOT_CLOUD}/cloud"
-CLUSTER_PATH="${PROVIDER_PATH}/${provider}/env"
-ITEM_PATH="${CLUSTER_PATH}/${cluster}"
+CLUSTER_PATH="${PROVIDER_PATH}/${PROVIDER}/env"
+ITEM_PATH="${CLUSTER_PATH}/${CLUSTER}"
+MODULES_PATH="${PROVIDER_PATH}/${PROVIDER}/modules"
 
-## Check Syntax Functions
+## Additional Soure
 
-if [ "${action}" != "plan" ] && [ "${action}" != "apply" ] && [ "${action}" != "destroy" ];then
-  echo "Err: ACTION FLAG"
-  exit 1
-fi
+source ${ROOT_CLOUD}/tools/setup.sh
 
-if [ $(ls ${PROVIDER_PATH} | grep ${provider} 2>/dev/null | wc -l) -eq 0 ];then
-  echo "Err: PROVIDER FLAG"
-  exit 1
-fi
+## Check Syntax Function
 
-if [ $(ls ${CLUSTER_PATH} | grep ${cluster} 2>/dev/null | wc -l) -eq 0 ];then
-  echo ${cluster}
-  echo "Err: CLUSTER FLAG"
-  exit 1
-fi
-
-if [ $(ls ${ITEM_PATH} | grep ${item} 2>/dev/null | wc -l) -eq 0 ];then
-  echo "Err: ITEMS FLAG"
-  exit 1
-fi
-
-if [ "${targets}" == "" ];then
-  targets="all"
-fi
-
-## Main Functions
-
-if [ "${targets}" == "all" ]; then
-  exit 0
-else
-  for tag in $(echo ${tags} | tr ',' ' '); do
-  path_target=${ITEM_PATH}/${item}/${tag}
-  var="${ITEM_PATH}/${item}/${tag}/variables.yaml"
-  project="${ITEM_PATH}/project.yaml"
-  if [ ! -d $path ]; then
-    continue
+function check() {
+  if [ "${ACTION}" != "plan" ] && [ "${ACTION}" != "apply" ] && [ "${ACTION}" != "destroy" ]
+  then
+    echo "WRONG ACTION FLAG"
+    exit 1
   fi
-  for part in $(yq)
-  command="terraform ${action} -chdir ${path} -var=\"inputs=\$(yq '.inputs.${part}' ${var} -o j -I=0)\" -var=\"project=\$(yq '.inputs.project' ${project} -o j -I=0)\""
-  echo $command
-  # eval $command  
-done
+
+  if [ $(ls ${PROVIDER_PATH} | grep -w ${PROVIDER} 2>/dev/null | wc -l) -eq 0 ]
+  then
+    echo "WRONG PROVIDER FLAG"
+    exit 1
+  fi
+
+  if [ $(ls ${CLUSTER_PATH} | grep -w ${CLUSTER} 2>/dev/null | wc -l) -eq 0 ]
+  then
+    echo "WRONG CLUSTER FLAG"
+    exit 1
+  fi
+
+  if [ $(ls ${ITEM_PATH} | grep -w ${ITEM} 2>/dev/null | wc -l) -eq 0 ]
+  then
+    echo "WRONG ITEMS FLAG"
+    exit 1
+  fi
+
+  if [ "${TARGETS}" == "" ]
+  then
+    TARGETS="all"
+  fi
+}
+
+## Terraform Function
+
+function terraform_target() {
+  path_target=${ITEM_PATH}/${ITEM}/${target}
+  project="${ITEM_PATH}/project.yaml"
+  var="${path_target}/variables.yaml"
+
+  if [ -f $path_target ]
+  then
+    var="${path_target}"
+  fi
+
+  for part in $(yq '.inputs | keys | .[]' $var)
+  do
+    command="terraform ${ACTION} -chdir ${MODULES_PATH}/${part} -var=\"inputs=\$(yq '.inputs.${part}' ${var} -o j -I=0)\" -var=\"project=\$(yq '.inputs.project' ${project} -o j -I=0)\""
+    echo $command
+    # eval $command  
+  done
+}
+
+## Setup Function
+
+install_terraform
+
+## Main Function
+
+check
+
+if [ "${TARGETS}" == "all" ]
+then
+  for target in $(ls $ITEM_PATH/${ITEM})
+  do
+    terraform_target
+  done
+else
+  for target in $(echo ${TARGETS} | tr ',' ' ')
+  do
+    terraform_target
+  done
 fi
