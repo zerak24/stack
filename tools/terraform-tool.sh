@@ -14,7 +14,7 @@ do
       shift 2
       ;;
     --ci)
-      CI=true
+      # CI=true
       AUTO="-auto-approve"
       shift 1
       ;;
@@ -37,8 +37,10 @@ done
 ROOT_CLOUD="."
 PROVIDER_PATH="${ROOT_CLOUD}/cloud"
 CLUSTER_PATH="${PROVIDER_PATH}/${PROVIDER}/env"
-ITEM_PATH="${CLUSTER_PATH}/${CLUSTER}"
 MODULES_PATH="${PROVIDER_PATH}/${PROVIDER}/modules"
+ITEM_PATH="${CLUSTER_PATH}/${CLUSTER}"
+PROJECT="${ITEM_PATH}/project.yaml"
+
 
 ## Additional Soure
 
@@ -46,7 +48,7 @@ source ${ROOT_CLOUD}/tools/setup.sh
 
 ## Check Syntax Function
 
-function check() {
+function check_flag() {
   if [ "${ACTION}" != "plan" ] && [ "${ACTION}" != "apply" ] && [ "${ACTION}" != "destroy" ]
   then
     echo "WRONG ACTION FLAG"
@@ -71,7 +73,7 @@ function check() {
     exit 1
   fi
 
-  if [ "${TARGETS}" == "" ]
+  if [ -z ${TARGETS} ]
   then
     TARGETS="all"
   fi
@@ -81,7 +83,6 @@ function check() {
 
 function terraform_target() {
   path_target=${ITEM_PATH}/${ITEM}/${target}
-  project="${ITEM_PATH}/project.yaml"
   var="${path_target}/variables.yaml"
 
   if [ -f $path_target ]
@@ -91,19 +92,35 @@ function terraform_target() {
 
   for part in $(yq '.inputs | keys | .[]' $var)
   do
-    command="terraform ${ACTION} -chdir ${MODULES_PATH}/${part} -var=\"inputs=\$(yq '.inputs.${part}' ${var} -o j -I=0)\" -var=\"project=\$(yq '.inputs.project' ${project} -o j -I=0)\""
+    command="terraform ${ACTION} ${AUTO} -chdir ${MODULES_PATH}/${part} -var=\"inputs=\$(yq '.inputs.${part}' ${var} -o j -I=0)\" -var=\"project=\$(yq '.inputs.project' ${PROJECT} -o j -I=0)\""
     echo $command
     # eval $command  
   done
 }
 
+function check_automation() {
+  if [ "${ACTION}" == "apply" ] || [ "${ACTION}" == "destroy" ] && [ -z ${AUTO} ]
+  then
+    echo -n "This is ${ACTION} action. Are you sure that you wanna do this ? Did you run plan action yet ? [y/n]: "
+    read -r ans
+    if [ "${ans}" != "y" ] && [ "${ans}" != "yes" ]
+    then
+      exit
+    fi
+    AUTO="-auto-approve"
+  fi
+}
+
 ## Setup Function
 
 install_terraform
+install_yq
+install_helm3
 
 ## Main Function
 
-check
+check_flag
+check_automation
 
 if [ "${TARGETS}" == "all" ]
 then
