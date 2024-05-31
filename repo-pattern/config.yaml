@@ -1,0 +1,18 @@
+email-domain:
+  - 'heaven.com'
+
+groups:
+  admin:
+    - god@heaven.com
+  speaker:
+    - peter@heaven.com
+    - lukes@heaven.com
+    - matthew@heaven.com
+    - john@heaven.com
+  writer:
+    - mark@heaven.com
+    - john@heaven.com
+
+except:
+  - Dockerfile
+  - .gitlab-ci.yml
