@@ -1,0 +1,3 @@
+install terrafrom
+install yq
+install helm3
