@@ -1,0 +1,84 @@
+chart:
+  version: v1
+  repository: zerak24
+
+general:
+  fullName: app-test
+  repo: docker.io/zerak24
+  image: simple-go:v1.0.4
+  namespace: default
+
+cronjobs:
+  - name: run-something
+    schedule: '* 12 * * *'
+    command:
+    - date
+
+env:
+  ENV_1: data-1
+  ENV_2: data-2
+  SOMETHING:
+    valueFrom:
+      secretKeyRef:
+        name: k8s-secret-env
+        key: something
+
+replicaCount: 1
+
+rbac:
+  enabled: true
+
+service:
+  type: ClusterIP
+  port: 80
+  containerPort: 9000
+  containerGrpcPort: 10000
+
+no_healthcheck: true
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 200Mi
+  requests:
+    cpu: 10m
+    memory: 10Mi
+
+kongIngress:
+  enabled: true
+  class: "kong"
+  mode: "http"
+  routeMap:
+  - name: public
+    overridePath: /api/v1/public
+    upstream_path: /public
+    plugins:
+    - cors
+    cors:
+      origins:
+      - "*"
+      methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+  - name: user
+    overridePath: /api/v1/user
+    upstream_path: /user
+    plugins:
+    - cors
+    cors:
+      origins:
+      - "*"
+      methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+  ingress_config: {}
+
+kongIngressConfig:
+  domains:
+    - localhost

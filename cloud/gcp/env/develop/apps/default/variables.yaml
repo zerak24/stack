@@ -1,0 +1,5 @@
+inputs:
+  sa:
+    - names: [olympus]
+      prefix: tf-gke
+      roles: []
