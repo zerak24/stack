@@ -116,6 +116,7 @@ function check_automation() {
 install_terraform
 install_yq
 install_helm3
+install_gcloud
 
 ## Main Function
 
