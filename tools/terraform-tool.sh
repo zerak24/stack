@@ -84,17 +84,20 @@ function check_flag() {
 function terraform_target() {
   path_target=${ITEM_PATH}/${ITEM}/${target}
   var="${path_target}/variables.yaml"
+  state="../../../../${path_target}/state/terraform.tfstate"
 
   if [ -f $path_target ]
   then
     var="${path_target}"
+    state="../../../../$(dirname $var)/state/terraform.tfstate"
   fi
 
   for part in $(yq '.inputs | keys | .[]' $var)
   do
-    command="terraform ${ACTION} ${AUTO} -chdir ${MODULES_PATH}/${part} -var=\"inputs=\$(yq '.inputs.${part}' ${var} -o j -I=0)\" -var=\"project=\$(yq '.inputs.project' ${PROJECT} -o j -I=0)\""
-    echo $command
-    # eval $command  
+    init_command="terraform -chdir=\"${MODULES_PATH}/${part}\" init"
+    action_command="terraform -chdir=\"${MODULES_PATH}/${part}\" ${ACTION} -state=\"${state}\" ${AUTO} -var=\"inputs=\$(yq '.inputs.${part}' ${var} -o j -I=0)\" -var=\"project=\$(yq '.inputs.project' ${PROJECT} -o j -I=0)\""
+    eval $init_command  
+    eval $action_command
   done
 }
 
