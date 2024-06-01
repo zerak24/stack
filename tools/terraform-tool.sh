@@ -51,6 +51,7 @@ function setup() {
   install_yq
   install_helm3
   install_gcloud
+  install_kubectl
 }
 
 ## Check Syntax Function

@@ -1,5 +1,7 @@
+#! /bin/bash
+
 function install_terraform() {
-  if [ $(which terraform | grep -w "not found" | wc -l) -eq 1 ]
+  if [ $(which terraform | wc -l) -eq 0 ]
   then
     wget -O /tmp/terraform_1.8.4_linux_amd64.zip https://releases.hashicorp.com/terraform/1.8.4/terraform_1.8.4_linux_amd64.zip
     mkdir -p /tmp/terraform
@@ -10,10 +12,10 @@ function install_terraform() {
 }
 
 function install_yq() {
-  if [ $(which yq | grep -w "not found" | wc -l) -eq 1 ]
+  if [ $(which yq | wc -l) -eq 0 ]
   then
     wget -O /tmp/yq_linux_amd64.tar.gz https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64.tar.gz
-    mkdir -p yq_linux_amd64
+    mkdir -p /tmp/yq_linux_amd64
     tar -xvzf /tmp/yq_linux_amd64.tar.gz -C /tmp/yq_linux_amd64
     mv /tmp/yq_linux_amd64/yq_linux_amd64 /usr/local/bin/yq
     rm -rf /tmp/yq_linux_amd64 /tmp/yq_linux_amd64.tar.gz
@@ -21,18 +23,18 @@ function install_yq() {
 }
 
 function install_helm3() {
-  if [ $(which helm | grep -w "not found" | wc -l) -eq 1 ]
+  if [ $(which helm | wc -l) -eq 0 ]
   then
     wget -O /tmp/helm-v3.15.1-linux-amd64.tar.gz https://get.helm.sh/helm-v3.15.1-linux-amd64.tar.gz
     mkdir -p /tmp/helm-v3
     tar -xvzf /tmp/helm-v3.15.1-linux-amd64.tar.gz -C /tmp/helm-v3
     mv /tmp/helm-v3/linux-amd64/helm /usr/local/bin/helm
     rm -rf /tmp/helm-v3 /tmp/helm-v3.15.1-linux-amd64.tar.gz
-  fis
+  fi
 }
 
 function install_gcloud() {
-  if [ $(which gcloud | grep -w "not found" | wc -l) -eq 1 ]
+  if [ $(which gcloud | wc -l) -eq 0 ]
   then
     wget -O /tmp/google-cloud-cli-478.0.0-linux-x86_64.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-478.0.0-linux-x86_64.tar.gz
     mkdir -p /usr/local/bin/gcloud
@@ -42,7 +44,7 @@ function install_gcloud() {
 }
 
 function install_kubectl() {
-  if [ $(which kubectl | grep -w "not found" | wc -l) -eq 1 ]
+  if [ $(which kubectl | wc -l) -eq 0 ]
   then
     wget -O /tmp/kubectl "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
     chmod +x /tmp/kubectl
