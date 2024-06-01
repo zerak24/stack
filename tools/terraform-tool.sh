@@ -34,6 +34,7 @@ do
 done
 
 ## Global Variables
+
 ROOT_CLOUD="."
 PROVIDER_PATH="${ROOT_CLOUD}/cloud"
 CLUSTER_PATH="${PROVIDER_PATH}/${PROVIDER}/env"
@@ -41,10 +42,16 @@ MODULES_PATH="${PROVIDER_PATH}/${PROVIDER}/modules"
 ITEM_PATH="${CLUSTER_PATH}/${CLUSTER}"
 PROJECT="${ITEM_PATH}/project.yaml"
 
+## Setup Function
 
-## Additional Soure
-
-source ${ROOT_CLOUD}/tools/setup.sh
+function setup() {
+  source ${ROOT_CLOUD}/tools/setup.sh
+  
+  install_terraform
+  install_yq
+  install_helm3
+  install_gcloud
+}
 
 ## Check Syntax Function
 
@@ -114,15 +121,9 @@ function check_automation() {
   fi
 }
 
-## Setup Function
-
-install_terraform
-install_yq
-install_helm3
-install_gcloud
-
 ## Main Function
 
+setup
 check_flag
 check_automation
 

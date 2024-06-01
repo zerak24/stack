@@ -28,15 +28,24 @@ function install_helm3() {
     tar -xvzf /tmp/helm-v3.15.1-linux-amd64.tar.gz -C /tmp/helm-v3
     mv /tmp/helm-v3/linux-amd64/helm /usr/local/bin/helm
     rm -rf /tmp/helm-v3 /tmp/helm-v3.15.1-linux-amd64.tar.gz
-  fi
+  fis
 }
 
 function install_gcloud() {
-  if [ $(which helm | grep -w "not found" | wc -l) -eq 1 ]
+  if [ $(which gcloud | grep -w "not found" | wc -l) -eq 1 ]
   then
     wget -O /tmp/google-cloud-cli-478.0.0-linux-x86_64.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-478.0.0-linux-x86_64.tar.gz
     mkdir -p /usr/local/bin/gcloud
     tar -xvzf /tmp/google-cloud-cli-478.0.0-linux-x86_64.tar.gz -C /usr/local/bin/gcloud
     /usr/local/bin/gcloud/google-cloud-sdk/install.sh
+  fi
+}
+
+function install_kubectl() {
+  if [ $(which kubectl | grep -w "not found" | wc -l) -eq 1 ]
+  then
+    wget -O /tmp/kubectl "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    chmod +x /tmp/kubectl
+    mv /tmp/kubectl /usr/local/bin/kubectl
   fi
 }
