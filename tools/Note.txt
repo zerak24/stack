@@ -1,5 +1,5 @@
-install terrafrom
-install yq
-install helm3
+# gcloud auth application-default login --disable-quota-project --no-launch-browser
+# gcloud auth activate-service-account --key-file auth.json
 
-# gcloud auth application-default login
+# /etc/gitlab/initial_root_password
+# 9m46H29O+WYpAaWDckYh+lXcs99Qy/8jTwmAopFyZGU=

@@ -1,0 +1,11 @@
+inputs:
+  vault:
+    network_name: develop-main
+    network_subnet_cidr_range: 10.255.0.0/16
+    vault_allowed_cidrs: 
+      - "10.10.0.0/16"
+    ssh_allowed_cidrs: 
+      - "118.69.55.60/32"
+    machine_type: "e2-micro"
+    max_nodes: "1"
+    min_nodes: "1"

@@ -1,4 +1,4 @@
-module "service_accounts" {
+module "sa" {
   for_each = {
     for idx, obj in var.inputs:
     idx => obj

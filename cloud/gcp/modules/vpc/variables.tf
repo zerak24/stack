@@ -2,11 +2,11 @@ variable "project" {
   type = object({
     project_id = string
     region = string
+    network_name = string
   })
 }
 variable "inputs" {
   type = object({
-    network_name = string
     subnets = list(object({
       subnet_name = string
       subnet_ip = string

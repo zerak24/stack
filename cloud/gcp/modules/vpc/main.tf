@@ -2,7 +2,7 @@ module "vpc" {
     source  = "git@github.com:zerak24/terraform_modules.git//gcp/vpc"
 
     project_id   = var.project.project_id
-    network_name = var.inputs.network_name
+    network_name = var.project.network_name
     routing_mode = "GLOBAL"
 
     subnets = [for sub in var.inputs.subnets:

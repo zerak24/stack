@@ -12,7 +12,7 @@ module "gke" {
   name                       = var.inputs.cluster_name
   region                     = var.project.region
   zones                      = var.inputs.zones
-  network                    = var.inputs.network_name
+  network                    = var.project.network_name
   subnetwork                 = var.inputs.subnet
   ip_range_pods              = var.inputs.pod_cidr
   ip_range_services          = var.inputs.svc_cidr
@@ -35,7 +35,7 @@ module "gke" {
       max_count                 = node_pool.max_nodes
       local_ssd_count           = 0
       spot                      = node_pool.spot_plan
-      disk_size_gb              = 10
+      disk_size_gb              = 50
       disk_type                 = "pd-standard"
       image_type                = "COS_CONTAINERD"
       enable_gcfs               = false

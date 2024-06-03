@@ -94,12 +94,6 @@ function terraform_target() {
   var="${path_target}/variables.yaml"
   state="../../../../${path_target}/state/terraform.tfstate"
 
-  if [ -f $path_target ]
-  then
-    var="${path_target}"
-    state="../../../../$(dirname $var)/state/terraform.tfstate"
-  fi
-
   for part in $(yq '.inputs | keys | .[]' $var)
   do
     init_command="terraform -chdir=\"${MODULES_PATH}/${part}\" init"

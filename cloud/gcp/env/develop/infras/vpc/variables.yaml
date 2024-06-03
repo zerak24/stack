@@ -1,0 +1,22 @@
+inputs:
+  vpc:
+    network_name: develop-main
+    subnets:
+      - subnet_name: subnet-01
+        subnet_ip: 10.10.0.0/16
+      - subnet_name: subnet-02
+        subnet_ip: 10.20.0.0/16
+    secondary_ranges:
+      subnet-01:
+        - range_name: subnet-01-pods
+          ip_cidr_range: 10.11.0.0/16
+        - range_name: subnet-01-services
+          ip_cidr_range: 10.12.0.0/16
+    egress_rules: []
+    ingress_rules:
+      - name: "allow-ssh-ingress"
+        source_ranges:
+          - 0.0.0.0/0
+        allow:
+          - protocol: tcp
+            ports: ["22"]

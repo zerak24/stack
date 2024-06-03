@@ -1,0 +1,8 @@
+inputs:
+  nat:
+    - subnets:
+        - name: subnet-01
+          source_ip_ranges_to_nat: ["10.10.0.0/16"]
+          # secondary_ip_range_names: ["subnet-01-pods", "subnet-01-services"]
+      router_name: nat-router
+      create_router: true
