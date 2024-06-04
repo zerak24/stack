@@ -1,2 +1,10 @@
 inputs:
-  dns: {}
+  dns:
+    name: thisiszerak-net
+    domain: thisiszerak.net.
+    recordsets:
+      - name: git
+        type: A
+        ttl: 5
+        records:
+          - 34.162.41.175

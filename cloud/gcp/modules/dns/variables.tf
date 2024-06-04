@@ -5,14 +5,14 @@ variable "project" {
   })
 }
 variable "inputs" {
-  type = list(object({
-    network_name = string
-    subnets = list(object({
+  type = object({
+    name = string
+    domain = string
+    recordsets = list(object({
       name = string
-      source_ip_ranges_to_nat  = list(string)
-      secondary_ip_range_names = optional(list(string))
+      type  = string
+      ttl = number
+      records = list(string)
     }))
-    router_name = string
-    create_router = bool
-  }))
+  })
 }

@@ -106,7 +106,7 @@ function terraform_target() {
 function check_automation() {
   if [ "${ACTION}" == "apply" ] || [ "${ACTION}" == "destroy" ] && [ -z ${AUTO} ]
   then
-    echo -n "This is ${ACTION} action. Are you sure that you wanna do this ? Did you run plan action yet ? [y/n]: "
+    echo -n "This is ${ACTION} action. Are you sure that you wanna do this ? Did you run plan action yet ? [y/N]: "
     read -r ans
     if [ "${ans}" != "y" ] && [ "${ans}" != "yes" ]
     then

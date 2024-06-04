@@ -26,6 +26,7 @@ variable "inputs" {
     ingress_rules = optional(list(object({
       name = string
       source_ranges = list(string)
+      target_tags = optional(list(string))
       allow = list(object({
         protocol = string
         ports = optional(list(string))

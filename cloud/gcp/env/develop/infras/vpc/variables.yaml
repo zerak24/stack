@@ -14,9 +14,27 @@ inputs:
           ip_cidr_range: 10.12.0.0/16
     egress_rules: []
     ingress_rules:
-      - name: "allow-ssh-ingress"
+      - name: allow-ssh-ingress
+        target_tags: 
+          - allow-ssh
         source_ranges:
           - 0.0.0.0/0
         allow:
           - protocol: tcp
             ports: ["22"]
+      - name: allow-http-ingress
+        target_tags: 
+          - allow-http
+        source_ranges:
+          - 0.0.0.0/0
+        allow:
+          - protocol: tcp
+            ports: ["80"]
+      - name: allow-https-ingress
+        target_tags:
+          - allow-https
+        source_ranges:
+          - 0.0.0.0/0
+        allow:
+          - protocol: tcp
+            ports: ["443"]
