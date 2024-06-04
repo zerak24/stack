@@ -9,7 +9,7 @@ provider "kubernetes" {
 module "gke" {
   source                     = "git@github.com:zerak24/terraform_modules.git//gcp/gke"
   project_id                 = var.project.project_id
-  name                       = var.inputs.cluster_name
+  name                       = format("%v-%v", var.project.env, var.inputs.cluster_name)
   region                     = var.project.region
   zones                      = var.inputs.zones
   network                    = var.project.network_name
@@ -28,7 +28,7 @@ module "gke" {
 
   node_pools = [for idx, node_pool in var.inputs.node_pools :
     {
-      name                        = node_pool.pool_name
+      name                        = format("%v-%v-%v", var.project.env, var.inputs.cluster_name, node_pool.pool_name)
       machine_type                = node_pool.machine_type
       node_locations              = var.inputs.zones[idx]
       min_count                   = node_pool.min_nodes

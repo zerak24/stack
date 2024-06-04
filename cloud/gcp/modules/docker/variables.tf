@@ -6,7 +6,3 @@ variable "project" {
     env          = string
   })
 }
-variable "inputs" {
-  type = list(object({
-  }))
-}

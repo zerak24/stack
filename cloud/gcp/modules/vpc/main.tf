@@ -7,7 +7,7 @@ module "vpc" {
 
   subnets = [for sub in var.inputs.subnets :
     {
-      subnet_name           = sub.subnet_name
+      subnet_name           = format("subnet-%v", sub.subnet_name)
       subnet_ip             = sub.subnet_ip
       subnet_region         = var.project.region
       subnet_private_access = false
