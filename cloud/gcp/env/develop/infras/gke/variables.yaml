@@ -7,17 +7,17 @@ inputs:
     svc_cidr: subnet-01-services
     # service_account_name: tf-gke-olympus@playground-s-11-27dc58ef.iam.gserviceaccount.com
     node_pools:
-      - pool_name: zone-1
+      - pool_name: zone-a
         machine_type: e2-micro
         min_nodes: 1
         max_nodes: 2
         spot_plan: true
-      - pool_name: zone-2
+      - pool_name: zone-b
         machine_type: e2-micro
         min_nodes: 1
         max_nodes: 1
         spot_plan: true
-      - pool_name: zone-3
+      - pool_name: zone-c
         machine_type: e2-micro
         min_nodes: 1
         max_nodes: 1
