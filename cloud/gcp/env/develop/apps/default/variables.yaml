@@ -1,5 +1,6 @@
 inputs:
-  sa:
-    - names: [default]
-      prefix: tf-gke
-      roles: []
+  app:
+    sa:
+      - names: [default]
+        prefix: tf-gke
+        roles: []

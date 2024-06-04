@@ -1,7 +1,8 @@
 inputs:
-  gitlab:
-    subnetwork_name: subnet-01
-    disk_size_gb: 30
-    disk_type: pd-standard
-    machine_type: e2-medium
-    name_prefix: gitlab
+  ce:
+    template:
+      subnetwork_name: subnet-01
+      disk_size_gb: 30
+      disk_type: pd-standard
+      machine_type: e2-medium
+      name_prefix: gitlab

@@ -1,5 +1,6 @@
 inputs:
-  sa:
-    - names: [another]
-      prefix: tf-gke
-      roles: []
+  app:
+    sa:
+      - names: [another]
+        prefix: tf-gke
+        roles: []
