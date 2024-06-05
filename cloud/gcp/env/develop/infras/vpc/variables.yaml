@@ -15,25 +15,31 @@ inputs:
     routes: []
     egress_rules: []
     ingress_rules:
-      - name: allow-ssh-ingress
+      - name: allow-ssh
         target_tags: 
           - allow-ssh
+          - gitlab-ce-allow
+          - vault-ce-allow
         source_ranges:
           - 0.0.0.0/0
         allow:
           - protocol: tcp
             ports: ["22"]
-      - name: allow-http-ingress
+      - name: allow-http
         target_tags: 
           - allow-http
+          - gitlab-ce-allow
+          - vault-ce-allow
         source_ranges:
           - 0.0.0.0/0
         allow:
           - protocol: tcp
             ports: ["80"]
-      - name: allow-https-ingress
+      - name: allow-https
         target_tags:
           - allow-https
+          - gitlab-ce-allow
+          - vault-ce-allow
         source_ranges:
           - 0.0.0.0/0
         allow:

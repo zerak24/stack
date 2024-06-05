@@ -13,6 +13,7 @@ variable "inputs" {
       disk_type       = string
       machine_type    = string
       name_prefix     = string
+      tags = list(string)
     })
   })
 }

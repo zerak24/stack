@@ -6,3 +6,5 @@ inputs:
       disk_type: pd-standard
       machine_type: e2-medium
       name_prefix: gitlab
+      tags:
+        - gitlab-ce-allow

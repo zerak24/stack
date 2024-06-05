@@ -1,7 +1,7 @@
-resource "google_compute_address" "gitlab_ip_address" {
+resource "google_compute_address" "ip_address" {
   project      = var.project.project_id
   region       = var.project.region
-  name         = "gitlab-external-ip"
+  name         = "${var.inputs.template.name_prefix}-external-ip"
   address_type = "EXTERNAL"
   network_tier = "STANDARD"
 }
@@ -22,11 +22,7 @@ module "template" {
     email  = "default"
     scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
-  tags = [
-    "allow-ssh",
-    "allow-http",
-    "allow-https"
-  ]
+  tags = var.inputs.template.tags
 }
 
 module "compute" {
@@ -35,12 +31,12 @@ module "compute" {
   region              = var.project.region
   network             = "https://www.googleapis.com/compute/v1/projects/${var.project.project_id}/global/networks/${var.project.network_name}"
   subnetwork          = "https://www.googleapis.com/compute/v1/projects/${var.project.project_id}/regions/${var.project.region}/subnetworks/${var.project.network_name}-${var.inputs.template.subnetwork_name}"
-  hostname            = "gitlab-compute-engine"
+  hostname            = "${var.inputs.template.name_prefix}-compute-engine"
   add_hostname_suffix = false
   instance_template   = module.template.self_link_unique
   num_instances       = "1"
   access_config = [{
-    nat_ip       = "${google_compute_address.gitlab_ip_address.address}"
+    nat_ip       = "${google_compute_address.ip_address.address}"
     network_tier = "STANDARD"
   }]
 }
