@@ -11,7 +11,7 @@ module "template" {
   project_id           = var.project.project_id
   region               = var.project.region
   network              = "https://www.googleapis.com/compute/v1/projects/${var.project.project_id}/global/networks/${var.project.network_name}"
-  subnetwork           = "https://www.googleapis.com/compute/v1/projects/${var.project.project_id}/regions/${var.project.region}/subnetworks/${var.inputs.template.subnetwork_name}"
+  subnetwork           = "https://www.googleapis.com/compute/v1/projects/${var.project.project_id}/regions/${var.project.region}/subnetworks/${var.project.network_name}-${var.inputs.template.subnetwork_name}"
   disk_size_gb         = var.inputs.template.disk_size_gb
   disk_type            = var.inputs.template.disk_type
   machine_type         = var.inputs.template.machine_type
@@ -34,7 +34,7 @@ module "compute" {
   subnetwork_project  = var.project.project_id
   region              = var.project.region
   network             = "https://www.googleapis.com/compute/v1/projects/${var.project.project_id}/global/networks/${var.project.network_name}"
-  subnetwork          = "https://www.googleapis.com/compute/v1/projects/${var.project.project_id}/regions/${var.project.region}/subnetworks/${var.inputs.template.subnetwork_name}"
+  subnetwork          = "https://www.googleapis.com/compute/v1/projects/${var.project.project_id}/regions/${var.project.region}/subnetworks/${var.project.network_name}-${var.inputs.template.subnetwork_name}"
   hostname            = "gitlab-compute-engine"
   add_hostname_suffix = false
   instance_template   = module.template.self_link_unique
