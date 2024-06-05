@@ -12,6 +12,7 @@ inputs:
           ip_cidr_range: 10.11.0.0/16
         - range_name: zone-1-services
           ip_cidr_range: 10.12.0.0/16
+    routes: []
     egress_rules: []
     ingress_rules:
       - name: allow-ssh-ingress

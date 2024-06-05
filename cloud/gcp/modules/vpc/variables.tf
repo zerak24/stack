@@ -3,7 +3,6 @@ variable "project" {
     project_id   = string
     region       = string
     network_name = string
-    env          = string
   })
 }
 variable "inputs" {
@@ -16,15 +15,16 @@ variable "inputs" {
       range_name    = string
       ip_cidr_range = string
     })))
-    egress_rules = optional(list(object({
+    routes = list(any)
+    egress_rules = list(object({
       name          = string
       source_ranges = list(string)
       allow = list(object({
         protocol = string
         ports    = optional(list(string))
       }))
-    })))
-    ingress_rules = optional(list(object({
+    }))
+    ingress_rules = list(object({
       name          = string
       source_ranges = list(string)
       target_tags   = optional(list(string))
@@ -32,6 +32,6 @@ variable "inputs" {
         protocol = string
         ports    = optional(list(string))
       }))
-    })))
+    }))
   })
 }

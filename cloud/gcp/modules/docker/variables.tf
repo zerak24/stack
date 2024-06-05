@@ -3,6 +3,5 @@ variable "project" {
     project_id   = string
     region       = string
     network_name = string
-    env          = string
   })
 }
