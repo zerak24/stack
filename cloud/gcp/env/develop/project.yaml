@@ -1,6 +1,6 @@
 inputs:
   project:
-    project_id: playground-s-11-3fd96f67
+    project_id: playground-s-11-4d920d4f
     region: us-east5
     network_name: develop-main
     env: develop

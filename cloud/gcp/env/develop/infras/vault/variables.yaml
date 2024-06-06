@@ -1,44 +1,11 @@
 inputs:
-  docker:
-    instance_name: vault
-    instance_type: e2-small
-    zone: c
-    subnetwork: zone-2
-    disk_size: 10
-    disk_type: pd-ssd
-    disk_name: data-disk-0
-    additional_metadata: {}
-    tags:
-      - allow-http
-      - allow-https
-      - allow-ssh
-      - vault-ce-allow
-    docker:
-      image: docker.io/vault:1.13.3
-      env:
-        - name: VAULT_ADDR 
-          value: http://0.0.0.0:80
-        - name: VAULT_API_ADDR
-          value: http://0.0.0.0:80
-      volumeMounts:
-        - mountPath: /mnt/data
-          name: data-disk-0
-          readOnly: false
-      volumes:
-        - name: data-disk-0
-          gcePersistentDisk:
-            pdName: data-disk-0
-            fsType: ext4
-  # docker run --detach --hostname vault.thisiszerak.net --publish 80:80 -e 'VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:80' --cap-add=IPC_LOCK -e 'VAULT_DEV_ROOT_TOKEN_ID=myroot' vault:1.13.3
-  # ce:
-  #   template:
-  #     subnetwork_name: zone-2
-  #     disk_size_gb: 30
-  #     disk_type: pd-standard
-  #     machine_type: e2-small
-  #     name_prefix: vault
-  #     tags:
-  #       - allow-ssh
-  #       - allow-http
-  #       - allow-https
+  ce:
+    template:
+      subnetwork_name: zone-2
+      disk_size_gb: 30
+      disk_type: pd-standard
+      machine_type: e2-small
+      name_prefix: vault
+      tags:
+        - vault-ce-allow
 

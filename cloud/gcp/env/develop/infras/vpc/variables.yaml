@@ -17,7 +17,6 @@ inputs:
     ingress_rules:
       - name: allow-ssh
         target_tags: 
-          - allow-ssh
           - gitlab-ce-allow
           - vault-ce-allow
         source_ranges:
@@ -27,7 +26,6 @@ inputs:
             ports: ["22"]
       - name: allow-http
         target_tags: 
-          - allow-http
           - gitlab-ce-allow
           - vault-ce-allow
         source_ranges:
@@ -37,7 +35,6 @@ inputs:
             ports: ["80"]
       - name: allow-https
         target_tags:
-          - allow-https
           - gitlab-ce-allow
           - vault-ce-allow
         source_ranges:
