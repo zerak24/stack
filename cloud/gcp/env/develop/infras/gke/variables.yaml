@@ -1,6 +1,5 @@
 inputs:
   gke:
-    cluster_name: main
     zones: ["us-east5-a", "us-east5-b", "us-east5-c"]
     subnet: zone-1
     pod_cidr: zone-1-pods

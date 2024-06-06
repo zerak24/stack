@@ -2,4 +2,3 @@
 # gcloud auth activate-service-account --key-file auth.json
 
 # /etc/gitlab/initial_root_password
-# 9m46H29O+WYpAaWDckYh+lXcs99Qy/8jTwmAopFyZGU=

@@ -5,7 +5,7 @@ module "sa" {
   }
   source     = "git@github.com:zerak24/terraform_modules.git//gcp/sa"
   project_id = var.project.project_id
-  prefix        = var.project.network_name
+  prefix        = var.project.env
   names         = each.value.name
   description = each.value.description
   project_roles = [for role in each.value.project_roles:

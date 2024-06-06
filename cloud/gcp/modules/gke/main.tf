@@ -9,11 +9,11 @@ provider "kubernetes" {
 module "gke" {
   source                     = "git@github.com:zerak24/terraform_modules.git//gcp/gke"
   project_id                 = var.project.project_id
-  name                       = format("%v-%v", var.project.network_name, var.inputs.cluster_name)
+  name                       = var.project.env
   region                     = var.project.region
   zones                      = var.inputs.zones
-  network                    = var.project.network_name
-  subnetwork                 = format("%v-%v", var.project.network_name, var.inputs.subnet)
+  network                    = var.project.env
+  subnetwork                 = format("%v-%v", var.project.env, var.inputs.subnet)
   ip_range_pods              = var.inputs.pod_cidr
   ip_range_services          = var.inputs.svc_cidr
   http_load_balancing        = false
@@ -21,14 +21,14 @@ module "gke" {
   horizontal_pod_autoscaling = false
   filestore_csi_driver       = true
   create_service_account     = false
-  service_account_name       = format("%v-%v@%v.iam.gserviceaccount.com", var.project.network_name, var.inputs.service_account_name, var.project.project_id)
+  service_account_name       = format("%v-%v@%v.iam.gserviceaccount.com", var.project.env, var.inputs.service_account_name, var.project.project_id)
   remove_default_node_pool   = true
   deletion_protection        = false
   release_channel            = "STABLE"
 
   node_pools = [for idx, node_pool in var.inputs.node_pools :
     {
-      name                        = format("%v-%v-%v", var.project.network_name, var.inputs.cluster_name, node_pool.pool_name)
+      name                        = format("%v-%v-%v", var.project.env, var.inputs.cluster_name, node_pool.pool_name)
       machine_type                = node_pool.machine_type
       node_locations              = var.inputs.zones[idx]
       min_count                   = node_pool.min_nodes

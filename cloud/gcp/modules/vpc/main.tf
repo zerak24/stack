@@ -2,12 +2,12 @@ module "vpc" {
   source = "git@github.com:zerak24/terraform_modules.git//gcp/vpc"
 
   project_id   = var.project.project_id
-  network_name = var.project.network_name
+  network_name = var.project.env
   routing_mode = "GLOBAL"
 
   subnets = [for sub in var.inputs.subnets :
     {
-      subnet_name           = format("%v-%v", var.project.network_name, sub.subnet_name)
+      subnet_name           = format("%v-%v", var.project.env, sub.subnet_name)
       subnet_ip             = sub.subnet_ip
       subnet_region         = var.project.region
       subnet_private_access = false
@@ -15,7 +15,7 @@ module "vpc" {
 
   secondary_ranges = merge([for key, value in var. inputs.secondary_ranges :
     {
-      format(format("%v-%v", var.project.network_name, key)) = value
+      format(format("%v-%v", var.project.env, key)) = value
     }
   ]...)
 
