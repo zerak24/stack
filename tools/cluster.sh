@@ -1,0 +1,1 @@
+gcloud container clusters get-credentials develop-main --location=us-east5
