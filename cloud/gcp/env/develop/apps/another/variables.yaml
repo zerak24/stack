@@ -1,6 +1,3 @@
 inputs:
   app:
-    sa:
-      - names: [another]
-        prefix: tf-gke
-        roles: []
+    workload-identity: {}

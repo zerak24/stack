@@ -1,11 +1,5 @@
 inputs:
   sa:
-    - name: ["gke-node-sa"]
-      description: "GKE Node Service Account"
-      project_roles:
-        - roles/monitoring.viewer
-        - roles/monitoring.metricWriter
-        - roles/logging.logWriter
-        - roles/stackdriver.resourceMetadata.writer
-        - roles/autoscaling.metricsWriter
-        - roles/artifactregistry.reader
+    - name: []
+      description: ""
+      project_roles: []

@@ -1,9 +1,7 @@
-module "sa" {
-  source        = "git@github.com:zerak24/terraform_modules.git//gcp/sa"
+module "workload-identity" {
+  source        = "git@github.com:zerak24/terraform_modules.git//gcp/workload-identity"
   project_id    = var.project.project_id
   prefix        = var.inputs.sa.prefix
-  names         = var.inputs.sa.names
-  project_roles = var.inputs.sa.roles
 }
 
 module "pubsub" {

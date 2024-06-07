@@ -11,7 +11,6 @@ variable "inputs" {
     subnet               = string
     pod_cidr             = string
     svc_cidr             = string
-    service_account_name = string
     node_pools = list(object({
       pool_name    = string
       machine_type = string

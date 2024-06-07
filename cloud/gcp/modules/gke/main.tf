@@ -21,14 +21,14 @@ module "gke" {
   horizontal_pod_autoscaling = false
   filestore_csi_driver       = true
   create_service_account     = false
-  service_account_name       = format("%v-%v@%v.iam.gserviceaccount.com", var.project.env, var.inputs.service_account_name, var.project.project_id)
+  service_account_name       = "cli-service-account-1@playground-s-11-ea852893.iam.gserviceaccount.com"
   remove_default_node_pool   = true
   deletion_protection        = false
   release_channel            = "STABLE"
 
   node_pools = [for idx, node_pool in var.inputs.node_pools :
     {
-      name                        = format("%v-%v-%v", var.project.env, var.inputs.cluster_name, node_pool.pool_name)
+      name                        = format("%v-%v", var.project.env, node_pool.pool_name)
       machine_type                = node_pool.machine_type
       node_locations              = var.inputs.zones[idx]
       min_count                   = node_pool.min_nodes

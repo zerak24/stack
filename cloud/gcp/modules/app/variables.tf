@@ -8,9 +8,6 @@ variable "project" {
 variable "inputs" {
   type = object({
     sa = object({
-      names  = list(string)
-      prefix = string
-      roles  = list(string)
     })
     pubsub = object({
     })

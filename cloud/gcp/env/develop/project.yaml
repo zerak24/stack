@@ -1,5 +1,5 @@
 inputs:
   project:
-    project_id: playground-s-11-7b7d5e89
+    project_id: playground-s-11-299dcc21
     region: us-east5
     env: develop

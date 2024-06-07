@@ -1,10 +1,10 @@
 inputs:
   dns:
-    name: thisiszerak-net
-    domain: thisiszerak.net.
+    name: tonghia-com
+    domain: tonghia.com.
     recordsets:
       - name: git
         type: A
         ttl: 5
         records:
-          - 34.162.41.175
+          - 34.1.18.199

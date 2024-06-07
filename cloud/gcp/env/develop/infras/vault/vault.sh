@@ -1,8 +1,9 @@
+export DOMAIN_NAME=vault.thisiszerak.info
 # vault
 sudo snap install docker
-sudo mkdir -p ./vault/logs
-sudo mkdir -p ./vault/file
-sudo mkdir -p ./vault/config
+sudo mkdir -p $HOME/vault/logs
+sudo mkdir -p $HOME/vault/file
+sudo mkdir -p $HOME/vault/config
 sudo docker volume create --opt device=/home/duyle/vault/config
 sudo echo << EOF >> /vault/config/vault.json
 {
@@ -24,6 +25,32 @@ sudo echo << EOF >> /vault/config/vault.json
   "ui":true,
 }
 EOF
-sudo docker run --detach --name vault-container --hostname vault.thisiszerak.net -v /home/duyle/vault/config:/vault/config -v /home/duyle/vault/logs:/vault/logs -v /home/duyle/vault/file:/vault/file --entrypoint docker-entrypoint.sh --publish 80:8200 --cap-add=IPC_LOCK vault:1.13.3 vault server -config=/vault/config/vault.json
-# certbot
-# nginx ssl
+sudo docker run --detach --network host --restart always --name vault --hostname $DOMAIN_NAME -v $HOME/vault/config:/vault/config -v $HOME/vault/logs:/vault/logs -v $HOME/vault/file:/vault/file --entrypoint docker-entrypoint.sh --cap-add=IPC_LOCK vault:1.13.3 vault server -config=/vault/config/vault.json
+# nginx
+sudo apt install nginx -y
+sudo systemctl enable nginx
+sudo systemctl reload nginx
+# certbot  
+sudo apt update
+sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d $DOMAIN_NAME --register-unsafely-without-email
+
+# update: add something format like this to /etc/nginx/sites-available/defaul
+# server {
+#     server_name <domain-name>; # managed by Certbot
+
+#     listen [::]:443 ssl ipv6only=on; # managed by Certbot
+#     listen 443 ssl; # managed by Certbot
+#     ssl_certificate /etc/letsencrypt/live/<domain-name>/fullchain.pem; # managed by Certbot
+#     ssl_certificate_key /etc/letsencrypt/live/<domain-name>/privkey.pem; # managed by Certbot
+#     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+#     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+#     location / {
+#             proxy_pass http://127.0.0.1:8200;
+#             proxy_set_header Host $host;
+#             proxy_set_header X-Real-IP $remote_addr;
+#             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#             proxy_set_header X-Forwarded-Proto https;
+#     }
+# }

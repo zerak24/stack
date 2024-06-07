@@ -16,5 +16,5 @@ do
   esac
 done
 
-PROJECT_CONFIG="../cloud/$PROVIDER/env/$CLUSTER/project.yaml"
+PROJECT_CONFIG="./cloud/$PROVIDER/env/$CLUSTER/project.yaml"
 gcloud container clusters get-credentials $CLUSTER --location=$(yq '.inputs.project.region' $PROJECT_CONFIG)
