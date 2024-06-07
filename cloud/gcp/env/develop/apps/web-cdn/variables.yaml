@@ -1,0 +1,5 @@
+inputs:
+  web-cdn:
+    cdn:
+    bucket:
+    lb:

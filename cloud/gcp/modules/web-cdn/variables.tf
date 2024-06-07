@@ -8,6 +8,7 @@ variable "project" {
 variable "inputs" {
   type = list(object({
     cdn = object()
-    storage = object()
+    lb = object()
+    bucket = object()
   }))
 }
