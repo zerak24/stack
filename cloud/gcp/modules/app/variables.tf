@@ -7,9 +7,15 @@ variable "project" {
 }
 variable "inputs" {
   type = object({
-    sa = object({
+    identity = object({
+      name = string
+      namespace = string
+      roles = list(string)
     })
-    pubsub = object({
-    })
+    pubsub = list(object({
+      topic = string
+      topic_labels = object()
+      storage_name = string
+    }))
   })
 }
