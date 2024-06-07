@@ -1,5 +1,4 @@
 inputs:
   web-cdn:
-    cdn:
-    bucket:
-    lb:
+    name: test
+    cdn_domain: test.tonghia.com.

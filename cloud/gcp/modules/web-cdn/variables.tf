@@ -7,8 +7,7 @@ variable "project" {
 }
 variable "inputs" {
   type = list(object({
-    cdn = object()
-    lb = object()
-    bucket = object()
+    name = string
+    cdn_domain = string
   }))
 }
