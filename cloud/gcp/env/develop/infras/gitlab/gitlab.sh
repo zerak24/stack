@@ -1,4 +1,4 @@
-export DOMAIN_NAME=git.thisiszerak.com
+export DOMAIN_NAME=git.tonghia.com.
 # docker
 sudo snap install docker
 sudo mkdir -p $HOME/gitlab/config

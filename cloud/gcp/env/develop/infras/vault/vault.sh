@@ -1,4 +1,4 @@
-export DOMAIN_NAME=vault.thisiszerak.info
+export DOMAIN_NAME=vault.tonghia.com
 # vault
 sudo snap install docker
 sudo mkdir -p $HOME/vault/logs

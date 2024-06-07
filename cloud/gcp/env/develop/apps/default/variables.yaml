@@ -6,4 +6,4 @@ inputs:
       roles: []
     pubsub: 
       - topic: default-message
-        storage_name: pubsub_bucket
+        storage_name: pubsub-subscription

@@ -38,7 +38,7 @@ module "pubsub" {
   cloud_storage_subscriptions = [
     {
       name   = "pubsub_bucket_subscription"
-      bucket = each.value.pubsub.storage_name
+      bucket = format("%v-%v", var.project.env, each.value.pubsub.storage_name)
       ack_deadline_seconds = 300
     }
   ]
