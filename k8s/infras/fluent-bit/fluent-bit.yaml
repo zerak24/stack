@@ -13,14 +13,49 @@ testFramework:
 #     operator: "Equal"
 #     value: "true"
 config:
+  inputs: |
+    [INPUT]
+        Name tail
+        Path /var/log/containers/*.log
+        multiline.parser docker, cri
+        Tag kube.*
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
+
+    [INPUT]
+        Name systemd
+        Tag host.*
+        Systemd_Filter _SYSTEMD_UNIT=kubelet.service
+        Read_From_Tail On
+
+    [INPUT]
+        Name tail
+        Path /var/run/cilium/tetragon/tetragon.log
+        Tag tetragon.*
+        Mem_Buf_Limit 5MB
+        Skip_Long_Lines On
+
   outputs: |
     [OUTPUT]
         Name http
         tls off
         Match kube.*
-        Host clickhouse.tools.svc.cluster.local.
+        Host clickhouse.log.svc.cluster.local.
         Port 8123
         URI /?query=INSERT+INTO+fluentbit.kube+FORMAT+JSONEachRow
+        format json_stream
+        json_date_key timestamp
+        json_date_format epoch
+        http_user default
+        http_passwd cf13d373b2e8c30bb4216e63c549d71f8e784b62
+
+    [OUTPUT]
+        Name http
+        tls off
+        Match tetragon.*
+        Host clickhouse.log.svc.cluster.local.
+        Port 8123
+        URI /?query=INSERT+INTO+fluentbit.tetragon+FORMAT+JSONEachRow
         format json_stream
         json_date_key timestamp
         json_date_format epoch
@@ -37,16 +72,22 @@ config:
 
     [FILTER]
         Name nest
-        Match *
+        Match kube.*
         Operation nest
         Wildcard *
         Nest_under log
 
     [FILTER]
         Name lua
-        Match *
+        Match kube.*
         script /fluent-bit/scripts/functions.lua
         call set_fields
+
+    [FILTER]
+        Name lua
+        Match tetragon.*
+        script /fluent-bit/scripts/functions.lua
+        call tetragon_set_fields
 
 luaScripts:
   functions.lua: |
@@ -55,5 +96,14 @@ luaScripts:
           record['log']['kubernetes']['host'] = nil
           record['pod_name'] = record['log']['kubernetes']['pod_name']
           record['log']['kubernetes']['pod_name'] = nil
+          return 2, timestamp, record
+    end
+    function tetragon_set_fields(tag, timestamp, record)
+          record['pod_name'] = record['process_exit']['process']['pod']['name']
+          record['process_exit']['process']['pod']['name'] = nil
+          record['namespace'] = record['process_exit']['process']['pod']['namespace']
+          record['process_exit']['process']['pod']['namespace'] = nil
+          record['process'] = record['process_exit']['process']
+          record['process_exit'] = nil
           return 2, timestamp, record
     end

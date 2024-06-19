@@ -1,4 +1,4 @@
-{{- if .Values.tetragon.prometheus.serviceMonitor.enabled -}}
+{{- if and .Values.tetragon.enabled .Values.tetragon.prometheus.enabled .Values.tetragon.prometheus.serviceMonitor.enabled -}}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -9,12 +9,12 @@ metadata:
     {{- else }}
     {{- include "tetragon.labels" . | nindent 4 }}
     {{- end }}
-  name: tetragon
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
 spec:
   endpoints:
     - honorLabels: true
-      interval: 10s
+      interval: {{ .Values.tetragon.prometheus.serviceMonitor.scrapeInterval }}
       path: /metrics
       port: metrics
       relabelings:

@@ -1,12 +1,12 @@
 shards: 1
 replicaCount: 1
-resources:
-  limits:
-    cpu: 200m
-    memory: 500Mi
-  requests:
-    cpu: 50m
-    memory: 100Mi
+# resources:
+#   limits:
+#     cpu: 200m
+#     memory: 500Mi
+#   requests:
+#     cpu: 50m
+#     memory: 100Mi
 auth:
   username: default
   password: "cf13d373b2e8c30bb4216e63c549d71f8e784b62"

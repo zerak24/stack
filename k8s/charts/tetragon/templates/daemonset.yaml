@@ -11,7 +11,7 @@ metadata:
   {{- else }}
     {{- include "tetragon.labels" . | nindent 4 }}
   {{- end }}
-  name: {{ .Chart.Name }}
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
@@ -23,32 +23,38 @@ spec:
     {{- end }}
   template:
     metadata:
-    {{- if .Values.podAnnotations }}
       annotations:
-    {{- with .Values.podAnnotations }}
+        checksum/configmap: {{ toJson .Values.tetragon | sha256sum }}
+      {{- with .Values.podAnnotations }}
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- end }}
+      {{- end }}
       labels:
       {{- with .Values.podLabelsOverride }}
         {{- toYaml . | nindent 8 }}
       {{- else }}
         {{- include "tetragon.labels" . | nindent 8 }}
       {{- end }}
+      {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
+      {{- with .Values.priorityClassName }}
+      priorityClassName: "{{ . }}"
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ .Chart.Name }}
+      serviceAccountName: {{ include "tetragon.serviceAccount" . }}
       {{- with .Values.podSecurityContext }}
       securityContext:
-        {{- toYaml . | nindent 6 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
-{{- if .Values.tetragon.enabled }}
       initContainers:
-      {{- include "container.tetragon.init-operator" . | nindent 6 -}}
+{{- if .Values.tetragon.ociHookSetup.enabled }}
+      {{- include "container.tetragon-oci-hook-setup" . | nindent 6 -}}
 {{- end }}
+      {{- include "initcontainers.extra" . | nindent 6 }}
       containers:
 {{- if eq .Values.export.mode "stdout" }}
       {{- include "container.export.stdout" . | nindent 6 -}}
@@ -66,7 +72,7 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
-        {{- toYaml . | nindent 6 }}
+        {{- toYaml . | nindent 8 }}
       {{- end }}
       hostNetwork: {{ .Values.hostNetwork }}
       dnsPolicy: {{ .Values.dnsPolicy }}
@@ -83,18 +89,24 @@ spec:
 {{- if .Values.tetragon.enabled }}
       - name: tetragon-config
         configMap:
-          name: {{ .Chart.Name }}-config
+          name: {{ .Release.Name }}-config
       - name: bpf-maps
         hostPath:
           path: /sys/fs/bpf
           type: DirectoryOrCreate
       - name: host-proc
         hostPath:
-          path: /proc
+          path: {{ .Values.tetragon.hostProcPath }}
           type: Directory
-{{- if not .Values.tetragon.btf }}
-      - emptyDir: {}
-        name: metadata-files
+{{- if .Values.tetragon.ociHookSetup.enabled }}
+      - name: oci-hooks-path
+        hostPath:
+          path: /usr/share/containers/oci/hooks.d/
+          type: Directory
+      - name: oci-hooks-install-path
+        hostPath:
+          path: {{ quote .Values.tetragon.ociHookSetup.installDir }}
+          type: DirectoryOrCreate
 {{- end }}
 {{- end }}
       {{- with .Values.extraVolumes }}
@@ -105,6 +117,7 @@ spec:
         hostPath:
           path: {{ .mountPath }}
 {{- end }}
+      {{- include "volumes.extra" . | nindent 6 }}
 {{- with .Values.updateStrategy }}
   updateStrategy:
     {{- toYaml . | nindent 4 }}
