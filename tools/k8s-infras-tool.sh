@@ -19,5 +19,3 @@ do
       ;;
   esac
 done
-
-helm install -f ./k8s/infras/tetragon/tetragon.yaml tetragon ./k8s/charts/tetragon
