@@ -31,6 +31,7 @@ config:
     [INPUT]
         Name tail
         Path /var/run/cilium/tetragon/tetragon.log
+        Parser docker_no_time
         Tag tetragon.*
         Mem_Buf_Limit 5MB
         Skip_Long_Lines On
@@ -99,11 +100,48 @@ luaScripts:
           return 2, timestamp, record
     end
     function tetragon_set_fields(tag, timestamp, record)
+        if record['process_exec'] ~= nil then
+          record['pod_name'] = record['process_exec']['process']['pod']['name']
+          record['process_exec']['process']['pod']['name'] = nil
+          record['namespace'] = record['process_exec']['process']['pod']['namespace']
+          record['process_exec']['process']['pod']['namespace'] = nil
+          record['process'] = record['process_exec']['process']
+          record['process_exec'] = nil
+        end
+        if record['process_exit'] ~= nil then
           record['pod_name'] = record['process_exit']['process']['pod']['name']
           record['process_exit']['process']['pod']['name'] = nil
           record['namespace'] = record['process_exit']['process']['pod']['namespace']
           record['process_exit']['process']['pod']['namespace'] = nil
           record['process'] = record['process_exit']['process']
           record['process_exit'] = nil
-          return 2, timestamp, record
+        end
+        return 2, timestamp, record
     end
+
+daemonSetVolumes:
+  - name: varlog
+    hostPath:
+      path: /var/log
+  - name: cilium
+    hostPath:
+      path: /var/run/cilium
+  - name: varlibdockercontainers
+    hostPath:
+      path: /var/lib/docker/containers
+  - name: etcmachineid
+    hostPath:
+      path: /etc/machine-id
+      type: File
+
+daemonSetVolumeMounts:
+  - name: varlog
+    mountPath: /var/log
+  - name: cilium
+    mountPath: /var/run/cilium
+  - name: varlibdockercontainers
+    mountPath: /var/lib/docker/containers
+    readOnly: true
+  - name: etcmachineid
+    mountPath: /etc/machine-id
+    readOnly: true
