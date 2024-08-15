@@ -150,11 +150,6 @@ defaultConfigurationOverrides: |
         <asynchronous_metrics>true</asynchronous_metrics>
     </prometheus>
     {{- end }}
-    <compression incl="clickhouse_compression">
-      <case>
-        <method>lz4</method>  
-      </case>
-    </compression>
   </clickhouse>
 persistence:
   storageClass: "standard"

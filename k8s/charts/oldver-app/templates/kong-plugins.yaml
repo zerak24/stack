@@ -8,29 +8,31 @@
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
-  name: {{ include "app.fullname" $ }}-{{ $element.name }}-cors-plugin
-consumerRef: {{ include "app.fullname" $ }}-consumer-plugin-{{ $.Values.general.namespace }}
+  name: {{ $.Values.general.fullName }}-{{ $element.name }}-cors-plugin
+consumerRef: {{ $.Values.general.fullName }}-consumer-plugin-{{ $.Values.general.namespace }}
 plugin: cors
 config:
-{{- if hasKey $element.cors "origins" }}
+{{ if hasKey $element.cors "origins" }}
   origins:
 {{ toYaml $element.cors.origins | indent 4 }}
-{{- end }}
-{{- if hasKey $element.cors "methods" }}
+{{ end }}
+{{ if hasKey $element.cors "methods" }}
   methods:
 {{ toYaml $element.cors.methods | indent 4 }}
-{{- end }}
+{{ end }}
   headers:
-{{- if hasKey $element.cors "headers" }}
+{{ if hasKey $element.cors "headers" }}
 {{ toYaml $element.cors.headers | indent 4 }}
-{{- else }}
-    - "Authorization"
-    - "*"
-{{- end }}
+{{ else }}
+  - "Authorization"
+  - "*"
+{{ end }}
   credentials: {{ default false $element.cors.credentials }}
   max_age: 3600
   preflight_continue: {{ $element.cors.preflight_continue | default false }}
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
+{{ end }}
+{{ end }}
+
+
+{{ end }}
+{{ end }}

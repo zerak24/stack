@@ -5,10 +5,10 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ $.Values.general.fullName }}-{{ .name }}
-  namespace:  {{ $.Values.general.namespace | default "default"}}
+  name: {{ include "app.fullname" . }}
+  namespace:  {{ $.Values.general.namespace }}
   labels:
-    app: {{ $.Values.general.fullName }}
+    {{- include "app.labels" . | nindent 4 }}
 spec:
   timeZone: {{ .timeZone | default "Etc/GMT-7" }}
   concurrencyPolicy: Forbid
@@ -17,10 +17,10 @@ spec:
     spec:
       template:
         spec:
-          serviceAccountName: {{ $.Values.general.fullName }}
+          serviceAccountName: {{ include "app.serviceAccountName" . }}
           containers:
           - name: {{ .name }}
-            image: "{{ $.Values.general.repo }}:{{ $.Values.general.image }}"
+            image: {{ printf "%s/%s:%s" .Values.image.repository .Values.image.image .Values.image.tag }}
             env:
             {{- range $key, $val := $.Values.env }}
             - name: {{ $key }}
@@ -34,6 +34,6 @@ spec:
                 cpu: 100m
                 memory: 200Mi
             command:
-{{ toYaml .command |  indent 12 -}}
+            {{ toYaml .command |  indent 12 -}}
           restartPolicy: OnFailure
 {{- end }}
