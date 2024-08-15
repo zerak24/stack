@@ -39,6 +39,8 @@ service:
   containerPort: 9000
   containerGrpcPort: 10000
 
+env: {}
+
 resources:
   limits:
     cpu: 200m
