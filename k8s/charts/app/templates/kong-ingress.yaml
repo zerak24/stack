@@ -54,12 +54,12 @@ spec:
       targetPort: {{ $.Values.service.name | default "http" }}
       protocol: TCP
       name: http
-  {{ if $.Values.service.containerGrpcPort }}
+  {{- if $.Values.service.containerGrpcPort }}
     - port: {{ $.Values.service.containerGrpcPort }}
       targetPort: grpc
       protocol: TCP
       name: grpclb
-  {{end}}
+  {{- end }}
   selector:
     app: {{ include "app.fullname" $ }}
 {{- end}}
