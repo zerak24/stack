@@ -1,0 +1,5 @@
+helm_repo:
+  repoUrl: https://charts.example.net
+  username: admin
+  password: admin
+  name: example

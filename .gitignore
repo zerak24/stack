@@ -5,5 +5,4 @@
 *.terraform.lock.hcl
 *.crt
 auth.json
-config.yaml
 *.tgz
