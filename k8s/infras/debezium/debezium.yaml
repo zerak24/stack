@@ -1,6 +1,5 @@
 deploy_config:
   namespace: default
-  helm_version: v3
 
 chart:
   repository: saladin/debezium

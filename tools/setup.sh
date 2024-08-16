@@ -31,6 +31,16 @@ function install_helm3() {
     mv /tmp/helm-v3/linux-amd64/helm /usr/local/bin/helm
     rm -rf /tmp/helm-v3 /tmp/helm-v3.15.1-linux-amd64.tar.gz
   fi
+  ## install helm plugins
+  if [ $(helm plugin list | awk '{print $1}' | grep diff | wc -l) -eq 0 ]; then
+    helm plugin install https://github.com/databus23/helm-diff
+  fi
+  if [ $(helm plugin list | awk '{print $1}' | grep secrets | wc -l) -eq 0 ]; then
+    helm plugin install https://github.com/jkroepke/helm-secrets
+  fi
+  if [ $(helm plugin list | awk '{print $1}' | grep cm-push | wc -l) -eq 0 ]; then
+    helm plugin install https://github.com/chartmuseum/helm-push
+  fi
 }
 
 function install_gcloud() {

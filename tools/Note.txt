@@ -2,3 +2,5 @@
 # gcloud auth activate-service-account --key-file auth.json
 
 # /etc/gitlab/initial_root_password
+
+# bash tools/terraform-tool.sh -a apply -p gcp -c develop -i infras -t gke

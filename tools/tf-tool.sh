@@ -14,7 +14,6 @@ do
       shift 2
       ;;
     --ci)
-      # CI=true
       AUTO="-auto-approve"
       shift 1
       ;;
@@ -59,25 +58,25 @@ function setup() {
 function check_flag() {
   if [ "${ACTION}" != "plan" ] && [ "${ACTION}" != "apply" ] && [ "${ACTION}" != "destroy" ]
   then
-    echo "WRONG ACTION FLAG"
+    echo "Wrong action flag"
     exit 1
   fi
 
   if [ $(ls ${PROVIDER_PATH} | grep -w ${PROVIDER} 2>/dev/null | wc -l) -eq 0 ]
   then
-    echo "WRONG PROVIDER FLAG"
+    echo "Wrong provider flag"
     exit 1
   fi
 
   if [ $(ls ${CLUSTER_PATH} | grep -w ${CLUSTER} 2>/dev/null | wc -l) -eq 0 ]
   then
-    echo "WRONG CLUSTER FLAG"
+    echo "Wrong cluster flag"
     exit 1
   fi
 
   if [ $(ls ${ITEM_PATH} | grep -w ${ITEM} 2>/dev/null | wc -l) -eq 0 ]
   then
-    echo "WRONG ITEMS FLAG"
+    echo "Wrong items flag"
     exit 1
   fi
 
@@ -106,7 +105,7 @@ function terraform_target() {
 function check_automation() {
   if [ "${ACTION}" == "apply" ] || [ "${ACTION}" == "destroy" ] && [ -z ${AUTO} ]
   then
-    echo -n "This is ${ACTION} action. Are you sure that you wanna do this ? Did you run plan action yet ? [y/N]: "
+    echo -n "This is ${ACTION} action. Are you sure that you wanna do this ? [y/N]: "
     read -r ans
     if [ "${ans}" != "y" ] && [ "${ans}" != "yes" ]
     then
@@ -116,21 +115,24 @@ function check_automation() {
   fi
 }
 
+function terraform_action() {
+  if [ "${TARGETS}" == "all" ]
+  then
+    for target in $(ls ${ITEM_PATH}/${ITEM})
+    do
+      terraform_target
+    done
+  else
+    for target in $(echo ${TARGETS} | tr ',' ' ')
+    do
+      terraform_target
+    done
+  fi
+}
+
 ## Main Function
 
 setup
 check_flag
 check_automation
-
-if [ "${TARGETS}" == "all" ]
-then
-  for target in $(ls $ITEM_PATH/${ITEM})
-  do
-    terraform_target
-  done
-else
-  for target in $(echo ${TARGETS} | tr ',' ' ')
-  do
-    terraform_target
-  done
-fi
+terraform_action
