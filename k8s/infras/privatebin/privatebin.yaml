@@ -1,0 +1,111 @@
+---
+# Default values for privatebin.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# if you are using the default filesystem storage class, don't use
+# multiple replicas
+replicaCount: 1
+
+image:
+  # https://github.com/PrivateBin/docker-nginx-fpm-alpine
+  repository: privatebin/nginx-fpm-alpine
+  # tag: latest # defaults to Chart.appVersion
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ##
+  # pullSecrets:
+  #   - myRegistrKeySecretName
+
+podAnnotations: {}
+additionalLabels: {}
+
+nameOverride: ""
+fullnameOverride: ""
+datapath: "/srv/data"
+
+service:
+  type: ClusterIP
+  port: 80
+  portName: http
+  annotations: {}
+  ## Limit load balancer source ips to list of CIDRs (where available)
+  # loadBalancerSourceRanges: []
+
+controller:
+  # Valid values are "Deployment", "StatefulSet", and "Both"
+  kind: StatefulSet
+  pvc:
+    requests: "1Gi"
+    accessModes: "ReadWriteOnce"
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+    ##   GKE, AWS & OpenStack)
+    ## Please be aware that gp2 supports only RWO, check with
+    ## this table:
+    ## https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+    ##
+    # storageClass: "-"
+  # For deployment controller, an emptyDir can be enable in the pod for writing data
+  # with the following option
+  emptyDir: false
+securityContext:
+  runAsUser: 65534
+  runAsGroup: 82
+  fsGroup: 82
+  readOnlyRootFilesystem: true
+
+extraVolumes: []
+  # Optionally specify extra list of additional volumes for PrivateBin pod.
+  # Example
+  # - name: nginx-params
+  #   configMap:
+  #     name: nginx-params
+
+extraVolumeMounts: []
+  # Optionally specify extra list of additional volumeMounts for PrivateBin pod.
+  # Example
+  # - mountPath: /etc/nginx/server.d
+  #   name: nginx-params
+
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  limits:
+    cpu: 1
+    memory: 512Mi
+  requests:
+    cpu: 10m
+    memory: 50Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+configs: {}
+  # conf.php: |-
+  #   ; see https://github.com/PrivateBin/PrivateBin/blob/master/cfg/conf.sample.php for config
+
+## Enable RBAC
+rbac:
+  create: false
+  serviceAccount:
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+# If true, create & use Pod Security Policy resources. Requires rbac.
+podSecurityPolicy:
+  enabled: false
+  annotations: []

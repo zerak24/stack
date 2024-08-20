@@ -1,0 +1,127 @@
+---
+{{- $controller := default "Deployment" .Values.controller.kind -}}
+{{- if or (eq $controller "StatefulSet") (eq $controller "Both") }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "privatebin.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "privatebin.name" . }}
+    helm.sh/chart: {{ include "privatebin.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- if .Values.additionalLabels }}
+      {{- toYaml .Values.additionalLabels | nindent 4 }}
+    {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  serviceName: {{ include "privatebin.fullname" . }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "privatebin.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "privatebin.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- if .Values.additionalLabels }}
+          {{- toYaml .Values.additionalLabels | nindent 8 }}
+        {{- end }}
+      {{- if .Values.podAnnotations }}
+      annotations:
+        {{- toYaml .Values.podAnnotations | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ include "privatebin.serviceAccountName" . }}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.runAsGroup }}
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ default .Chart.AppVersion .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          securityContext:
+            readOnlyRootFilesystem: {{ .Values.securityContext.readOnlyRootFilesystem }}
+            privileged: false
+            allowPrivilegeEscalation: false
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: configs
+              mountPath: /srv/cfg
+            - name: storage
+              mountPath: {{ .Values.datapath }}
+            - name: run
+              mountPath: /run
+            - name: tmp
+              mountPath: /tmp
+            - name: nginx-cache
+              mountPath: /var/lib/nginx/tmp
+          {{- if .Values.extraVolumeMounts }}
+          {{- include "privatebin.tplvalues.render" (dict "value" .Values.extraVolumeMounts "context" $) | nindent 12 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: configs
+          configMap:
+            name: {{ include "privatebin.fullname" . }}-configs
+        - name: run
+          emptyDir:
+            medium: "Memory"
+        - name: tmp
+          emptyDir:
+            medium: "Memory"
+        - name: nginx-cache
+          emptyDir: {}
+      {{- if .Values.extraVolumes }}
+      {{- include "privatebin.tplvalues.render" (dict "value" .Values.extraVolumes "context" $) | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: storage
+      spec:
+        accessModes: [ "{{ .Values.controller.pvc.accessModes }}" ]
+        {{- if .Values.controller.pvc.storageClass }}
+        {{- if (eq "-" .Values.controller.pvc.storageClass) }}
+        storageClassName: ""
+        {{- else }}
+        storageClassName: "{{ .Values.controller.pvc.storageClass }}"
+        {{- end }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.controller.pvc.requests }}
+        volumeMode: Filesystem
+{{- end }}
