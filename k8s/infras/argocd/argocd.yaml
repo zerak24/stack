@@ -1,0 +1,37 @@
+crds:
+  install: false
+
+global:
+  logging:
+    format: json
+    level: warn
+
+configs:
+  cm:
+    create: true
+  params:
+    server.insecure: true
+
+controller:
+  name: application-controller
+
+dex:
+  name: dex-server
+
+redis:
+  name: redis
+  
+server:
+  name: server
+  ingress:
+    enabled: true
+    hostname: argocd.example.info
+    path: /
+    pathType: Prefix
+  tls: true
+
+repoServer:
+  name: repo-server
+
+notifications:
+  name: notifications-controller

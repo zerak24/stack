@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ssh-github-repo
+  namespace: tools
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  url: git@github.com:zerak24/stack.git
+  type: git
+  name: github
+  project: default
+  sshPrivateKey: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    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
+    6arwVOAUFX0AAAAJYXJnb2NkQGNpAQI=
+    -----END OPENSSH PRIVATE KEY-----
+  insecure: "true"

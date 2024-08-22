@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: privatebin
+  namespace: tools
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  sources:
+    - repoURL: http://chartmuseum.default.svc.cluster.local.:8080
+      targetRevision: "0.17.0"
+      chart: privatebin
+      helm:
+        releaseName: privatebin
+        valueFiles:
+          - $values/k8s/infras/privatebin/privatebin.yaml
+        version: v3
+    - repoURL: git@github.com:zerak24/stack.git
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: "https://kubernetes.default.svc"
+    namespace: default

@@ -35,7 +35,7 @@ env:
     # password for basic http authentication
     BASIC_AUTH_PASS: 7b9f6844ef1ccf4d23f34ef16490746e78883838
 service:
-  type: NodePort
+  type: ClusterIP
 serviceAccount:
   create: true
   name: "chart-museum"
@@ -52,6 +52,8 @@ ingress:
   hosts:
     - name: charts.example.info
       path: /
+      tls: true
+      tlsSecret: ingress-selfsigned-tls
 # nodeSelector: {}
 # tolerations:
 #   - key: "tools"

@@ -4,5 +4,7 @@
 *.tfstate.backup
 *.terraform.lock.hcl
 *.crt
-auth.json
+# auth.json
 *.tgz
+id_rsa*
+# argocd-*-repo.yaml

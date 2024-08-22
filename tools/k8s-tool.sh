@@ -79,21 +79,25 @@ function check_automation() {
 
 function load_config() {
   CLUSTER=$(basename ${FILE} | cut -d"." -f1)
-  RELEASE=$(yq '.deploy_config.namespace' ${FILE})
+  RELEASE=$(yq '.deploy_config.name' ${FILE})
   if [ "${RELEASE}" == "null" ]; then
     RELEASE=$(basename $(dirname ${FILE}))
   fi
   NAMESPACE=$(yq '.deploy_config.namespace' ${FILE})
-  CHART_REPO=$(yq '.chart.repository' ${FILE})
-  CHART_VERSION=$(yq '.chart.version' ${FILE})
+  if [ -z $DIRECTORY ]; then
+    CHART_REPO=$(yq '.chart.repository' ${FILE})
+    CHART_VERSION=$(yq '.chart.version' ${FILE})
+  elif
+    CHART_REPO=${DIRECTORY}
+  fi
   REPO_NAME=$(yq '.helm_repo.name' ${CONFIG_FILE_PATH})
-  REPO_URL=$(yq '.helm_repo.repoUrl' ${CONFIG_FILE_PATH})
-  REPO_USERNAME=$(yq '.helm_repo.username' ${CONFIG_FILE_PATH})
-  REPO_PASSWORD=$(yq '.helm_repo.password' ${CONFIG_FILE_PATH})
 }
 
 function add_helm_repo() {
 	if [ $(helm repo list | grep -E "${REPO_NAME}" | wc -l) -eq 0 ]; then
+    REPO_URL=$(yq '.helm_repo.repoUrl' ${CONFIG_FILE_PATH})
+    REPO_USERNAME=$(yq '.helm_repo.username' ${CONFIG_FILE_PATH})
+    REPO_PASSWORD=$(yq '.helm_repo.password' ${CONFIG_FILE_PATH})
 		command="helm repo add ${REPO_NAME} ${REPO_URL} --username=${REPO_USERNAME} --password=${REPO_PASSWORD}"
 	fi
   eval $command
