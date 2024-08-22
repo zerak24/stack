@@ -3,7 +3,7 @@
 *.tfstate
 *.tfstate.backup
 *.terraform.lock.hcl
-*.crt
+# *.crt
 # auth.json
 *.tgz
 id_rsa*
