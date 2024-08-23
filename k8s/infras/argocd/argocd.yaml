@@ -1,3 +1,10 @@
+deploy_config:
+  namespace: tools
+  cluster: minikube
+chart:
+  repo: zerak/argocd
+  version: 7.4.4
+
 crds:
   install: false
 
@@ -28,7 +35,7 @@ server:
     hostname: argocd.example.info
     path: /
     pathType: Prefix
-  tls: true
+    tls: true
 
 repoServer:
   name: repo-server

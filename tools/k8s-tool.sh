@@ -5,6 +5,15 @@
 while (( "$#" ))
 do
   case "$1" in
+    -h|--help)
+      echo "
+-a|--action               : action want to execute (plan, apply, destroy, push, debug)
+-f|--file                 : .yaml file want to execute with action flags
+-d|--directory (optional) : directory of helm charts want to execute with action flags if use helm repository please define in .yaml file
+  |--ci (optional)        : auto yes every questions
+"
+      exit 0
+      ;;
     -a|--action)
       ACTION=$2
       shift 2
@@ -78,17 +87,21 @@ function check_automation() {
 }
 
 function load_config() {
-  CLUSTER=$(basename ${FILE} | cut -d"." -f1)
-  RELEASE=$(yq '.deploy_config.name' ${FILE})
-  if [ "${RELEASE}" == "null" ]; then
-    RELEASE=$(basename $(dirname ${FILE}))
-  fi
-  NAMESPACE=$(yq '.deploy_config.namespace' ${FILE})
-  if [ -z $DIRECTORY ]; then
-    CHART_REPO=$(yq '.chart.repository' ${FILE})
-    CHART_VERSION=$(yq '.chart.version' ${FILE})
-  elif
-    CHART_REPO=${DIRECTORY}
+  CHART_REPO=${DIRECTORY}
+  if [ ! -z ${FILE} ]; then
+    NAMESPACE=$(yq '.deploy_config.namespace' ${FILE})
+    CLUSTER=$(yq '.deploy_config.cluster' ${FILE})
+    if [ "${CLUSTER}" == "null" ]; then
+      CLUSTER=$(basename ${FILE} | cut -d"." -f1)
+    fi
+    RELEASE=$(yq '.deploy_config.name' ${FILE})
+    if [ "${RELEASE}" == "null" ]; then
+      RELEASE=$(basename $(dirname ${FILE}))
+    fi
+    if [ -z $DIRECTORY ]; then
+      CHART_REPO=$(yq '.chart.repository' ${FILE})
+      CHART_VERSION=$(yq '.chart.version' ${FILE})
+    fi
   fi
   REPO_NAME=$(yq '.helm_repo.name' ${CONFIG_FILE_PATH})
 }
@@ -98,7 +111,7 @@ function add_helm_repo() {
     REPO_URL=$(yq '.helm_repo.repoUrl' ${CONFIG_FILE_PATH})
     REPO_USERNAME=$(yq '.helm_repo.username' ${CONFIG_FILE_PATH})
     REPO_PASSWORD=$(yq '.helm_repo.password' ${CONFIG_FILE_PATH})
-		command="helm repo add ${REPO_NAME} ${REPO_URL} --username=${REPO_USERNAME} --password=${REPO_PASSWORD}"
+		command="helm repo add ${REPO_NAME} ${REPO_URL} --username=${REPO_USERNAME} --password=${REPO_PASSWORD} --insecure-skip-tls-verify"
 	fi
   eval $command
 }
@@ -126,10 +139,11 @@ function helm_action() {
     ;;
     push)
     HELM_ACTION="cm-push"
-    HELM_FLAG="${DIRECTORY} ${REPO_NAME}"
+    HELM_FLAG="${DIRECTORY} ${REPO_NAME} --insecure"
     ;;
   esac
   command="helm ${HELM_PLUGINS} ${HELM_ACTION} ${HELM_FLAG}"
+  eval $command
 }
 
 ## Main Function

@@ -1,5 +1,5 @@
 helm_repo:
-  repoUrl: https://charts.example.net
-  username: admin
-  password: admin
-  name: example
+  repoUrl: https://charts.example.info
+  username: zerak24
+  password: 7b9f6844ef1ccf4d23f34ef16490746e78883838
+  name: zerak

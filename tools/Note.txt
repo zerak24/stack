@@ -4,3 +4,5 @@
 # /etc/gitlab/initial_root_password
 
 # bash tools/tf-tool.sh -a apply -p gcp -c develop -i infras -t gke
+
+# REMOVE --insecure|--insecure-skip-tls-verify in command for k8s-tools.sh
