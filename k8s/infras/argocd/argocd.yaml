@@ -19,7 +19,16 @@ configs:
   params:
     server.insecure: true
   clusterCredentials: {}
-  credentialTemplates: {}
+    # develop-cluster:
+    #   server: https://mycluster.example.com
+    #   labels: {}
+    #   annotations: {}
+    #   project: default
+    #   config:
+    #     bearerToken: "<authentication token>"
+    #     tlsClientConfig:
+    #       insecure: false
+    #       caData: "<base64 encoded certificate>"
   repositories:
     helm:
       name: chart-museum
@@ -38,7 +47,6 @@ configs:
         ...
         -----END OPENSSH PRIVATE KEY-----
       insecure: "true"
-
 
 controller:
   name: application-controller

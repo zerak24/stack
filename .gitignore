@@ -7,4 +7,3 @@
 # auth.json
 *.tgz
 id_rsa*
-argocd-git-repo.yaml

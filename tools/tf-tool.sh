@@ -73,7 +73,7 @@ function check_flag() {
 
   if [ $(ls ${PROVIDER_PATH} | grep -w ${PROVIDER} 2>/dev/null | wc -l) -eq 0 ]
   then
-    echo "Provider not existed"
+    echo "Wrong provider"
     exit 1
   fi
 
