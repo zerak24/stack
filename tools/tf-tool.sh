@@ -5,6 +5,17 @@
 while (( "$#" ))
 do
   case "$1" in
+    -h|--help)
+      echo "
+-a|--action              : action want to execute (plan, apply, destroy)
+-c|--cluster             : .yaml file want to execute with action flags
+-i|--item                : item want to execute with action flags (apps, domains, infras)
+-t|--targets  (optional) : list of targets want to execute with action flags if not define all targets will be chosen
+-p|--provider            : directory of helm charts want to execute with action flags if use helm repository please define in .yaml file
+  |--ci       (optional) : auto yes every questions
+"
+      exit 0
+      ;;
     -a|--action)
       ACTION=$2
       shift 2
@@ -12,10 +23,6 @@ do
     -c|--cluster)
       CLUSTER=$2
       shift 2
-      ;;
-    --ci)
-      AUTO="-auto-approve"
-      shift 1
       ;;
     -p|--provider)
       PROVIDER=$2
@@ -28,6 +35,10 @@ do
     -t|--targets)
       TARGETS=$2
       shift 2
+      ;;
+    --ci)
+      AUTO="-auto-approve"
+      shift 1
       ;;
   esac
 done
@@ -48,9 +59,7 @@ function setup() {
   
   install_terraform
   install_yq
-  install_helm3
   install_gcloud
-  install_kubectl
 }
 
 ## Check Syntax Function
@@ -58,25 +67,25 @@ function setup() {
 function check_flag() {
   if [ "${ACTION}" != "plan" ] && [ "${ACTION}" != "apply" ] && [ "${ACTION}" != "destroy" ]
   then
-    echo "Wrong action flag"
+    echo "Wrong action"
     exit 1
   fi
 
   if [ $(ls ${PROVIDER_PATH} | grep -w ${PROVIDER} 2>/dev/null | wc -l) -eq 0 ]
   then
-    echo "Wrong provider flag"
+    echo "Provider not existed"
     exit 1
   fi
 
   if [ $(ls ${CLUSTER_PATH} | grep -w ${CLUSTER} 2>/dev/null | wc -l) -eq 0 ]
   then
-    echo "Wrong cluster flag"
+    echo "Cluster not existed"
     exit 1
   fi
 
   if [ $(ls ${ITEM_PATH} | grep -w ${ITEM} 2>/dev/null | wc -l) -eq 0 ]
   then
-    echo "Wrong items flag"
+    echo "Items not existed"
     exit 1
   fi
 

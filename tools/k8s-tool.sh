@@ -10,7 +10,7 @@ do
 -a|--action               : action want to execute (plan, apply, destroy, push, debug)
 -f|--file                 : .yaml file want to execute with action flags
 -d|--directory (optional) : directory of helm charts want to execute with action flags if use helm repository please define in .yaml file
-  |--ci (optional)        : auto yes every questions
+  |--ci        (optional) : auto yes every questions
 "
       exit 0
       ;;
