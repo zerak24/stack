@@ -11,6 +11,27 @@ function install_terraform() {
   fi
 }
 
+function install_gcloud() {
+  if [ $(which gcloud | wc -l) -eq 0 ]
+  then
+    wget -O /tmp/google-cloud-cli-478.0.0-linux-x86_64.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-478.0.0-linux-x86_64.tar.gz
+    mkdir -p /usr/local/bin/gcloud
+    tar -xvzf /tmp/google-cloud-cli-478.0.0-linux-x86_64.tar.gz -C /usr/local/bin/gcloud
+    /usr/local/bin/gcloud/google-cloud-sdk/install.sh
+    rm -rf /tmp/google-cloud-cli-478.0.0-linux-x86_64.tar.gz
+  fi
+}
+
+function install_aws() {
+  if [ $(which aws | wc -l) -eq 0 ]
+  then
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+    unzip /tmp/awscliv2.zip
+    sudo /tmp/aws/install
+    rm -rf /tmp/aws /tmp/awscliv2.zip
+  fi
+}
+
 function install_yq() {
   if [ $(which yq | wc -l) -eq 0 ]
   then
@@ -43,16 +64,6 @@ function install_helm3() {
   fi
 }
 
-function install_gcloud() {
-  if [ $(which gcloud | wc -l) -eq 0 ]
-  then
-    wget -O /tmp/google-cloud-cli-478.0.0-linux-x86_64.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-478.0.0-linux-x86_64.tar.gz
-    mkdir -p /usr/local/bin/gcloud
-    tar -xvzf /tmp/google-cloud-cli-478.0.0-linux-x86_64.tar.gz -C /usr/local/bin/gcloud
-    /usr/local/bin/gcloud/google-cloud-sdk/install.sh
-  fi
-}
-
 function install_kubectl() {
   if [ $(which kubectl | wc -l) -eq 0 ]
   then
@@ -61,3 +72,4 @@ function install_kubectl() {
     mv /tmp/kubectl /usr/local/bin/kubectl
   fi
 }
+
