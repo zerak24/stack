@@ -1,16 +1,16 @@
 variable "project" {
   type = object({
-    project_id   = string
-    region       = string
-    env = string
+    project_id = string
+    region     = string
+    env        = string
   })
 }
 variable "inputs" {
   type = object({
-    zones                = list(string)
-    subnet               = string
-    pod_cidr             = string
-    svc_cidr             = string
+    zones    = list(string)
+    subnet   = string
+    pod_cidr = string
+    svc_cidr = string
     node_pools = list(object({
       pool_name    = string
       machine_type = string

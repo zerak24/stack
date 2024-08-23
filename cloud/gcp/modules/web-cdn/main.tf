@@ -6,7 +6,7 @@ module "bucket-cdn" {
   source     = "git@github.com:zerak24/terraform_modules.git//gcp/lb"
   project_id = var.project.project_id
   region     = var.project.region
-  name = each.value.name
+  name       = each.value.name
   cdn_domain = each.value.cdn_domain
 
 }

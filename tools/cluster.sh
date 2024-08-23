@@ -16,5 +16,9 @@ do
   esac
 done
 
-PROJECT_CONFIG="./cloud/$PROVIDER/env/$CLUSTER/project.yaml"
-gcloud container clusters get-credentials $CLUSTER --location=$(yq '.inputs.project.region' $PROJECT_CONFIG)
+PROJECT_CONFIG="./cloud/${PROVIDER}/env/${CLUSTER}/project.yaml"
+if [ "${PROVIDER}" == "gcp" ]; then
+  gcloud container clusters get-credentials ${CLUSTER} --location=$(yq '.inputs.project.region' ${PROJECT_CONFIG})
+elif [ "${PROVIDER}" == "aws" ]; then
+  aws eks --region $(yq '.inputs.project.region' ${PROJECT_CONFIG}) update-kubeconfig --name ${CLUSTER}
+fi

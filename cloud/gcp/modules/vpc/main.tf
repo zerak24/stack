@@ -13,7 +13,7 @@ module "vpc" {
       subnet_private_access = false
   }]
 
-  secondary_ranges = merge([for key, value in var. inputs.secondary_ranges :
+  secondary_ranges = merge([for key, value in var.inputs.secondary_ranges :
     {
       format(format("%v-%v", var.project.env, key)) = value
     }

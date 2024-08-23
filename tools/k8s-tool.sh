@@ -43,10 +43,8 @@ CONFIG_FILE_PATH="$ROOT_HELM/config.yaml"
 function setup() {
   source ${ROOT_HELM}/tools/setup.sh
   
-  install_terraform
   install_yq
   install_helm3
-  install_gcloud
   install_kubectl
 }
 

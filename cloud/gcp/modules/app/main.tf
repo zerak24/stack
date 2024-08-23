@@ -1,13 +1,13 @@
 module "workload-identity" {
-  source        = "git@github.com:zerak24/terraform_modules.git//gcp/workload-identity"
-  project_id    = var.project.project_id
-  location = var.project.region
+  source              = "git@github.com:zerak24/terraform_modules.git//gcp/workload-identity"
+  project_id          = var.project.project_id
+  location            = var.project.region
   name                = var.inputs.identity.name
-  gcp_sa_name = format("%v-%v", var.project.env, var.inputs.identity.name)
+  gcp_sa_name         = format("%v-%v", var.project.env, var.inputs.identity.name)
   namespace           = var.inputs.identity.namespace
   roles               = var.inputs.identity.roles
-  cluster_name = var.project.env
-  annotate_k8s_sa = true
+  cluster_name        = var.project.env
+  annotate_k8s_sa     = true
   use_existing_k8s_sa = true
 }
 
@@ -16,7 +16,7 @@ module "pubsub" {
     for idx, object in var.inputs :
     idx => object
   }
-  source = "git@github.com:zerak24/terraform_modules.git//gcp/pubsub"
+  source     = "git@github.com:zerak24/terraform_modules.git//gcp/pubsub"
   project_id = var.project.project_id
   topic      = each.value.pubsub.topic
   pull_subscriptions = [
@@ -37,8 +37,8 @@ module "pubsub" {
   ]
   cloud_storage_subscriptions = [
     {
-      name   = "pubsub_bucket_subscription"
-      bucket = format("%v-%v", var.project.env, each.value.pubsub.storage_name)
+      name                 = "pubsub_bucket_subscription"
+      bucket               = format("%v-%v", var.project.env, each.value.pubsub.storage_name)
       ack_deadline_seconds = 300
     }
   ]
