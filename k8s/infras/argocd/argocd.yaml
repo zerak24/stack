@@ -21,17 +21,17 @@ configs:
   clusterCredentials: {}
   credentialTemplates: {}
   repositories:
-    helm-test:
-      name: chart-museum-test
+    helm:
+      name: chart-museum
       project: default
       type: helm
       url: http://chartmuseum.default.svc.cluster.local.:8080
       username: zerak24
       password: 7b9f6844ef1ccf4d23f34ef16490746e78883838
-    ssh-github-repo-test:
+    ssh-git-repo:
       url: git@github.com:zerak24/stack.git
       type: git
-      name: github-test
+      name: github
       project: default
       sshPrivateKey: |
         -----BEGIN OPENSSH PRIVATE KEY-----
