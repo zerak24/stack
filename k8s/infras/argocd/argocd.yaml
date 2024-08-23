@@ -2,7 +2,7 @@ deploy_config:
   namespace: tools
   cluster: minikube
 chart:
-  repo: zerak/argocd
+  repository: zerak/argo-cd
   version: 7.4.4
 
 crds:

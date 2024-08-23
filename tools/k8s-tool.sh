@@ -118,14 +118,17 @@ function helm_action() {
   HELM_ACTION=""
   HELM_FLAG=""
   HELM_PLUGINS="secrets"
+  update_helm_repositoy="helm repo update"
   case ${ACTION} in
     plan)
     HELM_ACTION="diff upgrade"
     HELM_FLAG="--install --namespace=${NAMESPACE} --values=${FILE} --kube-context=${CLUSTER} ${RELEASE} ${CHART_REPO} --version=${CHART_VERSION}"
+    eval $update_helm_repositoy
     ;;
     apply)
     HELM_ACTION="upgrade --install"
     HELM_FLAG="--install --namespace=${NAMESPACE} --values=${FILE} --kube-context=${CLUSTER} ${RELEASE} ${CHART_REPO} --version=${CHART_VERSION}"
+    eval $update_helm_repositoy
     ;;
     destroy)
     HELM_ACTION="uninstall"
@@ -134,6 +137,7 @@ function helm_action() {
     debug)
     HELM_ACTION="template"
     HELM_FLAG="--namespace=${NAMESPACE} --values=${FILE} --kube-context=${CLUSTER} ${RELEASE} ${CHART_REPO} --version=${CHART_VERSION}"
+    eval $update_helm_repositoy
     ;;
     push)
     HELM_ACTION="cm-push"
