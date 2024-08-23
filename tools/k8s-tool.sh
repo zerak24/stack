@@ -55,19 +55,19 @@ function setup() {
 function check_flag() {
   if [ "${ACTION}" != "plan" ] && [ "${ACTION}" != "apply" ] && [ "${ACTION}" != "destroy" ] && [ "${ACTION}" != "debug" ] && [ "${ACTION}" != "push" ]
   then
-    echo "Wrong action flag"
+    echo "Wrong action"
     exit 1
   fi
 
   if [ ! -z ${FILE} ] && [ ! -f ${FILE} ]
   then
-    echo "Wrong file flag"
+    echo "File not existed"
     exit 1
   fi
 
   if [ ! -z ${DIRECTORY} ] && [ ! -d ${DIRECTORY} ]
   then
-    echo "Wrong directory flag"
+    echo "Directory not existed"
     exit 1
   fi
 }
