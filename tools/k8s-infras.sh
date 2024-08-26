@@ -118,7 +118,7 @@ function helm_action() {
   HELM_ACTION=""
   HELM_FLAG=""
   HELM_PLUGINS="secrets"
-  update_helm_repositoy="helm repo update"
+  update_helm_repositoy="helm repo update ${REPO_NAME}"
   case ${ACTION} in
     plan)
     HELM_ACTION="diff upgrade"

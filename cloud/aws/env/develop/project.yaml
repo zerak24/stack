@@ -1,0 +1,4 @@
+inputs:
+  project:
+    region: us-east5
+    env: develop
