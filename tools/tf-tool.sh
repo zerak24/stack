@@ -12,6 +12,7 @@ do
 -i|--item                : item want to execute with action flags (apps, domains, infras)
 -t|--targets  (optional) : list of targets want to execute with action flags if not define all targets will be chosen
 -p|--provider            : directory of helm charts want to execute with action flags if use helm repository please define in .yaml file
+  |--profile  (optional) : use with provider is aws
   |--ci       (optional) : auto yes every questions
 "
       exit 0
@@ -36,6 +37,10 @@ do
       TARGETS=$2
       shift 2
       ;;
+    --profile)
+      AWS_PROFILE=$2
+      shift 2
+      ;;
     --ci)
       AUTO="-auto-approve"
       shift 1
@@ -51,6 +56,10 @@ CLUSTER_PATH="${PROVIDER_PATH}/${PROVIDER}/env"
 MODULES_PATH="${PROVIDER_PATH}/${PROVIDER}/modules"
 ITEM_PATH="${CLUSTER_PATH}/${CLUSTER}"
 PROJECT="${ITEM_PATH}/project.yaml"
+if [ -z ${AWS_PROFILE} ]; then
+  AWS_PROFILE=$(yq '.inputs.project.profile' ${PROJECT})
+fi
+export AWS_PROFILE=${AWS_PROFILE}
 
 ## Setup Function
 

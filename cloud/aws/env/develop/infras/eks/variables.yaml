@@ -1,0 +1,3 @@
+inputs:
+  eks:
+    version: 1.30
