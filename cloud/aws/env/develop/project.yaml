@@ -1,4 +1,4 @@
 inputs:
   project:
-    region: us-east5
+    profile: learner
     env: develop

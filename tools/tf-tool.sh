@@ -111,11 +111,12 @@ function terraform_target() {
   var="${path_target}/variables.yaml"
   state="../../../../${path_target}/state/terraform.tfstate"
 
+  ## bug here
   for part in $(yq '.inputs | keys | .[]' $var)
   do
     init_command="terraform -chdir=\"${MODULES_PATH}/${part}\" init"
     action_command="terraform -chdir=\"${MODULES_PATH}/${part}\" ${ACTION} -state=\"${state}\" ${AUTO} -var=\"inputs=\$(yq '.inputs.${part}' ${var} -o j -I=0)\" -var=\"project=\$(yq '.inputs.project' ${PROJECT} -o j -I=0)\""
-    eval $init_command  
+    eval $init_command
     eval $action_command
   done
 }
@@ -147,6 +148,7 @@ function terraform_action() {
     done
   fi
 }
+
 
 ## Main Function
 
