@@ -107,15 +107,21 @@ function check_flag() {
 ## Terraform Function
 
 function terraform_target() {
+  path_prefix="../../../../"
   path_target=${ITEM_PATH}/${ITEM}/${target}
   var="${path_target}/variables.yaml"
-  state="../../../../${path_target}/state/terraform.tfstate"
+  json_var="${path_target}/variables.tfvars.json"
+  state="${path_target}/state/terraform.tfstate"
 
-  ## bug here
+  if [ -z "$(yq '.inputs' $var)" ]; then
+    exit 0
+  fi
   for part in $(yq '.inputs | keys | .[]' $var)
   do
+    yq '.inputs' $var -o json > $json_var
     init_command="terraform -chdir=\"${MODULES_PATH}/${part}\" init"
-    action_command="terraform -chdir=\"${MODULES_PATH}/${part}\" ${ACTION} -state=\"${state}\" ${AUTO} -var=\"inputs=\$(yq '.inputs.${part}' ${var} -o j -I=0)\" -var=\"project=\$(yq '.inputs.project' ${PROJECT} -o j -I=0)\""
+    # action_command="terraform -chdir=\"${MODULES_PATH}/${part}\" ${ACTION} -state=\"${state}\" ${AUTO} -var=\"${part}=\$(yq '.inputs.${part}' ${var} -o j -I=0)\" -var=\"project=\$(yq '.inputs.project' ${PROJECT} -o j -I=0)\""
+    action_command="terraform -chdir=\"${MODULES_PATH}/${part}\" ${ACTION} -state=\"${path_prefix}${state}\" ${AUTO} -var-file=\"${path_prefix}${json_var}\" -var=\"project=\$(yq '.inputs.project' ${PROJECT} -o json -I=0)\""
     eval $init_command
     eval $action_command
   done
@@ -148,7 +154,6 @@ function terraform_action() {
     done
   fi
 }
-
 
 ## Main Function
 

@@ -3,7 +3,7 @@ variable "project" {
     env        = string
   })
 }
-variable "inputs" {
+variable "vpc" {
   type = object({
     cidr = string
     zones = list(string)
