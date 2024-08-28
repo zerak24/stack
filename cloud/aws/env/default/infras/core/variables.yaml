@@ -34,7 +34,7 @@ inputs:
 
     access_entries:
       admin:
-        kubernetes_groups: ["cluster-admin"]
+        kubernetes_groups: []
         principal_arn: "arn:aws:iam::851725393723:user/cloud_user"
         user_name: "cloud_user"
 
