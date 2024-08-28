@@ -1,18 +1,19 @@
 module "vpc" {
+  count = var.vpc == null ? 0 : 1
   source = "git@github.com:zerak24/terraform_modules.git//aws/vpc"
 
-  name = var.project.env
-  cidr = var.inputs.vpc.cidr
+  name = format("%s-%s-vpc", var.project.company, var.project.env)
+  cidr = var.vpc.cidr
 
-  azs             = var.inputs.vpc.zones
-  private_subnets = var.inputs.vpc.private_subnets
-  private_subnet_tags = var.inputs.vpc.private_subnet_tags
-  public_subnets  = var.inputs.vpc.public_subnets
-  public_subnet_tags = var.inputs.vpc.public_subnet_tags
-  database_subnets = var.inputs.vpc.database_subnets
+  azs             = var.vpc.zones
+  private_subnets = var.vpc.private_subnets
+  private_subnet_tags = var.vpc.private_subnet_tags
+  public_subnets  = var.vpc.public_subnets
+  public_subnet_tags = var.vpc.public_subnet_tags
+  database_subnets = var.vpc.database_subnets
 
   enable_nat_gateway = true
-  single_nat_gateway = var.inputs.vpc.single_nat_gateway
+  single_nat_gateway = var.vpc.single_nat_gateway
   one_nat_gateway_per_az = true
 
   tags = {
@@ -22,12 +23,15 @@ module "vpc" {
 }
 
 module "eks" {
+  count = var.eks == null ? 0 : 1
   source = "git@github.com:zerak24/terraform_modules.git//aws/eks"
 
-  cluster_name    = var.project.env
-  cluster_version = var.inputs.version
-
+  cluster_name    = format("%s-%s-eks", var.project.company, var.project.env)
+  cluster_version = var.eks.version
+  cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
+
+  cluster_enabled_log_types = var.eks.cluster_enabled_log_types == null ? ["audit", "api", "authenticator"] : var.eks.cluster_enabled_log_types
 
   cluster_addons = {
     coredns                = {}
@@ -36,48 +40,34 @@ module "eks" {
     vpc-cni                = {}
   }
 
-  vpc_id                   = "vpc-1234556abcdef"
-  subnet_ids               = ["subnet-abcde012", "subnet-bcde012a", "subnet-fghi345a"]
-  control_plane_subnet_ids = ["subnet-xyzde987", "subnet-slkjf456", "subnet-qeiru789"]
+  vpc_id                   = module.vpc[0].vpc_id
+  subnet_ids               = module.vpc[0].private_subnets
+  cluster_service_ipv4_cidr = var.eks.cluster_service_ipv4_cidr
 
-  # EKS Managed Node Group(s)
-  eks_managed_node_group_defaults = {
-    instance_types = ["m6i.large", "m5.large", "m5n.large", "m5zn.large"]
-  }
+  kms_key_administrators = var.eks.kms_key_administrators
 
-  eks_managed_node_groups = {
-    example = {
-      # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
-      ami_type       = "AL2023_x86_64_STANDARD"
-      instance_types = ["m5.xlarge"]
-
-      min_size     = 2
-      max_size     = 10
-      desired_size = 2
+  node_security_group_additional_rules = {
+    ingress_nodes_ephemeral_ports_tcp = {
+      description               = "Nodes on ephemeral ports"
+      protocol                  = "-1"
+      from_port                 = 0
+      to_port                   = 0
+      type                      = "ingress"
+      source_node_security_group= true
+    }
+    ingress_cluster_to_node_all_traffic = {
+      description                   = "Cluster API to Nodegroup all traffic"
+      protocol                      = "-1"
+      from_port                     = 0
+      to_port                       = 0
+      type                          = "ingress"
+      source_cluster_security_group = true
     }
   }
 
-  # Cluster access entry
-  # To add the current caller identity as an administrator
-  enable_cluster_creator_admin_permissions = true
+  eks_managed_node_groups = {for k,v in var.eks.eks_managed_node_groups: k => merge(v, {subnet_ids = [module.vpc[0].private_subnets[index(var.vpc.zones, v.zone)]]})}
 
-  access_entries = {
-    # One access entry with a policy associated
-    example = {
-      kubernetes_groups = []
-      principal_arn     = "arn:aws:iam::123456789012:role/something"
-
-      policy_associations = {
-        example = {
-          policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
-          access_scope = {
-            namespaces = ["default"]
-            type       = "namespace"
-          }
-        }
-      }
-    }
-  }
+  access_entries = {for k,v in var.eks.access_entries: k => v}
 
   tags = {
     Environment = "dev"

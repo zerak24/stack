@@ -1,0 +1,69 @@
+module: core
+inputs:
+  vpc:
+    cidr: "10.10.0.0/16"
+    zones: ["us-east-1a", "us-east-1b", "us-east-1c"]
+    public_subnets: ["10.10.10.0/24", "10.10.20.0/24", "10.10.30.0/24"]
+    private_subnets: ["10.10.110.0/24", "10.10.120.0/24", "10.10.130.0/24"]
+    database_subnets: ["10.10.210.0/24", "10.10.220.0/24"]
+    private_subnet_tags:
+      "kubernetes.io/role/internal-elb": 1
+    public_subnet_tags:
+      "kubernetes.io/role/elb": 1
+    single_nat_gateway: true
+
+  # security_group:
+  #   eks-access-rds:
+  #     ingress_with_cidr_blocks:
+  #       - from_port  : 3306
+  #         to_port    : 3306
+  #         protocol   : "tcp"
+  #         description: "Eks node group access rds"
+  #         cidr_blocks: "10.15.0.0/16"
+  #       - from_port  : 5432
+  #         to_port    : 5432
+  #         protocol   : "tcp"
+  #         description: "Eks node group access rds"
+  #         cidr_blocks: "10.15.0.0/16"
+    
+  eks:
+    version: "1.30"
+    cluster_service_ipv4_cidr: "10.12.0.0/16"
+
+    kms_key_administrators: []
+
+    access_entries:
+      admin:
+        kubernetes_groups: ["cluster-admin"]
+        principal_arn: "arn:aws:iam::214571729147:user/duylk@tenxtenx.com"
+        user_name: "cloud_user"
+  
+    eks_managed_node_groups:
+      group_develop_us_east_1a:
+        instance_types: ["t3a.small"]
+        capacity_type: "ON_DEMAND"
+        min_size: 1
+        desired_size: 2
+        max_size: 10
+        zone: "us-east-1a"
+        iam_role_additional_policies:
+          evs_csi_driver_policy: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+          cloudwach_log_policy: "arn:aws:iam::aws:policy/service-role/AWSTransferLoggingAccess"
+          # ssm_policy: "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        labels:
+          name: "default-node"
+          # role: "build"
+        taints: []
+        #   - key: "role"
+        #     value: "build"
+        #     effect: "NO_SCHEDULE"
+        block_device_mappings:
+          xvda:
+            device_name: "/dev/xvda"
+            ebs:
+              volume_size: 75
+              volume_type: gp3
+              delete_on_termination: true
+        tags:
+          k8s.io/cluster-autoscaler/enabled: 1
+    

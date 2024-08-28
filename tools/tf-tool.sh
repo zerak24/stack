@@ -48,23 +48,23 @@ do
   esac
 done
 
-## Global Variables
+## Variables
 
-ROOT_CLOUD="."
-PROVIDER_PATH="${ROOT_CLOUD}/cloud"
-CLUSTER_PATH="${PROVIDER_PATH}/${PROVIDER}/env"
-MODULES_PATH="${PROVIDER_PATH}/${PROVIDER}/modules"
-ITEM_PATH="${CLUSTER_PATH}/${CLUSTER}"
-PROJECT="${ITEM_PATH}/project.yaml"
+root_cloud_directory="."
+provider_directory="${root_cloud_directory}/cloud"
+cluster_directory="${provider_directory}/${PROVIDER}/env"
+modules_directory="${provider_directory}/${PROVIDER}/modules"
+item_directory="${cluster_directory}/${CLUSTER}"
+project_file="${item_directory}/project.yaml"
 if [ -z ${AWS_PROFILE} ]; then
-  AWS_PROFILE=$(yq '.inputs.project.profile' ${PROJECT})
+  AWS_PROFILE=$(yq '.inputs.project.profile' ${project_file})
 fi
 export AWS_PROFILE=${AWS_PROFILE}
 
 ## Setup Function
 
 function setup() {
-  source ${ROOT_CLOUD}/tools/setup.sh
+  source ${root_cloud_directory}/tools/setup.sh
   
   install_terraform
   install_yq
@@ -80,19 +80,19 @@ function check_flag() {
     exit 1
   fi
 
-  if [ $(ls ${PROVIDER_PATH} | grep -w ${PROVIDER} 2>/dev/null | wc -l) -eq 0 ]
+  if [ $(ls ${provider_directory} | grep -w ${PROVIDER} 2>/dev/null | wc -l) -eq 0 ]
   then
     echo "Wrong provider"
     exit 1
   fi
 
-  if [ $(ls ${CLUSTER_PATH} | grep -w ${CLUSTER} 2>/dev/null | wc -l) -eq 0 ]
+  if [ $(ls ${cluster_directory} | grep -w ${CLUSTER} 2>/dev/null | wc -l) -eq 0 ]
   then
     echo "Cluster not existed"
     exit 1
   fi
 
-  if [ $(ls ${ITEM_PATH} | grep -w ${ITEM} 2>/dev/null | wc -l) -eq 0 ]
+  if [ $(ls ${item_directory} | grep -w ${ITEM} 2>/dev/null | wc -l) -eq 0 ]
   then
     echo "Items not existed"
     exit 1
@@ -108,23 +108,22 @@ function check_flag() {
 
 function terraform_target() {
   path_prefix="../../../../"
-  path_target=${ITEM_PATH}/${ITEM}/${target}
+  path_target=${item_directory}/${ITEM}/${target}
   var="${path_target}/variables.yaml"
   json_var="${path_target}/variables.tfvars.json"
   state="${path_target}/state/terraform.tfstate"
+  module="$(yq '.module' $var)"
 
   if [ -z "$(yq '.inputs' $var)" ]; then
     exit 0
   fi
-  for part in $(yq '.inputs | keys | .[]' $var)
-  do
-    yq '.inputs' $var -o json > $json_var
-    init_command="terraform -chdir=\"${MODULES_PATH}/${part}\" init"
-    # action_command="terraform -chdir=\"${MODULES_PATH}/${part}\" ${ACTION} -state=\"${state}\" ${AUTO} -var=\"${part}=\$(yq '.inputs.${part}' ${var} -o j -I=0)\" -var=\"project=\$(yq '.inputs.project' ${PROJECT} -o j -I=0)\""
-    action_command="terraform -chdir=\"${MODULES_PATH}/${part}\" ${ACTION} -state=\"${path_prefix}${state}\" ${AUTO} -var-file=\"${path_prefix}${json_var}\" -var=\"project=\$(yq '.inputs.project' ${PROJECT} -o json -I=0)\""
-    eval $init_command
-    eval $action_command
-  done
+
+  yq eval-all '. as $item ireduce ({}; . * $item) | .inputs' ${var} ${project_file} -o json > $json_var
+
+  init_command="terraform -chdir=${modules_directory}/${module} init"
+  action_command="terraform -chdir=${modules_directory}/${module} ${ACTION} -state=${path_prefix}${state} ${AUTO} -var-file=${path_prefix}${json_var}"
+  eval $init_command
+  eval $action_command
 }
 
 function check_automation() {
@@ -143,7 +142,7 @@ function check_automation() {
 function terraform_action() {
   if [ "${TARGETS}" == "all" ]
   then
-    for target in $(ls ${ITEM_PATH}/${ITEM})
+    for target in $(ls ${item_directory}/${ITEM})
     do
       terraform_target
     done
