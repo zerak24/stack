@@ -67,7 +67,14 @@ module "eks" {
 
   eks_managed_node_groups = {for k,v in var.eks.eks_managed_node_groups: k => merge(v, {subnet_ids = [module.vpc[0].private_subnets[index(var.vpc.zones, v.zone)]]})}
 
-  access_entries = {for k,v in var.eks.access_entries: k => v}
+  access_entries = {for k,v in var.eks.access_entries: k => merge(v, {policy_associations = {
+    admin = {
+      policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+      access_scope = {
+        type = "cluster"
+      }
+    }
+  }})}
 
   tags = {
     Environment = "dev"
