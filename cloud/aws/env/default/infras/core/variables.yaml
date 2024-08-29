@@ -20,12 +20,12 @@ inputs:
           to_port    : 3306
           protocol   : "tcp"
           description: "Eks node group access rds (mysql)"
-          cidr_blocks: "10.10.110.0/24,10.10.120.0/24,10.10.130.0/24"
+          cidr_blocks: "10.10.0.0/16"
         - from_port  : 5432
           to_port    : 5432
           protocol   : "tcp"
           description: "Eks node group access rds (postgresql)"
-          cidr_blocks: "10.10.110.0/24,10.10.120.0/24,10.10.130.0/24"
+          cidr_blocks: "10.10.0.0/16"
   
   rds:
     postgres:
@@ -35,7 +35,7 @@ inputs:
 
   eks:
     version: "1.30"
-    cluster_service_ipv4_cidr: "10.12.0.0/16"
+    cluster_service_ipv4_cidr: "10.20.0.0/16"
 
     kms_key_administrators: []
 
