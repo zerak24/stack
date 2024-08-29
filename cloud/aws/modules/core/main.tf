@@ -22,6 +22,41 @@ module "vpc" {
   }
 }
 
+module "sg" {
+  for_each = var.sg
+  source = "git@github.com:zerak24/terraform_modules.git//aws/sg"
+
+  name        = format("%s-%s-%s-sg", var.project.company, var.project.env, each.key)
+  description = each.value.description
+  vpc_id      = module.vpc[0].vpc_id
+
+  ingress_with_cidr_blocks = each.value.ingress_with_cidr_blocks
+}
+
+module "rds" {
+  for_each = var.rds
+  source = "git@github.com:zerak24/terraform_modules.git//aws/rds"
+  
+  identifier        = format("%s-%s-%s", var.project.company, var.project.env, each.key)
+  # subnet_ids             = module.vpc[0].database_subnets
+  vpc_security_group_ids = [for sg in module.sg : sg.security_group_id]
+  db_subnet_group_name = module.vpc[0].database_subnet_group
+  username = "root"
+
+  engine            = each.value.engine
+  engine_version    = each.value.engine_version
+  instance_class    = each.value.instance_class
+  family = format("%s%s", each.value.engine, each.value.engine_version)
+  storage_type = "gp3"
+  allocated_storage = 30
+  multi_az = true
+  
+  deletion_protection = true
+  iam_database_authentication_enabled = true
+  maintenance_window = "Mon:00:00-Mon:03:00"
+  backup_window      = "03:00-06:00"
+}
+
 module "eks" {
   count = var.eks == null ? 0 : 1
   source = "git@github.com:zerak24/terraform_modules.git//aws/eks"

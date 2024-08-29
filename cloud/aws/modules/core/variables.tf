@@ -17,6 +17,21 @@ variable "vpc" {
   })
   default = null
 }
+variable "sg" {
+  type = map(object({
+    description = optional(string)
+    ingress_with_cidr_blocks = list(any)
+  }))
+  default = {}
+}
+variable "rds" {
+  type = map(object({
+    engine = string
+    engine_version = string
+    instance_class = string
+  }))
+  default = {}
+}
 variable "eks" {
   type = object({
     version = string
@@ -33,6 +48,7 @@ variable "eks" {
       min_size = number
       max_size = number
       desired_size = number
+      ami_type = optional(string)
       instance_types = list(string)
       capacity_type  = string
       iam_role_additional_policies = map(string)

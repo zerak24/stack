@@ -12,20 +12,27 @@ inputs:
       "kubernetes.io/role/elb": 1
     single_nat_gateway: true
 
-  # security_group:
-  #   eks-access-rds:
-  #     ingress_with_cidr_blocks:
-  #       - from_port  : 3306
-  #         to_port    : 3306
-  #         protocol   : "tcp"
-  #         description: "Eks node group access rds"
-  #         cidr_blocks: "10.15.0.0/16"
-  #       - from_port  : 5432
-  #         to_port    : 5432
-  #         protocol   : "tcp"
-  #         description: "Eks node group access rds"
-  #         cidr_blocks: "10.15.0.0/16"
-    
+  sg:
+    eks-access-rds:
+      description: "Allow EKS access RDS"
+      ingress_with_cidr_blocks:
+        - from_port  : 3306
+          to_port    : 3306
+          protocol   : "tcp"
+          description: "Eks node group access rds (mysql)"
+          cidr_blocks: "10.10.110.0/24,10.10.120.0/24,10.10.130.0/24"
+        - from_port  : 5432
+          to_port    : 5432
+          protocol   : "tcp"
+          description: "Eks node group access rds (postgresql)"
+          cidr_blocks: "10.10.110.0/24,10.10.120.0/24,10.10.130.0/24"
+  
+  rds:
+    postgres:
+      engine: "postgres"
+      engine_version: "16"
+      instance_class: "db.t4g.micro"
+
   eks:
     version: "1.30"
     cluster_service_ipv4_cidr: "10.12.0.0/16"
@@ -35,17 +42,46 @@ inputs:
     access_entries:
       admin:
         kubernetes_groups: []
-        principal_arn: "arn:aws:iam::851725393723:user/cloud_user"
+        principal_arn: "arn:aws:iam::381492130036:user/cloud_user"
         user_name: "cloud_user"
 
     eks_managed_node_groups:
       group_1:
-        instance_types: ["t3a.small"]
+        instance_types: ["t4g.small"]
         capacity_type: "ON_DEMAND"
+        ami_type: "AL2023_ARM_64_STANDARD"
         min_size: 1
-        desired_size: 2
+        desired_size: 1
         max_size: 10
         zone: "us-east-1a"
+        iam_role_additional_policies:
+          evs_csi_driver_policy: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+          cloudwach_log_policy: "arn:aws:iam::aws:policy/service-role/AWSTransferLoggingAccess"
+          # ssm_policy: "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+        labels:
+          name: "default-node"
+          # role: "build"
+        taints: []
+        #   - key: "role"
+        #     value: "build"
+        #     effect: "NO_SCHEDULE"
+        block_device_mappings:
+          xvda:
+            device_name: "/dev/xvda"
+            ebs:
+              volume_size: 75
+              volume_type: gp3
+              delete_on_termination: true
+        tags:
+          k8s.io/cluster-autoscaler/enabled: 1
+      group_2:
+        instance_types: ["t4g.small"]
+        capacity_type: "ON_DEMAND"
+        ami_type: "AL2023_ARM_64_STANDARD"
+        min_size: 1
+        desired_size: 1
+        max_size: 10
+        zone: "us-east-1b"
         iam_role_additional_policies:
           evs_csi_driver_policy: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
           cloudwach_log_policy: "arn:aws:iam::aws:policy/service-role/AWSTransferLoggingAccess"
