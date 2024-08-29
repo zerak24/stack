@@ -32,11 +32,11 @@ module "ec2_instance" {
 
   name = each.key
 
-  instance_type          = "t2.micro"
+  instance_type          = each.value.instance_type
   key_name               = "user1"
   monitoring             = true
   vpc_security_group_ids = [for sg_id in each.value.security_groups : module.sg[sg_id].security_group_id]
-  subnet_id              = module.vpc[0].public_subnets[index(var.vpc.zones, v.zone)]
+  subnet_id              = module.vpc[0].public_subnets[index(var.vpc.zones, each.value.zone)]
 
   tags = local.tags
 }
