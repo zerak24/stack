@@ -123,6 +123,8 @@ function terraform_target() {
   action_command="terraform -chdir=${modules_directory}/${module} ${ACTION} -state=${path_prefix}${state} ${AUTO} -var-file=${path_prefix}${json_var}"
   eval $init_command
   eval $action_command
+
+  rm -f $json_var
 }
 
 function check_automation() {

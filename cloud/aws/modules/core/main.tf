@@ -30,15 +30,25 @@ module "ec2_instance" {
   for_each = var.ec2
   source  = "git@github.com:zerak24/terraform_modules.git//aws/ec2"
 
-  name = each.key
-
+  name = format("%s-%s", var.project.company, each.key)
   instance_type          = each.value.instance_type
-  key_name               = "user1"
+  ## check this out and add eip
+  ami                    = each.value.ami
+  key_name               = each.value.create_key ? format("%s-%s-%s-key", var.project.company, var.project.env, each.key) : each.value.key_name
+  
   monitoring             = true
-  vpc_security_group_ids = [for sg_id in each.value.security_groups : module.sg[sg_id].security_group_id]
+  vpc_security_group_ids = [for sg_id in each.value.vpc_security_group_ids : module.sg[sg_id].security_group_id]
   subnet_id              = module.vpc[0].public_subnets[index(var.vpc.zones, each.value.zone)]
 
   tags = local.tags
+}
+
+## check this out
+module "key" {
+  for_each = { for k, v in var.ec2: k => v if v.create_key }
+  source  = "git@github.com:zerak24/terraform_modules.git//aws/key"
+  key_name           = format("%s-%s-%s-key", var.project.company, var.project.env, each.key)
+  create_private_key = true
 }
 
 module "sg" {
@@ -122,9 +132,9 @@ module "eks" {
     }
   }
 
-  eks_managed_node_groups = {for k,v in var.eks.eks_managed_node_groups: k => merge(v, {subnet_ids = [module.vpc[0].private_subnets[index(var.vpc.zones, v.zone)]]})}
+  eks_managed_node_groups = {for k, v in var.eks.eks_managed_node_groups: k => merge(v, {subnet_ids = [module.vpc[0].private_subnets[index(var.vpc.zones, v.zone)]]})}
 
-  access_entries = {for k,v in var.eks.access_entries: k => merge(v, {policy_associations = {
+  access_entries = {for k, v in var.eks.access_entries: k => merge(v, {policy_associations = {
     admin = {
       policy_arn = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
       access_scope = {

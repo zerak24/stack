@@ -20,9 +20,11 @@ variable "vpc" {
 variable "ec2" {
   type = map(object({
     instance_type = string
-    key_name = string
+    ami = optional(string)
     zone = string
-    security_groups = list(string)
+    create_key = optional(bool, false)
+    key_name = optional(string)
+    vpc_security_group_ids = list(string)
   }))
   default = {}
 }
