@@ -26,7 +26,7 @@ module "vpc" {
   tags = local.tags
 }
 
-module "ec2_instance" {
+module "ec2" {
   for_each = var.ec2
   source  = "git@github.com:zerak24/terraform_modules.git//aws/ec2"
 
