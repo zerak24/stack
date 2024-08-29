@@ -1,3 +1,10 @@
+locals {
+  tags = {
+    Terraform   = "true"
+    Environment = var.project.env
+  }
+}
+
 module "vpc" {
   count = var.vpc == null ? 0 : 1
   source = "git@github.com:zerak24/terraform_modules.git//aws/vpc"
@@ -16,10 +23,22 @@ module "vpc" {
   single_nat_gateway = var.vpc.single_nat_gateway
   one_nat_gateway_per_az = true
 
-  tags = {
-    Terraform = "true"
-    Environment = var.project.env
-  }
+  tags = local.tags
+}
+
+module "ec2_instance" {
+  for_each = var.ec2
+  source  = "git@github.com:zerak24/terraform_modules.git//aws/ec2"
+
+  name = each.key
+
+  instance_type          = "t2.micro"
+  key_name               = "user1"
+  monitoring             = true
+  vpc_security_group_ids = [for sg_id in each.value.security_groups : module.sg[sg_id].security_group_id]
+  subnet_id              = module.vpc[0].public_subnets[index(var.vpc.zones, v.zone)]
+
+  tags = local.tags
 }
 
 module "sg" {
@@ -31,6 +50,8 @@ module "sg" {
   vpc_id      = module.vpc[0].vpc_id
 
   ingress_with_cidr_blocks = each.value.ingress_with_cidr_blocks
+
+  tags = local.tags
 }
 
 module "rds" {
@@ -38,8 +59,7 @@ module "rds" {
   source = "git@github.com:zerak24/terraform_modules.git//aws/rds"
   
   identifier        = format("%s-%s-%s", var.project.company, var.project.env, each.key)
-  # subnet_ids             = module.vpc[0].database_subnets
-  vpc_security_group_ids = [for sg in module.sg : sg.security_group_id]
+  vpc_security_group_ids = [for sg_id in each.value.security_groups : module.sg[sg_id].security_group_id]
   db_subnet_group_name = module.vpc[0].database_subnet_group
   username = "root"
 
@@ -55,6 +75,8 @@ module "rds" {
   iam_database_authentication_enabled = true
   maintenance_window = "Mon:00:00-Mon:03:00"
   backup_window      = "03:00-06:00"
+
+  tags = local.tags
 }
 
 module "eks" {
@@ -111,9 +133,6 @@ module "eks" {
     }
   }})}
 
-  tags = {
-    Environment = "dev"
-    Terraform   = "true"
-  }
+  tags = local.tags
 }
 

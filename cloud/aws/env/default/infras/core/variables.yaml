@@ -12,6 +12,11 @@ inputs:
       "kubernetes.io/role/elb": 1
     single_nat_gateway: true
 
+  ec2:
+    gitlab:
+    vault:
+    pritunl:
+
   sg:
     eks-access-rds:
       description: "Allow EKS access RDS"
@@ -32,6 +37,7 @@ inputs:
       engine: "postgres"
       engine_version: "16"
       instance_class: "db.t4g.micro"
+      security_groups: ["eks-access-rds"]
 
   eks:
     version: "1.30"

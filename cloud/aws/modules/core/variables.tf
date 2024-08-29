@@ -17,6 +17,15 @@ variable "vpc" {
   })
   default = null
 }
+variable "ec2" {
+  type = map(object({
+    instance_type = string
+    key_name = string
+    zone = string
+    security_groups = list(string)
+  }))
+  default = {}
+}
 variable "sg" {
   type = map(object({
     description = optional(string)
@@ -29,6 +38,7 @@ variable "rds" {
     engine = string
     engine_version = string
     instance_class = string
+    security_groups = list(string)
   }))
   default = {}
 }

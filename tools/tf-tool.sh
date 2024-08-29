@@ -68,7 +68,6 @@ function setup() {
   
   install_terraform
   install_yq
-  install_gcloud
 }
 
 ## Check Syntax Function
