@@ -65,6 +65,13 @@ module "sg" {
   vpc_id      = module.vpc[0].vpc_id
 
   ingress_with_cidr_blocks = each.value.ingress_with_cidr_blocks
+  egress_with_cidr_blocks = [{
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    description = "Allow all egress"
+    cidr_blocks = "0.0.0.0/0"
+  }]
 
   tags = local.tags
 }
