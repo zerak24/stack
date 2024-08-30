@@ -1,42 +1,51 @@
+#! /bin/bash
+
 export DOMAIN_NAME=vault.example.info
+
 # vault
+
 sudo snap install docker
 sudo mkdir -p $HOME/vault/logs
 sudo mkdir -p $HOME/vault/file
 sudo mkdir -p $HOME/vault/config
 sudo docker volume create --opt type=none --opt device=/home/duyle/vault/config
 
-# add file vault/config/vault.json
-# {
-#   "backend":{
-#     "file":{
-#         "path":"/vault/file"
-#     }
-#   },
-#   "listener":{
-#     "tcp":{
-#         "address":"[::]:8200",
-#         "cluster_address":"[::]:8201",
-#         "tls_disable":1,
-#     }
-#   },
-#   "default_lease_ttl":"24h",
-#   "max_lease_ttl":"168h", 
-#   "disable_mlock":true,
-#   "ui":true,
-# }
+sudo tee vault/config/vault.json << EOF
+{
+  "backend":{
+    "file":{
+        "path":"/vault/file"
+    }
+  },
+  "listener":{
+    "tcp":{
+        "address":"[::]:8200",
+        "cluster_address":"[::]:8201",
+        "tls_disable":1,
+    }
+  },
+  "default_lease_ttl":"24h",
+  "max_lease_ttl":"168h", 
+  "disable_mlock":true,
+  "ui":true,
+}
+EOF
 
 sudo docker run --detach --network host --restart always --name vault --hostname $DOMAIN_NAME -v $HOME/vault/config:/vault/config -v $HOME/vault/logs:/vault/logs -v $HOME/vault/file:/vault/file --entrypoint docker-entrypoint.sh --cap-add=IPC_LOCK vault:1.13.3 vault server -config=vault/config/vault.json
+
 # nginx
+
 sudo apt install nginx -y
 sudo systemctl enable nginx
 sudo systemctl reload nginx
-# certbot  
-sudo apt update
-sudo apt install certbot python3-certbot-nginx -y
-sudo certbot --nginx -d $DOMAIN_NAME --register-unsafely-without-email
 
-# add to /etc/nginx/sites-available/default
+# certbot
+
+# sudo apt update
+# sudo apt install certbot python3-certbot-nginx -y
+# sudo certbot --nginx -d $DOMAIN_NAME --register-unsafely-without-email
+
+# sudo tee /etc/nginx/sites-available/default << EOF
 # server {
 #     server_name <domain-name>; # managed by Certbot
 
@@ -55,18 +64,25 @@ sudo certbot --nginx -d $DOMAIN_NAME --register-unsafely-without-email
 #             proxy_set_header X-Forwarded-Proto https;
 #     }
 # }
+# EOF
+
+# sudo systemctl reload nginx
 
 # test
 
-# server {
+sudo tee /etc/nginx/sites-available/default << EOF
+server {
 
-#     listen [::]:80;
-#     listen 80;
-#     location / {
-#             proxy_pass http://127.0.0.1:8200;
-#             proxy_set_header Host $host;
-#             proxy_set_header X-Real-IP $remote_addr;
-#             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-#             proxy_set_header X-Forwarded-Proto https;
-#     }
-# }
+    listen [::]:80;
+    listen 80;
+    location / {
+            proxy_pass http://127.0.0.1:8200;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+    }
+}
+EOF
+
+sudo systemctl reload nginx

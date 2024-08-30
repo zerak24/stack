@@ -17,6 +17,7 @@ inputs:
     vault:
       instance_type: t4g.small
       ami: ami-0e879a1b306fffb22
+      init_script: script/vault-setup.sh
       create_key: true
       zone: "us-east-1b"
       vpc_security_group_ids: ["ssh-access"]

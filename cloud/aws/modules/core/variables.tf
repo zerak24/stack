@@ -22,6 +22,7 @@ variable "ec2" {
   type = map(object({
     instance_type = string
     ami = optional(string)
+    init_script = optional(string)
     zone = string
     root_block_device = optional(list(any), [])
     create_key = optional(bool, false)

@@ -32,7 +32,7 @@ module "ec2" {
 
   name = format("%s-%s", var.project.company, each.key)
   instance_type          = each.value.instance_type
-  ## check this out
+  user_data_base64 = try(filebase64(each.value.init_script),null)
   create_eip = true
   ami                    = each.value.ami
   key_name               = each.value.create_key ? format("%s-%s-%s-key", var.project.company, var.project.env, each.key) : each.value.key_name
