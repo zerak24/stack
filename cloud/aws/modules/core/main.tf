@@ -7,7 +7,7 @@ locals {
 
 module "vpc" {
   count = var.vpc == null ? 0 : 1
-  source = "git@github.com:zerak24/terraform_modules.git//aws/vpc"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-vpc.git?ref=v5.13.0"
 
   name = format("%s-%s-vpc", var.project.company, var.project.env)
   cidr = var.vpc.cidr
@@ -28,11 +28,12 @@ module "vpc" {
 
 module "ec2" {
   for_each = var.ec2
-  source  = "git@github.com:zerak24/terraform_modules.git//aws/ec2"
+  source  = "git::https://github.com/terraform-aws-modules/terraform-aws-ec2-instance.git?ref=v5.7.0"
 
   name = format("%s-%s", var.project.company, each.key)
   instance_type          = each.value.instance_type
-  ## check this out and add eip
+  ## check this out
+  create_eip = true
   ami                    = each.value.ami
   key_name               = each.value.create_key ? format("%s-%s-%s-key", var.project.company, var.project.env, each.key) : each.value.key_name
   
@@ -43,17 +44,21 @@ module "ec2" {
   tags = local.tags
 }
 
-## check this out
 module "key" {
   for_each = { for k, v in var.ec2: k => v if v.create_key }
-  source  = "git@github.com:zerak24/terraform_modules.git//aws/key"
+  source  = "git::https://github.com/terraform-aws-modules/terraform-aws-key-pair.git?ref=v2.0.3"
   key_name           = format("%s-%s-%s-key", var.project.company, var.project.env, each.key)
   create_private_key = true
+}
+resource "local_sensitive_file" "private_key" {
+  for_each = module.key
+  content = each.value.private_key_pem
+  filename = format("%s/%s", var.project.key_directory, each.value.key_pair_name)
 }
 
 module "sg" {
   for_each = var.sg
-  source = "git@github.com:zerak24/terraform_modules.git//aws/sg"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-security-group.git?ref=v5.1.2"
 
   name        = format("%s-%s-%s-sg", var.project.company, var.project.env, each.key)
   description = each.value.description
@@ -66,7 +71,7 @@ module "sg" {
 
 module "rds" {
   for_each = var.rds
-  source = "git@github.com:zerak24/terraform_modules.git//aws/rds"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-rds.git?ref=v6.9.0"
   
   identifier        = format("%s-%s-%s", var.project.company, var.project.env, each.key)
   vpc_security_group_ids = [for sg_id in each.value.security_groups : module.sg[sg_id].security_group_id]
@@ -91,7 +96,7 @@ module "rds" {
 
 module "eks" {
   count = var.eks == null ? 0 : 1
-  source = "git@github.com:zerak24/terraform_modules.git//aws/eks"
+  source = "git::https://github.com/terraform-aws-modules/terraform-aws-eks.git?ref=v20.24.0"
 
   cluster_name    = format("%s-%s-eks", var.project.company, var.project.env)
   cluster_version = var.eks.version

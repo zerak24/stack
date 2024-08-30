@@ -1,5 +1,6 @@
 inputs:
   project:
     profile: learner
+    key_directory: ../../../../key/key-pair
     company: example
     env: develop
