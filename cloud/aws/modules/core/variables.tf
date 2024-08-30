@@ -23,6 +23,7 @@ variable "ec2" {
     instance_type = string
     ami = optional(string)
     zone = string
+    root_block_device = optional(list(any), [])
     create_key = optional(bool, false)
     key_name = optional(string)
     vpc_security_group_ids = list(string)

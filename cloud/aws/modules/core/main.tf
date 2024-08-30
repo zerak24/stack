@@ -36,7 +36,7 @@ module "ec2" {
   create_eip = true
   ami                    = each.value.ami
   key_name               = each.value.create_key ? format("%s-%s-%s-key", var.project.company, var.project.env, each.key) : each.value.key_name
-  
+  root_block_device = each.value.root_block_device
   monitoring             = true
   vpc_security_group_ids = [for sg_id in each.value.vpc_security_group_ids : module.sg[sg_id].security_group_id]
   subnet_id              = module.vpc[0].public_subnets[index(var.vpc.zones, each.value.zone)]
