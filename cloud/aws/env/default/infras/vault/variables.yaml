@@ -1,0 +1,4 @@
+module: vault
+inputs:
+  vault:
+    name: example
