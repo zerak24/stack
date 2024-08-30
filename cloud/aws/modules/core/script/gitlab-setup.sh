@@ -1,26 +1,33 @@
 export DOMAIN_NAME=git.example.info
-# docker
+DIR="/home/ubuntu"
+
+# gitlab
+
 sudo snap install docker
-sudo mkdir -p $HOME/gitlab/config
-sudo mkdir -p $HOME/gitlab/logs
-sudo mkdir -p $HOME/gitlab/data
+sudo mkdir -p $DIR/gitlab/config
+sudo mkdir -p $DIR/gitlab/logs
+sudo mkdir -p $DIR/gitlab/data
 sudo docker run --detach --hostname $DOMAIN_NAME --env GITLAB_OMNIBUS_CONFIG="external_url 'http://$DOMAIN_NAME'" \
   --network host --name gitlab --restart always \
-  --volume $HOME/gitlab/config:/etc/gitlab \
-  --volume $HOME/gitlab/logs:/var/log/gitlab \
-  --volume $HOME/gitlab/data:/var/opt/gitlab \
+  --volume $DIR/gitlab/config:/etc/gitlab \
+  --volume $DIR/gitlab/logs:/var/log/gitlab \
+  --volume $DIR/gitlab/data:/var/opt/gitlab \
   --shm-size 256m \
   gitlab/gitlab-ce:17.0.1-ce.0
+
 # nginx
+
 sudo apt install nginx -y
 sudo systemctl enable nginx
 sudo systemctl reload nginx
-# certbot  
-sudo apt update
-sudo apt install certbot python3-certbot-nginx -y
-sudo certbot --nginx -d $DOMAIN_NAME --register-unsafely-without-email
 
-# update: add something format like this to /etc/nginx/sites-available/defaul
+# certbot  
+
+# sudo apt update
+# sudo apt install certbot python3-certbot-nginx -y
+# sudo certbot --nginx -d $DOMAIN_NAME --register-unsafely-without-email
+
+# sudo tee /etc/nginx/sites-available/default << EOF
 # server {
 #     server_name <domain-name>; # managed by Certbot
 
@@ -39,3 +46,6 @@ sudo certbot --nginx -d $DOMAIN_NAME --register-unsafely-without-email
 #             proxy_set_header X-Forwarded-Proto https;
 #     }
 # }
+# EOF
+
+# sudo systemctl reload nginx

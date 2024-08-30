@@ -1,13 +1,14 @@
 #! /bin/bash
 
 export DOMAIN_NAME=vault.example.info
+DIR="/home/ubuntu"
 
 # vault
 
 sudo snap install docker
-sudo mkdir -p $HOME/vault/logs
-sudo mkdir -p $HOME/vault/file
-sudo mkdir -p $HOME/vault/config
+sudo mkdir -p $DIR/vault/logs
+sudo mkdir -p $DIR/vault/file
+sudo mkdir -p $DIR/vault/config
 sudo docker volume create --opt type=none --opt device=/home/duyle/vault/config
 
 sudo tee vault/config/vault.json << EOF
@@ -31,7 +32,7 @@ sudo tee vault/config/vault.json << EOF
 }
 EOF
 
-sudo docker run --detach --network host --restart always --name vault --hostname $DOMAIN_NAME -v $HOME/vault/config:/vault/config -v $HOME/vault/logs:/vault/logs -v $HOME/vault/file:/vault/file --entrypoint docker-entrypoint.sh --cap-add=IPC_LOCK vault:1.13.3 vault server -config=vault/config/vault.json
+sudo docker run --detach --network host --restart always --name vault --hostname $DOMAIN_NAME -v $DIR/vault/config:/vault/config -v $DIR/vault/logs:/vault/logs -v $DIR/vault/file:/vault/file --entrypoint docker-entrypoint.sh --cap-add=IPC_LOCK vault:1.13.3 vault server -config=vault/config/vault.json
 
 # nginx
 
