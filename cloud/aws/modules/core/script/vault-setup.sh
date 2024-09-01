@@ -5,13 +5,11 @@ DIR="/home/ubuntu"
 
 # vault
 
-sudo snap install docker
-sudo mkdir -p $DIR/vault/logs
-sudo mkdir -p $DIR/vault/file
-sudo mkdir -p $DIR/vault/config
-sudo docker volume create --opt type=none --opt device=/home/duyle/vault/config
-
-sudo tee vault/config/vault.json << EOF
+snap install docker
+mkdir -p $DIR/vault/logs
+mkdir -p $DIR/vault/file
+mkdir -p $DIR/vault/config
+tee vault/config/vault.json << EOF
 {
   "backend":{
     "file":{
@@ -32,13 +30,12 @@ sudo tee vault/config/vault.json << EOF
 }
 EOF
 
-sudo docker run --detach --network host --restart always --name vault --hostname $DOMAIN_NAME -v $DIR/vault/config:/vault/config -v $DIR/vault/logs:/vault/logs -v $DIR/vault/file:/vault/file --entrypoint docker-entrypoint.sh --cap-add=IPC_LOCK vault:1.13.3 vault server -config=vault/config/vault.json
+docker run --detach --network host --restart always --name vault --hostname $DOMAIN_NAME -v $DIR/vault/config:/vault/config -v $DIR/vault/logs:/vault/logs -v $DIR/vault/file:/vault/file --entrypoint docker-entrypoint.sh --cap-add=IPC_LOCK vault:1.13.3 vault server -config=vault/config/vault.json
 
 # nginx
 
-sudo apt install nginx -y
-sudo systemctl enable nginx
-sudo systemctl reload nginx
+apt install nginx -y
+systemctl enable nginx
 
 # certbot
 
@@ -59,9 +56,9 @@ sudo systemctl reload nginx
 
 #     location / {
 #             proxy_pass http://127.0.0.1:8200;
-#             proxy_set_header Host $host;
-#             proxy_set_header X-Real-IP $remote_addr;
-#             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#             proxy_set_header Host \$host;
+#             proxy_set_header X-Real-IP \$remote_addr;
+#             proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
 #             proxy_set_header X-Forwarded-Proto https;
 #     }
 # }
@@ -71,19 +68,19 @@ sudo systemctl reload nginx
 
 # test
 
-sudo tee /etc/nginx/sites-available/default << EOF
+tee /etc/nginx/sites-available/default << EOF
 server {
 
     listen [::]:80;
     listen 80;
     location / {
             proxy_pass http://127.0.0.1:8200;
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto https;
     }
 }
 EOF
 
-sudo systemctl reload nginx
+systemctl reload nginx

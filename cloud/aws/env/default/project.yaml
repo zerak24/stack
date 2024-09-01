@@ -4,3 +4,4 @@ inputs:
     key_directory: ../../../../key/key-pair
     company: example
     env: develop
+    oidc_issuer: https://git.example.info

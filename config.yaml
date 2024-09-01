@@ -1,5 +1,7 @@
 helm_repo:
-  repoUrl: https://charts.example.info
+  url: https://charts.example.info
   username: zerak24
   password: 7b9f6844ef1ccf4d23f34ef16490746e78883838
   name: zerak
+gitlab:
+  url: https://git.example.info

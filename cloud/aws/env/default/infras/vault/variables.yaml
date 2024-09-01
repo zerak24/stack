@@ -1,4 +1,5 @@
 module: vault
 inputs:
   vault:
-    name: example
+    repositories: []
+    users: []

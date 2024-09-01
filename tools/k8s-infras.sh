@@ -106,7 +106,7 @@ function load_config() {
 
 function add_helm_repo() {
 	if [ $(helm repo list | grep -E "${REPO_NAME}" | wc -l) -eq 0 ]; then
-    REPO_URL=$(yq '.helm_repo.repoUrl' ${CONFIG_FILE_PATH})
+    REPO_URL=$(yq '.helm_repo.url' ${CONFIG_FILE_PATH})
     REPO_USERNAME=$(yq '.helm_repo.username' ${CONFIG_FILE_PATH})
     REPO_PASSWORD=$(yq '.helm_repo.password' ${CONFIG_FILE_PATH})
 		command="helm repo add ${REPO_NAME} ${REPO_URL} --username=${REPO_USERNAME} --password=${REPO_PASSWORD} --insecure-skip-tls-verify"

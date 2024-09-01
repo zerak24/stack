@@ -1,4 +1,4 @@
-resource "vault_mount" "example" {
+resource "vault_mount" "mount" {
   path        = "example"
   type        = "kv-v2"
   options = {
@@ -16,4 +16,13 @@ path "secret/my_app" {
   capabilities = ["update"]
 }
 EOT
+}
+
+locals {
+  configs = yamldecode(file("../../../../config.yaml"))
+}
+
+
+resource "vault_identity_oidc" "gitlab" {
+  issuer = local.config.gitlab.url
 }

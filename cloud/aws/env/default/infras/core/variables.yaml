@@ -20,7 +20,7 @@ inputs:
       init_script: script/vault-setup.sh
       create_key: true
       zone: "us-east-1b"
-      vpc_security_group_ids: ["ssh-access"]
+      vpc_security_group_ids: ["ssh-access", "http-access"]
       root_block_device:
         - volume_size: 20
           delete_on_termination: false
@@ -35,11 +35,9 @@ inputs:
           protocol   : "tcp"
           description: "SSH access from anywhere"
           cidr_blocks: "0.0.0.0/0"
-        - from_port  : 443
-          to_port    : 443
-          protocol   : "tcp"
-          description: "HTTPS access from anywhere"
-          cidr_blocks: "0.0.0.0/0"
+    http-access:
+      description: "Allow HTTP access"
+      ingress_with_cidr_blocks:
         - from_port  : 80
           to_port    : 80
           protocol   : "tcp"
