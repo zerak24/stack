@@ -1,13 +1,15 @@
-export DOMAIN_NAME=git.example.info
+#! /bin/bash
+
+DOMAIN_NAME=git.example.info
 DIR="/home/ubuntu"
 
 # gitlab
 
-sudo snap install docker
-sudo mkdir -p $DIR/gitlab/config
-sudo mkdir -p $DIR/gitlab/logs
-sudo mkdir -p $DIR/gitlab/data
-sudo docker run --detach --hostname $DOMAIN_NAME --env GITLAB_OMNIBUS_CONFIG="external_url 'http://$DOMAIN_NAME'" \
+snap install docker
+mkdir -p $DIR/gitlab/config
+mkdir -p $DIR/gitlab/logs
+mkdir -p $DIR/gitlab/data
+docker run --detach --hostname $DOMAIN_NAME --env GITLAB_OMNIBUS_CONFIG="external_url 'http://$DOMAIN_NAME'" \
   --network host --name gitlab --restart always \
   --volume $DIR/gitlab/config:/etc/gitlab \
   --volume $DIR/gitlab/logs:/var/log/gitlab \
@@ -17,9 +19,27 @@ sudo docker run --detach --hostname $DOMAIN_NAME --env GITLAB_OMNIBUS_CONFIG="ex
 
 # nginx
 
-sudo apt install nginx -y
-sudo systemctl enable nginx
-sudo systemctl reload nginx
+apt install nginx -y
+systemctl enable nginx
+
+# test
+
+sudo tee /etc/nginx/sites-available/default << EOF
+server {
+    listen [::]:443 ssl ipv6only=on;
+    listen 443 ssl;
+    include snippets/self-signed.conf;
+    include snippets/ssl-params.conf;
+
+    location / {
+            proxy_pass http://127.0.0.1:80;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto https;
+    }
+}
+EOF
 
 # certbot  
 
@@ -40,9 +60,9 @@ sudo systemctl reload nginx
 
 #     location / {
 #             proxy_pass http://127.0.0.1:8200;
-#             proxy_set_header Host $host;
-#             proxy_set_header X-Real-IP $remote_addr;
-#             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#             proxy_set_header Host \$host;
+#             proxy_set_header X-Real-IP \$remote_addr;
+#             proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
 #             proxy_set_header X-Forwarded-Proto https;
 #     }
 # }

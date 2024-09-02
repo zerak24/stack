@@ -1,6 +1,6 @@
 #! /bin/bash
 
-export DOMAIN_NAME=vault.example.info
+DOMAIN_NAME=vault.example.info
 DIR="/home/ubuntu"
 
 # vault
@@ -9,7 +9,7 @@ snap install docker
 mkdir -p $DIR/vault/logs
 mkdir -p $DIR/vault/file
 mkdir -p $DIR/vault/config
-tee vault/config/vault.json << EOF
+tee $DIR/vault/config/vault.json << EOF
 {
   "backend":{
     "file":{
