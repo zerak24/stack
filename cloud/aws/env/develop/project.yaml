@@ -3,5 +3,5 @@ inputs:
     profile: learner
     key_directory: ../../../../key/key-pair
     company: example
-    env: default
+    env: develop
     oidc_issuer: https://git.example.info

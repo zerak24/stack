@@ -1,6 +1,6 @@
 deploy_config:
   namespace: tools
-  cluster: minikube
+  cluster: arn:aws:eks:us-east-1:339713150448:cluster/example-default-eks
 chart:
   repository: zerak/argo-cd
   version: 7.4.4
@@ -18,17 +18,17 @@ configs:
     create: true
   params:
     server.insecure: true
-  clusterCredentials: {}
-    # develop-cluster:
-    #   server: https://mycluster.example.com
-    #   labels: {}
-    #   annotations: {}
-    #   project: default
-    #   config:
-    #     bearerToken: "<authentication token>"
-    #     tlsClientConfig:
-    #       insecure: false
-    #       caData: "<base64 encoded certificate>"
+  clusterCredentials: #{}
+    example-develop-eks:
+      server: https://64F1BD1E2FADCE15181B9E5DEDF26805.gr7.us-east-1.eks.amazonaws.com
+      labels: {}
+      annotations: {}
+      project: default
+      config:
+        bearerToken: "<authentication token>"
+        tlsClientConfig:
+          insecure: false
+          caData: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJYzNzQzQ5OGNndzR3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TkRBNU1ETXhNekU1TkRkYUZ3MHpOREE1TURFeE16STBORGRhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUURzZkFCMFMwditkNHg2T2xQQXQwaGZRaU5aeDlNcVVKN3V4dTFEanEweE9HRWpxUktyRVhadHN4R3IKOG95UEhibEwwa0g4ZmYzcDVmUVdiS0wyaytlanB3ZkhYSG9KM0dPUjZuZXFidVJWM3R0ODJsMjJ2OFBHZnNzSQpMVG1hWHQ3MXAwMjREd0RacGQ5bVdrVUpLa3ZBanFzZ2RFQ1hYQjQvTDRvcmRHd0pJWVVLVi9jOXJTZDJ3M2VBClRXczNLdGlOWVhXVUV4bkRReHFkMmUvbjJpZFlOZEpkcWYxdytwMFI5YWNHZTdXbEFldStZUUp5WE1wZHdhUnoKa0tZT2pJSTBCNjlWOXcxaU14ZEtOV3RaTUxJNUhiT2FML3BjS0wzSmZ2ZVh1RFZFZVFwcEdzb2FHQnlOejMwdQpOcUk5bnUrL0tUWC9tUG5hN1U5MWJSSGhSUDdmQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJROSs4V3k5bklHTE5WWFJOKzNtNFNSakNGMTlqQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQnZQdEM1am0wLwpnbXVQdUZ5aG5QdlFvSzRnbzFoenhyWU5EVEdWa0NqempKWE1uSWsrUUIyb3VES3JiS1lETEYyYjI2d0ZlNEd6CmRtczI2RnV0eWk0UmgyOVpUTTdsbjhma3R3WExoQW9WeUZHZ2NIWHlPRXRsSWJUMUpXc3RRaThTMVZBSEJFaHUKSWsybEtBZm9tZ2pZR24zMit4OGVYMWgwNW5XUGZ5WnIxeGJtc29VK2I2U1FmazIrcDZFNXByNmhEOHJsRmt5TQpnbjhkRXMxUStYaS91cGxRbkJjNXFLS0tocjBaOUd3U0ZqQXNmVzdWbFMwc0krUzJuZ1ZhS0h1OEJ4a0MxSkx1Clgwam0zS0VYa28zVTl4RWFvUkdHL2dlWTNpai9CeG0yT01qVzN5T2RjejJLUHlZdUVWY3B6a2tjd0JSclVZZEgKbmcwYWIwTGpCUVlQCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
   repositories:
     helm:
       name: chart-museum
@@ -59,6 +59,9 @@ redis:
   
 server:
   name: server
+  serviceAccount:
+    create: false
+    name: argocd-server
   ingress:
     enabled: true
     hostname: argocd.example.info

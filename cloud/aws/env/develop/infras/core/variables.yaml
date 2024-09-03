@@ -1,11 +1,11 @@
 module: core
 inputs:
   vpc:
-    cidr: "10.10.0.0/16"
+    cidr: "10.30.0.0/16"
     zones: ["us-east-1a", "us-east-1b", "us-east-1c"]
-    public_subnets: ["10.10.10.0/24", "10.10.20.0/24", "10.10.30.0/24"]
-    private_subnets: ["10.10.110.0/24", "10.10.120.0/24", "10.10.130.0/24"]
-    database_subnets: ["10.10.210.0/24", "10.10.220.0/24"]
+    public_subnets: ["10.30.10.0/24", "10.30.20.0/24", "10.30.30.0/24"]
+    private_subnets: ["10.30.110.0/24", "10.30.120.0/24", "10.30.130.0/24"]
+    database_subnets: ["10.30.210.0/24", "10.30.220.0/24"]
     private_subnet_tags:
       "kubernetes.io/role/internal-elb": 1
     public_subnet_tags:
@@ -64,12 +64,12 @@ inputs:
           to_port    : 3306
           protocol   : "tcp"
           description: "Eks node group access rds (mysql)"
-          cidr_blocks: "10.10.0.0/16"
+          cidr_blocks: "10.30.0.0/16"
         - from_port  : 5432
           to_port    : 5432
           protocol   : "tcp"
           description: "Eks node group access rds (postgresql)"
-          cidr_blocks: "10.10.0.0/16"
+          cidr_blocks: "10.30.0.0/16"
   
   # rds:
   #   postgres:
@@ -80,7 +80,7 @@ inputs:
 
   eks:
     version: "1.30"
-    cluster_service_ipv4_cidr: "10.20.0.0/16"
+    cluster_service_ipv4_cidr: "10.40.0.0/16"
 
     kms_key_administrators: []
 
@@ -119,32 +119,32 @@ inputs:
               delete_on_termination: true
         tags:
           k8s.io/cluster-autoscaler/enabled: 1
-      group_2:
-        instance_types: ["t4g.small"]
-        capacity_type: "ON_DEMAND"
-        ami_type: "AL2023_ARM_64_STANDARD"
-        min_size: 1
-        desired_size: 1
-        max_size: 10
-        zone: "us-east-1b"
-        iam_role_additional_policies:
-          evs_csi_driver_policy: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
-          cloudwach_log_policy: "arn:aws:iam::aws:policy/service-role/AWSTransferLoggingAccess"
-          # ssm_policy: "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
-        labels:
-          name: "default-node"
-          # role: "build"
-        taints: []
-        #   - key: "role"
-        #     value: "build"
-        #     effect: "NO_SCHEDULE"
-        block_device_mappings:
-          xvda:
-            device_name: "/dev/xvda"
-            ebs:
-              volume_size: 75
-              volume_type: gp3
-              delete_on_termination: true
-        tags:
-          k8s.io/cluster-autoscaler/enabled: 1
+      # group_2:
+      #   instance_types: ["t4g.small"]
+      #   capacity_type: "ON_DEMAND"
+      #   ami_type: "AL2023_ARM_64_STANDARD"
+      #   min_size: 1
+      #   desired_size: 1
+      #   max_size: 10
+      #   zone: "us-east-1b"
+      #   iam_role_additional_policies:
+      #     evs_csi_driver_policy: "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+      #     cloudwach_log_policy: "arn:aws:iam::aws:policy/service-role/AWSTransferLoggingAccess"
+      #     # ssm_policy: "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+      #   labels:
+      #     name: "default-node"
+      #     # role: "build"
+      #   taints: []
+      #   #   - key: "role"
+      #   #     value: "build"
+      #   #     effect: "NO_SCHEDULE"
+      #   block_device_mappings:
+      #     xvda:
+      #       device_name: "/dev/xvda"
+      #       ebs:
+      #         volume_size: 75
+      #         volume_type: gp3
+      #         delete_on_termination: true
+      #   tags:
+      #     k8s.io/cluster-autoscaler/enabled: 1
     

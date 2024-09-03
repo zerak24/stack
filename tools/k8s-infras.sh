@@ -118,16 +118,19 @@ function helm_action() {
   HELM_ACTION=""
   HELM_FLAG=""
   HELM_PLUGINS="secrets"
-  update_helm_repositoy="helm repo update ${REPO_NAME}"
+  update_helm_repositoy=""
+  if [ ! -z $DIRECTORY ]; then
+    update_helm_repositoy="helm repo update ${REPO_NAME}"
+  fi
   case ${ACTION} in
     plan)
     HELM_ACTION="diff upgrade"
-    HELM_FLAG="--install --namespace=${NAMESPACE} --values=${FILE} --kube-context=${CLUSTER} ${RELEASE} ${CHART_REPO} --version=${CHART_VERSION}"
+    HELM_FLAG="--install --namespace=${NAMESPACE} --create-namespace --create-namespace --values=${FILE} --kube-context=${CLUSTER} ${RELEASE} ${CHART_REPO} --version=${CHART_VERSION}"
     eval $update_helm_repositoy
     ;;
     apply)
     HELM_ACTION="upgrade --install"
-    HELM_FLAG="--install --namespace=${NAMESPACE} --values=${FILE} --kube-context=${CLUSTER} ${RELEASE} ${CHART_REPO} --version=${CHART_VERSION}"
+    HELM_FLAG="--install --namespace=${NAMESPACE} --create-namespace --values=${FILE} --kube-context=${CLUSTER} ${RELEASE} ${CHART_REPO} --version=${CHART_VERSION}"
     eval $update_helm_repositoy
     ;;
     destroy)
@@ -136,7 +139,7 @@ function helm_action() {
     ;;
     debug)
     HELM_ACTION="template"
-    HELM_FLAG="--namespace=${NAMESPACE} --values=${FILE} --kube-context=${CLUSTER} ${RELEASE} ${CHART_REPO} --version=${CHART_VERSION}"
+    HELM_FLAG="--namespace=${NAMESPACE} --create-namespace --values=${FILE} --kube-context=${CLUSTER} ${RELEASE} ${CHART_REPO} --version=${CHART_VERSION}"
     eval $update_helm_repositoy
     ;;
     push)
@@ -154,6 +157,6 @@ setup
 check_flag
 check_automation
 load_config
-add_helm_repo
+# add_helm_repo
 helm_action
 
