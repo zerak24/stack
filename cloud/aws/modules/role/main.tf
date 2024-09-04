@@ -24,13 +24,13 @@ module "iam_eks_role" {
 }
 
 module "iam_policy" {
-  count     = var.eks-sa.iam-poliy == null ? 0 : 1
+  count     = var.eks-sa.iam_policy == null ? 0 : 1
   source    = "git::https://github.com/terraform-aws-modules/terraform-aws-iam.git//modules/iam-policy?ref=v5.44.0"
 
-  name        = format("%s-%s-%s", var.project.company, var.project.env, var.eks-sa.iam-policy.name)
+  name        = format("%s-%s-%s", var.project.company, var.project.env, var.eks-sa.iam_policy.name)
   path        = format("/%s/%s/", var.project.company, var.project.env)
 
-  policy = var.eks-sa.iam-policy.policy
+  policy = var.eks-sa.iam_policy.policy
 
   tags = local.tags
 }

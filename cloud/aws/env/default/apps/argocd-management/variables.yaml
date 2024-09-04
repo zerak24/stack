@@ -1,0 +1,19 @@
+module: rolev2
+inputs:
+  role:
+    name: "argocd-manager"
+    attach_custom_policy: true
+    trust_policy_conditions:
+      - test: ""
+        variable: ""
+        values: ""
+    trust_policy_statements:
+      - sid: ""
+        actions: [""]
+        resources: [""]
+    policy_statements:
+      - sid: ""
+        actions: [""]
+        resources: [""]
+    additional_policy_arns:
+      AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
