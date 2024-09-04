@@ -1,6 +1,6 @@
 deploy_config:
   namespace: tools
-  cluster: arn:aws:eks:us-east-1:992382398009:cluster/example-default-eks
+  cluster: minikube
 chart:
   repository: zerak/argo-cd
   version: 7.4.4
@@ -68,12 +68,12 @@ server:
   serviceAccount:
     annotations:
       eks.amazonaws.com/role-arn: "arn:aws:iam::992382398009:role/example-default-argocd-management"
-  # ingress:
-  #   enabled: true
-  #   hostname: argocd.example.info
-  #   path: /
-  #   pathType: Prefix
-  #   tls: true
+  ingress:
+    enabled: false
+    hostname: argocd.example.info
+    path: /
+    pathType: Prefix
+    tls: true
 
 repoServer:
   name: repo-server
