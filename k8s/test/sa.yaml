@@ -1,39 +1,39 @@
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: dashboard
-rules:
-- apiGroups: [""]
-  resources: ["namespaces"]
-  verbs: ["get", "watch", "list"]
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "watch", "list", "delete"]
----
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRole
+# metadata:
+#   name: dashboard
+# rules:
+# - apiGroups: [""]
+#   resources: ["namespaces"]
+#   verbs: ["get", "watch", "list"]
+# - apiGroups: [""]
+#   resources: ["pods"]
+#   verbs: ["get", "watch", "list", "delete"]
+# ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: dashboard
+  name: argocd-default-sa
 subjects:
 - kind: ServiceAccount
-  name: dashboard
-  namespace: kube-system
+  name: argocd-default-sa
+  namespace: tools
 roleRef:
   kind: ClusterRole
-  name: dashboard
+  name: cluster-admin
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: dashboard
-  namespace: kube-system
+  name: argocd-default-sa
+  namespace: tools
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: dashboard-token
-  namespace: kube-system
+  name: argocd-default-sa-token
+  namespace: tools
   annotations:
-    kubernetes.io/service-account.name: dashboard
+    kubernetes.io/service-account.name: argocd-default-sa
 type: kubernetes.io/service-account-token

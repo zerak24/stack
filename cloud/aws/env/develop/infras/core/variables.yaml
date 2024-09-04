@@ -87,7 +87,7 @@ inputs:
     access_entries:
       admin:
         kubernetes_groups: []
-        principal_arn: "arn:aws:iam::339713150448:user/cloud_user"
+        principal_arn: "arn:aws:iam::992382398009:user/cloud_user"
         user_name: "cloud_user"
 
     eks_managed_node_groups:

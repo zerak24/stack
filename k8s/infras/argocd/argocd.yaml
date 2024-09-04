@@ -1,6 +1,6 @@
 deploy_config:
   namespace: tools
-  cluster: arn:aws:eks:us-east-1:211125606152:cluster/example-default-eks
+  cluster: arn:aws:eks:us-east-1:992382398009:cluster/example-default-eks
 chart:
   repository: zerak/argo-cd
   version: 7.4.4
@@ -20,18 +20,18 @@ configs:
     server.insecure: true
   clusterCredentials: #{}
     example-develop-eks:
-      server: https://64F1BD1E2FADCE15181B9E5DEDF26805.gr7.us-east-1.eks.amazonaws.com
+      server: https://3C22126A35CB688DE618F8406B40168E.gr7.us-east-1.eks.amazonaws.com
       labels: {}
       annotations: {}
       project: default
       config:
-        # bearerToken: "<authentication token>"
-        awsAuthConfig:
-          clusterName: example-develop-eks
-          roleARN: "<string>"
+        bearerToken: "eyJhbGciOiJSUzI1NiIsImtpZCI6IktDUF9QRUhDWThPWThzZjk4XzBfNl9IdmdsUWFJamlNWXloNkJhaG9HV2sifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJ0b29scyIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJhcmdvY2QtZGVmYXVsdC1zYS10b2tlbiIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50Lm5hbWUiOiJhcmdvY2QtZGVmYXVsdC1zYSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6ImE5MGMyZWZlLTlhYjYtNDAzZi04YzQwLWM1NDUwZDg0MzRhOCIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDp0b29sczphcmdvY2QtZGVmYXVsdC1zYSJ9.Isge0ndr840RGFfS-pNbjxoAxEZSPTdPvDoMQTxNQLewW_Xe_rJzJ_UZZL9vtQlIhNVQGtwHexjMsGhCoXnTi8AlFueMpz8v7DbaLN_Z4FnvPs4joVcCkBqhrNn_W17c0HNixFVguSBfimBUefyU8wb9x5Tjse0MDcnPOnJPJxoyceUeZnsJH1EP0EhPCl6YJS0reU6JMVm3Az3k4K1xNyrjgYosGBXRHvVSDJg10PVQm1riyqfi9XKWDp8qlIoUyVb9QR5OcRS10T7OgIbyb2weCJf_qqrB3rHeglf4I9z0RVwpk2FTGEQ6-nPFfZ5hluzNY7Y43pT9Wq557al_Ug"
+        # awsAuthConfig:
+        #   clusterName: example-develop-eks
+        #   roleARN: "<string>"
         tlsClientConfig:
           insecure: false
-          caData: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJYzNzQzQ5OGNndzR3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TkRBNU1ETXhNekU1TkRkYUZ3MHpOREE1TURFeE16STBORGRhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUURzZkFCMFMwditkNHg2T2xQQXQwaGZRaU5aeDlNcVVKN3V4dTFEanEweE9HRWpxUktyRVhadHN4R3IKOG95UEhibEwwa0g4ZmYzcDVmUVdiS0wyaytlanB3ZkhYSG9KM0dPUjZuZXFidVJWM3R0ODJsMjJ2OFBHZnNzSQpMVG1hWHQ3MXAwMjREd0RacGQ5bVdrVUpLa3ZBanFzZ2RFQ1hYQjQvTDRvcmRHd0pJWVVLVi9jOXJTZDJ3M2VBClRXczNLdGlOWVhXVUV4bkRReHFkMmUvbjJpZFlOZEpkcWYxdytwMFI5YWNHZTdXbEFldStZUUp5WE1wZHdhUnoKa0tZT2pJSTBCNjlWOXcxaU14ZEtOV3RaTUxJNUhiT2FML3BjS0wzSmZ2ZVh1RFZFZVFwcEdzb2FHQnlOejMwdQpOcUk5bnUrL0tUWC9tUG5hN1U5MWJSSGhSUDdmQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJROSs4V3k5bklHTE5WWFJOKzNtNFNSakNGMTlqQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQnZQdEM1am0wLwpnbXVQdUZ5aG5QdlFvSzRnbzFoenhyWU5EVEdWa0NqempKWE1uSWsrUUIyb3VES3JiS1lETEYyYjI2d0ZlNEd6CmRtczI2RnV0eWk0UmgyOVpUTTdsbjhma3R3WExoQW9WeUZHZ2NIWHlPRXRsSWJUMUpXc3RRaThTMVZBSEJFaHUKSWsybEtBZm9tZ2pZR24zMit4OGVYMWgwNW5XUGZ5WnIxeGJtc29VK2I2U1FmazIrcDZFNXByNmhEOHJsRmt5TQpnbjhkRXMxUStYaS91cGxRbkJjNXFLS0tocjBaOUd3U0ZqQXNmVzdWbFMwc0krUzJuZ1ZhS0h1OEJ4a0MxSkx1Clgwam0zS0VYa28zVTl4RWFvUkdHL2dlWTNpai9CeG0yT01qVzN5T2RjejJLUHlZdUVWY3B6a2tjd0JSclVZZEgKbmcwYWIwTGpCUVlQCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
+          caData: "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURCVENDQWUyZ0F3SUJBZ0lJS1o2WndzNW1BVlV3RFFZSktvWklodmNOQVFFTEJRQXdGVEVUTUJFR0ExVUUKQXhNS2EzVmlaWEp1WlhSbGN6QWVGdzB5TkRBNU1EUXdPVEE1TURGYUZ3MHpOREE1TURJd09URTBNREZhTUJVeApFekFSQmdOVkJBTVRDbXQxWW1WeWJtVjBaWE13Z2dFaU1BMEdDU3FHU0liM0RRRUJBUVVBQTRJQkR3QXdnZ0VLCkFvSUJBUUNoVUhaV0JEM0cyUGJFUFlpa1F3b0czUmNaSjFyV2tNRVR4eDlzWlB4VzZoVkFLdkYzTnRiUitJK0MKYmtFM2l5RUxkNGo4bUExSXRHZ1J1cjYxTzNHU1FwRFVLUmM0dUhqbFNkQ1c2QWt6TzBQUEpUKzJKUkxYOWhibAo3M2QrRzNPN293OUM2ejNMeGUvbFhaZG9WUG5YaVpGZzFTRW1WSTBHOGhRUjFzb1l2SzVKYnpObWI2RHhIb29FCjFrc1dxVno2RldRSnBmdzMzQUl2TE9JMStUSFNFUmFJbldlQzZrai9LMkkrQkNGSTNJb1NoUUE5T3VKbXF2dEEKSzVYbElIMUFNY05qaHRBNldVakpqM1NmTWVMUFNGZkxjK1NwV3d5VFQ2Z3JycWQzeU8weHgra0c4VnRYZFgyUwo1OXBHMjUrNWZ3T2xwZUlMS3pEcnFzUmYrVW0xQWdNQkFBR2pXVEJYTUE0R0ExVWREd0VCL3dRRUF3SUNwREFQCkJnTlZIUk1CQWY4RUJUQURBUUgvTUIwR0ExVWREZ1FXQkJTR3U2SlNObGpzTUdLUzFvcCtHNkFEK3FrcHVqQVYKQmdOVkhSRUVEakFNZ2dwcmRXSmxjbTVsZEdWek1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQkJrdExyM2FFTwpic0R6UEVkTDJoUlk3RTdjdHRYSEhGZGk2S2lrc1dmNStIY0FVSFFMdktwRlQ4WW5ER0lnTVVKbmNmVHVtc2x5Ckh6Z3IrelQvVVRxd09kVWhMYnVYVlRIWXRIVzdLeTBpLzRiZHZsd3hsWlQ2alhGZ1BYZE5aekp0M1Eya1RHWEQKaDNXNmVOOWdPZ3RBenAzUXRVcXdRaDZMQ3JZZGUxaDMxaUpRbVFpeUQ1SGJXMnJoS2NZcWtkbjJrdFQ0dW55aQowR2gvTyswQ1lMdjE1NlorcG1RMi8vNjRMVU42NnY4eWZ2SnJmQTZCOUxMNHRRdEFycmhaVVdLS09uQlJ1M2xEClhta3ZHellQN3l0WGxMNkUyWU9XOHQ4dXNpcy8ycG5RcXlkdUIzTk5LQlk4SEowWTBOU3VKeXFPWkVFWlJHVDMKMG5iMXRETWpLMmtjCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K"
   repositories:
     helm:
       name: chart-museum
@@ -55,7 +55,7 @@ controller:
   name: application-controller
   serviceAccount:
     annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::211125606152:role/example-default-argocd-management"
+      eks.amazonaws.com/role-arn: "arn:aws:iam::992382398009:role/example-default-argocd-management"
 
 dex:
   name: dex-server
@@ -67,13 +67,13 @@ server:
   name: server
   serviceAccount:
     annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::211125606152:role/example-default-argocd-management"
-  ingress:
-    enabled: true
-    hostname: argocd.example.info
-    path: /
-    pathType: Prefix
-    tls: true
+      eks.amazonaws.com/role-arn: "arn:aws:iam::992382398009:role/example-default-argocd-management"
+  # ingress:
+  #   enabled: true
+  #   hostname: argocd.example.info
+  #   path: /
+  #   pathType: Prefix
+  #   tls: true
 
 repoServer:
   name: repo-server
