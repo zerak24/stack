@@ -49,7 +49,7 @@ controller:
     ## this table:
     ## https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
     ##
-    # storageClass: "-"
+    storageClass: "gp3"
   # For deployment controller, an emptyDir can be enable in the pod for writing data
   # with the following option
   emptyDir: false

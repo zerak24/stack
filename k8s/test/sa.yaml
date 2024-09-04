@@ -17,7 +17,7 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: argocd-default-sa
-  namespace: tools
+  namespace: default
 roleRef:
   kind: ClusterRole
   name: cluster-admin
@@ -27,13 +27,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: argocd-default-sa
-  namespace: tools
+  namespace: default
 ---
 apiVersion: v1
 kind: Secret
 metadata:
   name: argocd-default-sa-token
-  namespace: tools
+  namespace: default
   annotations:
     kubernetes.io/service-account.name: argocd-default-sa
 type: kubernetes.io/service-account-token

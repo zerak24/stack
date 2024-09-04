@@ -20,5 +20,6 @@ spec:
       targetRevision: HEAD
       ref: values
   destination:
-    server: "https://kubernetes.default.svc"
+    # server: "https://kubernetes.default.svc"
+    name: example-default-eks
     namespace: default

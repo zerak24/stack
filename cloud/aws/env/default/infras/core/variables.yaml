@@ -87,7 +87,7 @@ inputs:
     access_entries:
       admin:
         kubernetes_groups: []
-        principal_arn: "arn:aws:iam::992382398009:user/cloud_user"
+        principal_arn: "arn:aws:iam::905418291613:user/cloud_user"
         user_name: "cloud_user"
 
     eks_managed_node_groups:
@@ -96,7 +96,7 @@ inputs:
         capacity_type: "ON_DEMAND"
         ami_type: "AL2023_ARM_64_STANDARD"
         min_size: 1
-        desired_size: 2
+        desired_size: 1
         max_size: 10
         zone: "us-east-1a"
         iam_role_additional_policies:
