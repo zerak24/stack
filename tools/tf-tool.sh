@@ -47,6 +47,7 @@ cluster_directory="${cloud_directory}/${cluster}"
 items_directory="${cluster_directory}/${part}"
 project_file="${cluster_directory}/project.yaml"
 additional_arguments=""
+all=""
 
 AWS_PROFILE=$(yq '.terraform.profile' ${project_file})
 export AWS_PROFILE=${AWS_PROFILE}
@@ -89,14 +90,9 @@ function check_flag() {
 ## Terraform Function
 
 function terraform_execute() {
-  if  [ "${action}" == "apply" ]
-  then
-    action="run-all"
-  fi
-  
   additional_arguments="${additional_arguments} --terragrunt-forward-tf-stdout"
 
-  action_command="terragrunt ${action} ${additional_arguments}"
+  action_command="terragrunt ${all} ${action} ${additional_arguments}"
 
   pushd "${items_directory}/${item}"
   eval $action_command
@@ -119,10 +115,8 @@ function check_automation() {
 function terraform_action() {
   if [ -z ${items} ]
   then
-    for item in $(ls ${items_directory})
-    do
-      terraform_execute
-    done
+    all="run-all"
+    terraform_execute
   else
     for item in $(echo ${items} | tr ',' ' ')
     do
