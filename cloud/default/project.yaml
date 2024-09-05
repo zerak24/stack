@@ -1,12 +1,6 @@
-# inputs:
-#   project:
-#     zone: us-east-1
-#     profile: learner
-#     key_directory: ../../../../key/key-pair
-#     company: example
-#     env: default
 project:
   env: default
+  key_directory: ../../../../key/key-pair
   company: example
 
 terraform_config:

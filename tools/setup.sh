@@ -35,7 +35,7 @@ function install_aws() {
 function install_terragrunt() {
   if [ $(which terragrunt | wc -l) -eq 0 ]
   then
-    curl "https://github.com/gruntwork-io/terragrunt/releases/download/v0.67.2/terragrunt_linux_amd64" -o "/tmp/terragrunt"
+    wget "https://github.com/gruntwork-io/terragrunt/releases/download/v0.67.2/terragrunt_linux_amd64" -O "/tmp/terragrunt"
     chmod +x /tmp/terragrunt
     sudo mv /tmp/terragrunt /usr/local/bin/terragrunt
     terragrunt --install-autocomplete

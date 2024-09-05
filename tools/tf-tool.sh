@@ -17,6 +17,10 @@ do
       ;;
     -a|--action)
       action=$2
+      if [ "${action}" == "debug" ]
+      then
+        action="validate-inputs"
+      fi
       shift 2
       ;;
     -c|--cluster)
@@ -46,10 +50,9 @@ cloud_directory="${root_cloud_directory}/cloud"
 cluster_directory="${cloud_directory}/${cluster}"
 items_directory="${cluster_directory}/${part}"
 project_file="${cluster_directory}/project.yaml"
-additional_arguments=""
-all=""
+additional_arguments="--terragrunt-parallelism 3 --terragrunt-forward-tf-stdout"
 
-AWS_PROFILE=$(yq '.terraform.profile' ${project_file})
+AWS_PROFILE=$(yq '.terraform_config.profile' ${project_file})
 export AWS_PROFILE=${AWS_PROFILE}
 
 ## Setup Function
@@ -90,13 +93,9 @@ function check_flag() {
 ## Terraform Function
 
 function terraform_execute() {
-  additional_arguments="${additional_arguments} --terragrunt-forward-tf-stdout"
+  action_command="terragrunt run-all ${action} ${additional_arguments}"
 
-  action_command="terragrunt ${all} ${action} ${additional_arguments}"
-
-  pushd "${items_directory}/${item}"
   eval $action_command
-  popd
 }
 
 function check_automation() {
@@ -108,20 +107,21 @@ function check_automation() {
     then
       exit
     fi
-    additional_arguments="${additional_arguments} -auto-approve"
+    additional_arguments="${additional_arguments} --terragrunt-non-interactive -auto-approve"
   fi
 }
 
 function terraform_action() {
   if [ -z ${items} ]
   then
-    all="run-all"
     terraform_execute
   else
+    additional_arguments="${additional_arguments} --terragrunt-strict-include"
     for item in $(echo ${items} | tr ',' ' ')
     do
-      terraform_execute
+      additional_arguments="${additional_arguments} --terragrunt-include-dir ${items_directory}/${item}"
     done
+    terraform_execute
   fi
 }
 
