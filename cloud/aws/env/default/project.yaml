@@ -1,7 +1,0 @@
-inputs:
-  project:
-    profile: learner
-    key_directory: ../../../../key/key-pair
-    company: example
-    env: default
-    oidc_issuer: https://git.example.info

@@ -32,13 +32,23 @@ function install_aws() {
   fi
 }
 
+function install_terragrunt() {
+  if [ $(which terragrunt | wc -l) -eq 0 ]
+  then
+    curl "https://github.com/gruntwork-io/terragrunt/releases/download/v0.67.2/terragrunt_linux_amd64" -o "/tmp/terragrunt"
+    chmod +x /tmp/terragrunt
+    sudo mv /tmp/terragrunt /usr/local/bin/terragrunt
+    terragrunt --install-autocomplete
+  fi
+}
+
 function install_yq() {
   if [ $(which yq | wc -l) -eq 0 ]
   then
     wget -O /tmp/yq_linux_amd64.tar.gz https://github.com/mikefarah/yq/releases/download/v4.44.1/yq_linux_amd64.tar.gz
     mkdir -p /tmp/yq_linux_amd64
     tar -xvzf /tmp/yq_linux_amd64.tar.gz -C /tmp/yq_linux_amd64
-    mv /tmp/yq_linux_amd64/yq_linux_amd64 /usr/local/bin/yq
+    sudo mv /tmp/yq_linux_amd64/yq_linux_amd64 /usr/local/bin/yq
     rm -rf /tmp/yq_linux_amd64 /tmp/yq_linux_amd64.tar.gz
   fi
 }
@@ -49,7 +59,7 @@ function install_helm3() {
     wget -O /tmp/helm-v3.15.1-linux-amd64.tar.gz https://get.helm.sh/helm-v3.15.1-linux-amd64.tar.gz
     mkdir -p /tmp/helm-v3
     tar -xvzf /tmp/helm-v3.15.1-linux-amd64.tar.gz -C /tmp/helm-v3
-    mv /tmp/helm-v3/linux-amd64/helm /usr/local/bin/helm
+    sudo mv /tmp/helm-v3/linux-amd64/helm /usr/local/bin/helm
     rm -rf /tmp/helm-v3 /tmp/helm-v3.15.1-linux-amd64.tar.gz
   fi
 
@@ -71,7 +81,8 @@ function install_kubectl() {
   then
     wget -O /tmp/kubectl "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
     chmod +x /tmp/kubectl
-    mv /tmp/kubectl /usr/local/bin/kubectl
+    sudo mv /tmp/kubectl /usr/local/bin/kubectl
   fi
 }
 
+install_terragrunt

@@ -10,3 +10,4 @@ id_rsa*
 *.tfvars.json
 key/key-pair/*
 **/credentials/*
+.terragrunt-cache*

@@ -7,42 +7,32 @@ do
   case "$1" in
     -h|--help)
       echo "
--a|--action              : action want to execute (plan, apply, destroy)
+-a|--action              : action want to execute (plan, apply, destroy, debug)
 -c|--cluster             : .yaml file want to execute with action flags
--i|--item                : item want to execute with action flags (apps, domains, infras)
--t|--targets  (optional) : list of targets want to execute with action flags if not define all targets will be chosen
--p|--provider            : directory of helm charts want to execute with action flags if use helm repository please define in .yaml file
-  |--profile  (optional) : use with provider is aws
+-p|--part                : part of cloud want to execute with action flags (apps, domains, infras)
+-i|--items    (optional) : list of items (separate with comma) want to execute with action flags if not define all items will be chosen
   |--ci       (optional) : auto yes every questions
 "
       exit 0
       ;;
     -a|--action)
-      ACTION=$2
+      action=$2
       shift 2
       ;;
     -c|--cluster)
-      CLUSTER=$2
+      cluster=$2
       shift 2
       ;;
-    -p|--provider)
-      PROVIDER=$2
+    -p|--part)
+      part=$2
       shift 2
       ;;
-    -i|--item)
-      ITEM=$2
-      shift 2
-      ;;
-    -t|--targets)
-      TARGETS=$2
-      shift 2
-      ;;
-    --profile)
-      AWS_PROFILE=$2
+    -i|--items)
+      items=$2
       shift 2
       ;;
     --ci)
-      AUTO="-auto-approve"
+      auto="-auto-approve"
       shift 1
       ;;
   esac
@@ -50,15 +40,15 @@ done
 
 ## Variables
 
+action_list="plan apply destroy debug"
 root_cloud_directory="."
-provider_directory="${root_cloud_directory}/cloud"
-cluster_directory="${provider_directory}/${PROVIDER}/env"
-modules_directory="${provider_directory}/${PROVIDER}/modules"
-item_directory="${cluster_directory}/${CLUSTER}"
-project_file="${item_directory}/project.yaml"
-if [ -z ${AWS_PROFILE} ]; then
-  AWS_PROFILE=$(yq '.inputs.project.profile' ${project_file})
-fi
+cloud_directory="${root_cloud_directory}/cloud"
+cluster_directory="${cloud_directory}/${cluster}"
+items_directory="${cluster_directory}/${part}"
+project_file="${cluster_directory}/project.yaml"
+additional_arguments=""
+
+AWS_PROFILE=$(yq '.terraform.profile' ${project_file})
 export AWS_PROFILE=${AWS_PROFILE}
 
 ## Setup Function
@@ -67,90 +57,76 @@ function setup() {
   source ${root_cloud_directory}/tools/setup.sh
   
   install_terraform
+  install_terragrunt
   install_yq
 }
 
 ## Check Syntax Function
 
 function check_flag() {
-  if [ "${ACTION}" != "plan" ] && [ "${ACTION}" != "apply" ] && [ "${ACTION}" != "destroy" ]
+  if [ $(echo ${action_list} | grep ${action} | wc -l) -eq 0 ]
   then
     echo "Wrong action"
     exit 1
   fi
 
-  if [ $(ls ${provider_directory} | grep -w ${PROVIDER} 2>/dev/null | wc -l) -eq 0 ]
-  then
-    echo "Wrong provider"
-    exit 1
-  fi
-
-  if [ $(ls ${cluster_directory} | grep -w ${CLUSTER} 2>/dev/null | wc -l) -eq 0 ]
+  if [ -z "${cluster}" ] || [ ! -d "${cluster_directory}" ]
   then
     echo "Cluster not existed"
     exit 1
   fi
 
-  if [ $(ls ${item_directory} | grep -w ${ITEM} 2>/dev/null | wc -l) -eq 0 ]
-  then
-    echo "Items not existed"
-    exit 1
-  fi
-
-  if [ -z ${TARGETS} ]
-  then
-    TARGETS="all"
-  fi
+  for item in $(echo ${items} | tr ',' ' ')
+  do
+    if [ ! -d "${items_directory}/${item}" ]
+    then
+      echo "Item ${item} not existed"
+      exit 1
+    fi
+  done
 }
 
 ## Terraform Function
 
-function terraform_target() {
-  path_prefix="../../../../"
-  path_target=${item_directory}/${ITEM}/${target}
-  var="${path_target}/variables.yaml"
-  json_var="${path_target}/variables.tfvars.json"
-  state="${path_target}/state/terraform.tfstate"
-  module="$(yq '.module' $var)"
-
-  if [ -z "$(yq '.inputs' $var)" ]; then
-    exit 0
+function terraform_execute() {
+  if  [ "${action}" == "apply" ]
+  then
+    action="run-all"
   fi
+  
+  additional_arguments="${additional_arguments} --terragrunt-forward-tf-stdout"
 
-  yq eval-all '. as $item ireduce ({}; . * $item) | .inputs' ${var} ${project_file} -o json > $json_var
+  action_command="terragrunt ${action} ${additional_arguments}"
 
-  init_command="terraform -chdir=${modules_directory}/${module} init"
-  action_command="terraform -chdir=${modules_directory}/${module} ${ACTION} -state=${path_prefix}${state} ${AUTO} -var-file=${path_prefix}${json_var}"
-  eval $init_command
+  pushd "${items_directory}/${item}"
   eval $action_command
-
-  rm -f $json_var
+  popd
 }
 
 function check_automation() {
-  if [ "${ACTION}" == "apply" ] || [ "${ACTION}" == "destroy" ] && [ -z ${AUTO} ]
+  if [ "${action}" == "apply" ] || [ "${action}" == "destroy" ] && [ -z ${auto} ]
   then
-    echo -n "This is ${ACTION} action. Are you sure that you wanna do this ? [y/N]: "
+    echo -n "This is ${action} action. Are you sure that you wanna do this ? [y/N]: "
     read -r ans
     if [ "${ans}" != "y" ] && [ "${ans}" != "yes" ]
     then
       exit
     fi
-    AUTO="-auto-approve"
+    additional_arguments="${additional_arguments} -auto-approve"
   fi
 }
 
 function terraform_action() {
-  if [ "${TARGETS}" == "all" ]
+  if [ -z ${items} ]
   then
-    for target in $(ls ${item_directory}/${ITEM})
+    for item in $(ls ${items_directory})
     do
-      terraform_target
+      terraform_execute
     done
   else
-    for target in $(echo ${TARGETS} | tr ',' ' ')
+    for item in $(echo ${items} | tr ',' ' ')
     do
-      terraform_target
+      terraform_execute
     done
   fi
 }

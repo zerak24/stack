@@ -1,3 +1,10 @@
+terraform:
+  default:
+    profile: learner
+    key_directory: ../../../../key/key-pair
+    company: example
+    env: default
+    oidc_issuer: https://git.example.info
 helm_repo:
   url: https://charts.example.info
   username: zerak24
@@ -5,3 +12,5 @@ helm_repo:
   name: zerak
 gitlab:
   url: https://git.example.info
+vault:
+  url: https://vault.example.info

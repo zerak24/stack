@@ -1,0 +1,16 @@
+# inputs:
+#   project:
+#     zone: us-east-1
+#     profile: learner
+#     key_directory: ../../../../key/key-pair
+#     company: example
+#     env: default
+project:
+  env: default
+  company: example
+
+terraform_config:
+  profile: learner
+  zone: us-east-1
+  bucket: example-default-terraform-state
+  dynamodb_table: default-terraform-lock-table
