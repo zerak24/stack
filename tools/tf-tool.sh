@@ -1,6 +1,6 @@
 #! /bin/bash
 
-## Tool's Flag
+## tool's flag
 
 while (( "$#" ))
 do
@@ -42,22 +42,10 @@ do
   esac
 done
 
-## Variables
+## terraform function
 
-action_list="plan apply destroy debug"
-root_cloud_directory="."
-cloud_directory="${root_cloud_directory}/cloud"
-cluster_directory="${cloud_directory}/${cluster}"
-items_directory="${cluster_directory}/${part}"
-project_file="${cluster_directory}/project.yaml"
-additional_arguments="--terragrunt-parallelism 3 --terragrunt-forward-tf-stdout"
-
-AWS_PROFILE=$(yq '.terraform_config.profile' ${project_file})
-export AWS_PROFILE=${AWS_PROFILE}
-
-## Setup Function
-
-function setup() {
+# setup
+function terraform_setup() {
   source ${root_cloud_directory}/tools/setup.sh
   
   install_terraform
@@ -65,9 +53,8 @@ function setup() {
   install_yq
 }
 
-## Check Syntax Function
-
-function check_flag() {
+# check syntax
+function terraform_check_flag() {
   if [ $(echo ${action_list} | grep ${action} | wc -l) -eq 0 ]
   then
     echo "Wrong action"
@@ -90,15 +77,15 @@ function check_flag() {
   done
 }
 
-## Terraform Function
-
+# execute command
 function terraform_execute() {
   action_command="terragrunt run-all ${action} ${additional_arguments}"
 
   eval $action_command
 }
 
-function check_automation() {
+# check automation
+function terraform_check_automation() {
   if [ "${action}" == "apply" ] || [ "${action}" == "destroy" ] && [ -z ${auto} ]
   then
     echo -n "This is ${action} action. Are you sure that you wanna do this ? [y/N]: "
@@ -111,6 +98,7 @@ function check_automation() {
   fi
 }
 
+# execute logic
 function terraform_action() {
   if [ -z ${items} ]
   then
@@ -125,9 +113,28 @@ function terraform_action() {
   fi
 }
 
-## Main Function
+## main function
 
-setup
-check_flag
-check_automation
-terraform_action
+function terraform_main() {
+  # variables
+
+  action_list="plan apply destroy debug"
+  root_cloud_directory="."
+  cloud_directory="${root_cloud_directory}/cloud"
+  cluster_directory="${cloud_directory}/${cluster}"
+  items_directory="${cluster_directory}/${part}"
+  project_file="${cluster_directory}/project.yaml"
+  additional_arguments="--terragrunt-parallelism 3 --terragrunt-forward-tf-stdout"
+
+  AWS_PROFILE=$(yq '.terraform_config.profile' ${project_file})
+  export AWS_PROFILE=${AWS_PROFILE}
+
+  # function
+
+  terraform_setup
+  terraform_check_flag
+  terraform_check_automation
+  terraform_action
+}
+
+terraform_main
