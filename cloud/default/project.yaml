@@ -1,10 +1,10 @@
 project:
   env: default
-  key_directory: ../../../../key/key-pair
+  key_directory: ../../../../../../../../../key/key-pair
   company: example
 
 terraform_config:
   profile: learner
   zone: us-east-1
-  bucket: example-default-terraform-state
+  bucket: example-default-terraform-state-test
   dynamodb_table: default-terraform-lock-table

@@ -1,5 +1,19 @@
-module: vault
-inputs:
-  vault:
-    repositories: []
-    users: []
+
+vault:
+  auth_method:
+    oidc:
+      oidc_discovery_url: "https://git.example.info"
+      oidc_client_id: "123456"
+      oidc_client_secret: "abcdef"
+      bound_issuer: "https://git.example.info"
+  repositories:
+    default:
+      type: kv-v2
+      description: "Default cluster secrets"
+  users:
+    duylk:
+      policies: ["admin"]
+  policies:
+    admin:
+      - path: "*"
+        capabilities: ["list", "create", "update", "patch", "read", "delete"]

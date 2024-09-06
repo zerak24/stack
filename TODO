@@ -3,3 +3,6 @@ enhance tf-tools
 merge all tools
 add eks role annotation to app helm
 remote backend terraform + terragrunt
+
+http://54.147.131.200/oidc/callback
+http://54.147.131.200/ui/vault/auth/oidc/oidc/callback

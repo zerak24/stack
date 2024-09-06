@@ -17,10 +17,6 @@ do
       ;;
     -a|--action)
       action=$2
-      if [ "${action}" == "debug" ]
-      then
-        action="validate-inputs"
-      fi
       shift 2
       ;;
     -c|--cluster)
@@ -54,11 +50,16 @@ function terraform_setup() {
 }
 
 # check syntax
-function terraform_check_flag() {
+function terraform_check_and_convert_flag() {
   if [ $(echo ${action_list} | grep ${action} | wc -l) -eq 0 ]
   then
     echo "Wrong action"
     exit 1
+  fi
+
+  if [ "${action}" == "debug" ]
+  then
+    action="validate-inputs"
   fi
 
   if [ -z "${cluster}" ] || [ ! -d "${cluster_directory}" ]
@@ -132,7 +133,7 @@ function terraform_main() {
   # function
 
   terraform_setup
-  terraform_check_flag
+  terraform_check_and_convert_flag
   terraform_check_automation
   terraform_action
 }
