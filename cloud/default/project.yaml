@@ -6,5 +6,5 @@ project:
 terraform_config:
   profile: learner
   zone: us-east-1
-  bucket: example-default-terraform-state-test
+  bucket: example-default-terraform-state
   dynamodb_table: default-terraform-lock-table
