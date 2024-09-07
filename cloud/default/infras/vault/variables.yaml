@@ -1,9 +1,13 @@
 
 vault:
+  url: "https://vault.example.info"
   auth_method:
     oidc:
       oidc_discovery_url: "https://git.example.info"
       oidc_client_id: "123456"
+      default_role:
+        name: gitlab_oidc
+        policies: ["gitlab_oidc"]
       oidc_client_secret: "abcdef"
       bound_issuer: "https://git.example.info"
   repositories:
@@ -14,6 +18,9 @@ vault:
     duylk:
       policies: ["admin"]
   policies:
+    gitlab_oidc:
+      - path: "default/*"
+        capabilities: ["list", "read"]
     admin:
       - path: "*"
         capabilities: ["list", "create", "update", "patch", "read", "delete"]
