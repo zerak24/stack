@@ -1,26 +1,29 @@
 
 vault:
-  url: "https://vault.example.info"
+  url: "https://vault.dumblearner.click"
   auth_method:
     oidc:
-      oidc_discovery_url: "https://git.example.info"
-      oidc_client_id: "123456"
+      oidc_discovery_url: "https://git.dumblearner.click"
+      oidc_client_id: "bb78693db38acb7a0c57dbdd4f6f14575c1790bcade070016e35ad23037442dc"
+      oidc_client_secret: "gloas-dd8f4829b55be6853d777c94aad482af6c522b23b546503b4851f924177c2b82"
+      bound_issuer: "https://git.dumblearner.click"
       default_role:
         name: gitlab_oidc
         policies: ["gitlab_oidc"]
-      oidc_client_secret: "abcdef"
-      bound_issuer: "https://git.example.info"
   repositories:
     default:
       type: kv-v2
       description: "Default cluster secrets"
+    test:
+      type: kv-v2
+      description: "Test secrets"
   users:
-    duylk:
+    root:
       policies: ["admin"]
   policies:
     gitlab_oidc:
       - path: "default/*"
-        capabilities: ["list", "read"]
+        capabilities: ["list", "create", "update", "patch", "read", "delete"]
     admin:
       - path: "*"
         capabilities: ["list", "create", "update", "patch", "read", "delete"]

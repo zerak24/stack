@@ -1,14 +1,14 @@
 route53:
   dumblearner.click:
-    - sub_domain: vault
+    - name: vault
       type: A
       ttl: 5
       records: 
-        - <vault-ip>
-    # - sub_domains: git
-    #   type: A
-    #   ttl: 5
-    #   records: 
-    #     - <gitlab-ip>
+        - 44.206.83.172
+    - name: git
+      type: A
+      ttl: 5
+      records: 
+        - 3.211.136.247
 
 # cloudflare:

@@ -95,7 +95,7 @@ function terraform_check_automation() {
     then
       exit
     fi
-    additional_arguments="${additional_arguments} --terragrunt-non-interactive -auto-approve"
+    additional_arguments="${additional_arguments} -auto-approve"
   fi
 }
 
@@ -125,7 +125,7 @@ function terraform_main() {
   cluster_directory="${cloud_directory}/${cluster}"
   items_directory="${cluster_directory}/${part}"
   project_file="${cluster_directory}/project.yaml"
-  additional_arguments="--terragrunt-parallelism 3 --terragrunt-forward-tf-stdout"
+  additional_arguments="--terragrunt-parallelism 3 --terragrunt-forward-tf-stdout --terragrunt-non-interactive"
 
   AWS_PROFILE=$(yq '.terraform_config.profile' ${project_file})
   export AWS_PROFILE=${AWS_PROFILE}

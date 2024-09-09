@@ -11,16 +11,16 @@ vpc:
   single_nat_gateway: true
 
 ec2: 
-  # gitlab:
-  #   instance_type: t3a.medium
-  #   ami: ami-0103953a003440c37
-  #   init_script: script/gitlab-setup.sh
-  #   create_key: true
-  #   zone: "us-east-1b"
-  #   vpc_security_group_ids: ["ssh-access", "http-access"]
-  #   root_block_device:
-  #     - volume_size: 20
-  #       delete_on_termination: false
+  gitlab:
+    instance_type: t3a.medium
+    ami: ami-0103953a003440c37
+    init_script: script/gitlab-setup.sh
+    create_key: true
+    zone: "us-east-1b"
+    vpc_security_group_ids: ["ssh-access", "http-access"]
+    root_block_device:
+      - volume_size: 20
+        delete_on_termination: false
   vault:
     instance_type: t4g.small
     ami: ami-0e879a1b306fffb22
