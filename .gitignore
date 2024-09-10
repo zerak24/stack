@@ -3,11 +3,10 @@
 *.tfstate
 *.tfstate.backup
 *.terraform.lock.hcl
-# *.crt
 # auth.json
 *.tgz
 id_rsa*
 *.tfvars.json
 key/key-pair/*
-**/credentials/*
 .terragrunt-cache*
+auth.yaml

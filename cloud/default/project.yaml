@@ -1,6 +1,7 @@
 project:
   env: default
   key_directory: ../../../../../../../../../key/key-pair
+  auth_directory: ../../../../../../../../../key/auth
   company: example
 
 terraform_config:

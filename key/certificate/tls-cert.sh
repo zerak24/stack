@@ -1,1 +1,0 @@
-kubectl create secret tls ingress-selfsigned-tls --cert=example.info.crt --key=example.info.key

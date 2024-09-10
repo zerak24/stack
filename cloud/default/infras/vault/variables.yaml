@@ -1,6 +1,5 @@
 
 vault:
-  url: "https://vault.dumblearner.click"
   auth_method:
     oidc:
       oidc_discovery_url: "https://git.dumblearner.click"
