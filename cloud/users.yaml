@@ -7,4 +7,6 @@ users:
       is_admin: true
       namespace: devops
       state: active
+    vault:
+      policies: ["admin"]
      

@@ -16,9 +16,6 @@ vault:
     test:
       type: kv-v2
       description: "Test secrets"
-  users:
-    root:
-      policies: ["admin"]
   policies:
     gitlab_oidc:
       - path: "default/*"
