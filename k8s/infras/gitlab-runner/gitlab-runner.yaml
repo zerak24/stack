@@ -4,6 +4,7 @@ runnerToken: "glrt-yF3AL_5Yis6S4bSCuZEi"
 concurrent: 5
 checkInterval: 1
 runners:
+  tags: "saladin-build-runner"
   config: |
     [[runners]]
       [runners.kubernetes]

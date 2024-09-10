@@ -1,0 +1,10 @@
+users:
+  duylk:
+    email: duylk@dumblearner.click
+    pritunl:
+      groups: ["sre"]
+    gitlab:
+      admin: true
+      namespace: devops
+      state: active
+     

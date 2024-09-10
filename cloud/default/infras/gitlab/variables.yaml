@@ -1,0 +1,9 @@
+gitlab:
+  email_suffix: "@dumblearner.click"
+  applications:
+    vault:
+      scopes: ["openid", "email", "profile"]
+  namespaces:
+    - devops
+    - backend
+    - frontend

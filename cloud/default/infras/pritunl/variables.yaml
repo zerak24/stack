@@ -1,0 +1,14 @@
+pritunl:
+  servers:
+    gitlab_access:
+      network: 192.168.250.0/24
+      groups: ["sre", "backend"]
+      port: 1194
+      protocol: tcp
+      routes:
+        gitlab:
+          network: <ip>
+          comment: gitlab
+        vault:
+          network: <ip>
+          comment: vault
