@@ -1,20 +1,18 @@
-module: rolev2
-inputs:
-  role:
-    name: "argocd-manager"
-    attach_custom_policy: true
-    trust_policy_conditions:
-      - test: "StringEquals"
-        variable: "oidc.eks.us-east-1.amazonaws.com/id/AA31B624E9807B9187ACFBE11E4A3106:sub"
-        values: ["system:serviceaccount:tools:argocd-application-controller", "system:serviceaccount:tools:argocd-server"]
-      - test: "StringEquals"
-        variable: "oidc.eks.us-east-1.amazonaws.com/id/AA31B624E9807B9187ACFBE11E4A3106:aud"
-        values: ["sts.amazonaws.com"]
-    trust_policy_statements:
-      - actions: ["sts:AssumeRoleWithWebIdentity"]
-        resources: ["*"]
-    policy_statements:
-      - actions: [""]
-        resources: [""]
-    # additional_policy_arns:
-    #   AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+role:
+  name: "argocd-manager"
+  attach_custom_policy: true
+  trust_policy_conditions:
+    - test: "StringEquals"
+      variable: "oidc.eks.us-east-1.amazonaws.com/id/AA31B624E9807B9187ACFBE11E4A3106:sub"
+      values: ["system:serviceaccount:tools:argocd-application-controller", "system:serviceaccount:tools:argocd-server"]
+    - test: "StringEquals"
+      variable: "oidc.eks.us-east-1.amazonaws.com/id/AA31B624E9807B9187ACFBE11E4A3106:aud"
+      values: ["sts.amazonaws.com"]
+  trust_policy_statements:
+    - actions: ["sts:AssumeRoleWithWebIdentity"]
+      resources: ["*"]
+  policy_statements:
+    - actions: [""]
+      resources: [""]
+  # additional_policy_arns:
+  #   AmazonEKS_CNI_Policy: "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
