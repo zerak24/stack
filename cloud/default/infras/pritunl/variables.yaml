@@ -8,7 +8,5 @@ pritunl:
       routes:
         gitlab:
           network: <ip>
-          comment: gitlab
         vault:
           network: <ip>
-          comment: vault
