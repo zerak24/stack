@@ -1,14 +1,18 @@
 route53:
   dumblearner.click:
+    certificate:
+      subject_alternative_names:
+        - "*.dumblearner.click"
+    records:
     - name: vault
       type: A
       ttl: 5
       records: 
-        - 44.206.83.172
+        - 3.232.185.96
     - name: git
       type: A
       ttl: 5
       records: 
-        - 3.211.136.247
+        - 44.217.193.68
 
 # cloudflare:

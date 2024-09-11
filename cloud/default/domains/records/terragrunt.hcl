@@ -11,4 +11,6 @@ locals {
   project_cfg = yamldecode(file(find_in_parent_folders("project.yaml")))
 }
 
-inputs = merge(local.vars, local.project_cfg)
+inputs = merge(local.vars, {
+  project = local.project_cfg.project
+})

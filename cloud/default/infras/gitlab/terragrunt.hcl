@@ -10,7 +10,11 @@ locals {
   vars        = yamldecode(file("variables.yaml"))
   project_cfg = yamldecode(file(find_in_parent_folders("project.yaml")))
   users_cfg   = yamldecode(file(find_in_parent_folders("users.yaml")))
-  auth_cfg    = yamldecode(file("${local.project_cfg.project.auth_directory}/auth.yaml"))
+  auth_cfg    = yamldecode(file(abspath("${local.project_cfg.project.auth_file}")))
 }
 
-inputs = merge(local.vars, local.project_cfg, local.users_cfg)
+inputs = merge(local.vars, local.users_cfg, {
+  project = local.project_cfg.project
+}, {
+  gitlab_auth = local.auth_cfg.gitlab_auth
+})
