@@ -1,0 +1,17 @@
+cloudfront:
+  aliases:
+  - "s3web.dumblearner.click"         
+  default_cache_behavior:
+    target_origin_id: "s3_one"
+    viewer_protocol_policy: "redirect-to-https"
+    allowed_methods: ["GET", "HEAD", "OPTIONS"]
+    cached_methods: ["HEAD", "GET"]
+    compress: true
+    query_string: true
+    response_headers_policy_id: "67f7725c-6f97-4210-82d7-5512b31e9d03"
+  viewer_certificate:
+    acm_certificate: "*.dumblearner.click"                
+    ssl_support_method: "sni-only"
+    minimum_protocol_version: "TLSv1.2_2018"
+s3:
+  name: s3web.dumblearner.click
