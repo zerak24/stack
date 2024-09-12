@@ -1,0 +1,13 @@
+project:
+  env: default
+  key_directory: ../../../../../../../../key/key-pair
+  auth_file: key/auth/auth.yaml
+  company: example
+
+# terraform_config:
+#   profile: learner
+#   zone: us-east-1
+#   bucket: example-default-terraform-state
+#   dynamodb_table: default-terraform-lock-table
+
+## TODO
