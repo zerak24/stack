@@ -16,7 +16,7 @@ do
   esac
 done
 
-PROJECT_CONFIG="./cloud/${PROVIDER}/env/${CLUSTER}/project.yaml"
+PROJECT_CONFIG="./cloud/${CLUSTER}/project.yaml"
 if [ "${PROVIDER}" == "gcp" ]; then
   gcloud container clusters get-credentials ${CLUSTER} --location=$(yq '.inputs.project.region' ${PROJECT_CONFIG})
 elif [ "${PROVIDER}" == "aws" ]; then

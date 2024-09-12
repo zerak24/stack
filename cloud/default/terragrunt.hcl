@@ -14,6 +14,7 @@ remote_state {
   }
   config           = {
     bucket         = local.bucket
+    profile        = local.profile
     key            = "${path_relative_to_include()}/terraform.tfstate"
     region         = local.zone
     encrypt        = true

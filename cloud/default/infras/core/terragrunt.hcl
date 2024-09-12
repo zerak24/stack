@@ -3,7 +3,7 @@ include "root" {
 }
 
 terraform {
-  source = "git@github.com:zerak24/terraform_modules.git//aws/core"
+  source = "git@github.com:zerak24/terraform_aws_modules.git//core"
 }
 
 locals {

@@ -127,9 +127,6 @@ function terraform_main() {
   project_file="${cluster_directory}/project.yaml"
   additional_arguments="--terragrunt-parallelism 3 --terragrunt-forward-tf-stdout --terragrunt-non-interactive"
 
-  AWS_PROFILE=$(yq '.terraform_config.profile' ${project_file})
-  export AWS_PROFILE=${AWS_PROFILE}
-
   # function
 
   terraform_setup
