@@ -11,28 +11,50 @@ vpc:
   single_nat_gateway: true
 
 ec2: 
-  gitlab:
+  # gitlab:
+  #   instance_type: t3a.medium
+  #   ami: ami-0103953a003440c37
+  #   init_script: script/gitlab-setup.sh
+  #   create_key: true
+  #   zone: "us-east-1b"
+  #   vpc_security_group_ids: ["ssh-access", "https-access"]
+  #   root_block_device:
+  #     - volume_size: 20
+  #       delete_on_termination: false
+  # vault:
+  #   instance_type: t4g.small
+  #   ami: ami-0e879a1b306fffb22
+  #   init_script: script/vault-setup.sh
+  #   create_key: true
+  #   zone: "us-east-1b"
+  #   vpc_security_group_ids: ["ssh-access", "https-access"]
+  #   root_block_device:
+  #     - volume_size: 20
+  #       delete_on_termination: false
+  pritunl:
     instance_type: t3a.medium
     ami: ami-0103953a003440c37
-    init_script: script/gitlab-setup.sh
     create_key: true
     zone: "us-east-1b"
-    vpc_security_group_ids: ["ssh-access", "http-access"]
+    vpc_security_group_ids: ["ssh-access", "https-access", "pritunl-setup"]
     root_block_device:
-      - volume_size: 20
-        delete_on_termination: false
-  vault:
-    instance_type: t4g.small
-    ami: ami-0e879a1b306fffb22
-    init_script: script/vault-setup.sh
-    create_key: true
-    zone: "us-east-1b"
-    vpc_security_group_ids: ["ssh-access", "http-access"]
-    root_block_device:
-      - volume_size: 20
+      - volume_size: 10
         delete_on_termination: false
 
 sg:
+  pritunl-setup:
+    description: "Pritunl setup"
+    ingress_with_cidr_blocks:
+      - from_port  : 1194
+        to_port    : 1194
+        protocol   : "tcp"
+        description: "Pritunl setup"
+        cidr_blocks: "0.0.0.0/0"
+      - from_port  : 16000
+        to_port    : 17000
+        protocol   : "udp"
+        description: "Pritunl setup"
+        cidr_blocks: "0.0.0.0/0"
   ssh-access:
     description: "Allow SSH access"
     ingress_with_cidr_blocks:
@@ -41,7 +63,7 @@ sg:
         protocol   : "tcp"
         description: "SSH access from anywhere"
         cidr_blocks: "0.0.0.0/0"
-  http-access:
+  https-access:
     description: "Allow HTTP/HTTPS access"
     ingress_with_cidr_blocks:
       - from_port  : 80

@@ -8,11 +8,16 @@ route53:
       type: A
       ttl: 5
       records: 
-        - 3.232.185.96
+        - 52.203.206.202
     - name: git
       type: A
       ttl: 5
       records: 
-        - 44.217.193.68
+        - 34.206.211.14
+    - name: vpn
+      type: A
+      ttl: 5
+      records: 
+        - 44.214.83.234
 
 # cloudflare:
