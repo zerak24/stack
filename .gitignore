@@ -9,4 +9,4 @@ id_rsa*
 *.tfvars.json
 key/key-pair/*
 .terragrunt-cache*
-auth.yaml
+# auth.yaml

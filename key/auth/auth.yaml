@@ -1,0 +1,18 @@
+gitlab_auth:
+  url: https://git.dumblearner.click
+  token: <token>
+
+pritunl_auth:
+  url: "https://vpn.dumblearner.click"
+  token: <token>
+  secret: <secret>
+
+vault_auth:
+  url: "https://vault.dumblearner.click"
+  token: <token>
+
+helm_auth:
+  url: https://charts.dumblearner.click
+  username: <user>
+  password: <pass>
+  name: <repo name>

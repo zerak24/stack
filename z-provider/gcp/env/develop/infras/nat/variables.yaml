@@ -1,8 +1,0 @@
-inputs:
-  nat:
-    - name: zone-1
-      subnets:
-        - name: zone-1
-          source_ip_ranges_to_nat: ["10.10.0.0/16"]
-          secondary_ip_range_names: ["zone-1-pods", "zone-1-services"]
-      create_router: true
