@@ -19,17 +19,6 @@ remote_state {
   }
 }
 
-// generate "provider" {
-//   path      = "provider.tf"
-//   if_exists = "overwrite_terragrunt"
-//   contents  = <<EOF
-// provider "google" {
-//   region  = "${local.zone}"
-//   project = "${local.project}"
-// }
-// EOF
-// }
-
 terraform {
   extra_arguments "common_vars" {
     commands = [
