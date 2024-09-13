@@ -1,18 +1,15 @@
 vpc:
-  network_name: develop-main
   subnets:
     - subnet_name: zone-1
       subnet_ip: 10.10.0.0/16
+      nat_enabled: true
+      secondary_ranges:
+        - range_name: zone-1-pods
+          ip_cidr_range: 10.11.0.0/16
+        - range_name: zone-1-services
+          ip_cidr_range: 10.12.0.0/16
     - subnet_name: zone-2
       subnet_ip: 10.20.0.0/16
-  secondary_ranges:
-    zone-1:
-      - range_name: zone-1-pods
-        ip_cidr_range: 10.11.0.0/16
-      - range_name: zone-1-services
-        ip_cidr_range: 10.12.0.0/16
-  routes: []
-  egress_rules: []
   ingress_rules:
     - name: allow-ssh
       target_tags: 
@@ -24,15 +21,6 @@ vpc:
         - protocol: tcp
           ports: ["22"]
     - name: allow-http
-      target_tags: 
-        - gitlab-ce-allow
-        - vault-ce-allow
-      source_ranges:
-        - 0.0.0.0/0
-      allow:
-        - protocol: tcp
-          ports: ["80"]
-    - name: allow-https
       target_tags:
         - gitlab-ce-allow
         - vault-ce-allow
@@ -40,27 +28,19 @@ vpc:
         - 0.0.0.0/0
       allow:
         - protocol: tcp
-          ports: ["443"]
+          ports: ["443", "80"]
 
-nat:
-  - name: zone-1
-    subnets:
-      - name: zone-1
-        source_ip_ranges_to_nat: ["10.10.0.0/16"]
-        secondary_ip_range_names: ["zone-1-pods", "zone-1-services"]
-    create_router: true
-
-gke:
-  zones: ["us-east5-a", "us-east5-b", "us-east5-c"]
-  subnet: zone-1
-  pod_cidr: zone-1-pods
-  svc_cidr: zone-1-services
-  node_pools:
-    - pool_name: zone-a
-      machine_type: e2-micro
-      min_nodes: 1
-      max_nodes: 2
-      spot_plan: true
+# gke:
+#   zones: ["us-east5-a", "us-east5-b", "us-east5-c"]
+#   subnet: zone-1
+#   pod_cidr: zone-1-pods
+#   svc_cidr: zone-1-services
+#   node_pools:
+#     - pool_name: zone-a
+#       machine_type: e2-micro
+#       min_nodes: 1
+#       max_nodes: 2
+#       spot_plan: true
     # - pool_name: zone-b
     #   machine_type: e2-micro
     #   min_nodes: 1
@@ -73,37 +53,31 @@ gke:
     #   spot_plan: true
 
 db:
-  postgresql:
-    - name: postgres
-      database_version: POSTGRES_15
-      tier: db-f1-micro
-      zone: b
-      availability_type: REGIONAL
-      deletion_protection_enabled: false
-      disk_size: 10
-      disk_type: "PD_SSD"
-      disk_autoresize: true
-      disk_autoresize_limit: 0
-      database_flags: []
-      read_replica_name_suffix: ""
-      read_replicas: []
+  postgres:
+    type: postgresql
+    database_version: POSTGRES_15
+    tier: db-f1-micro
+    # zone: us-east5-b
+    # availability_type: REGIONAL
+    deletion_protection_enabled: false
+    disk_size: 10
+    disk_type: "PD_SSD"
 
 ce:
-  template:
+  gitab:
     subnetwork_name: zone-1
-    disk_size_gb: 30
+    disk_size_gb: 10
     disk_type: pd-standard
     machine_type: e2-medium
-    name_prefix: gitlab
+    # name_prefix: gitlab
     tags:
       - gitlab-ce-allow
 
-ce:
-  template:
+  vault:
     subnetwork_name: zone-2
-    disk_size_gb: 30
+    disk_size_gb: 10
     disk_type: pd-standard
     machine_type: e2-small
-    name_prefix: vault
+    # name_prefix: vault
     tags:
       - vault-ce-allow

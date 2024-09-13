@@ -1,0 +1,9 @@
+inputs:
+  app:
+    identity:
+      name: "default"
+      namespace: "default"
+      roles: []
+    pubsub: 
+      - topic: default-message
+        storage_name: pubsub-subscription

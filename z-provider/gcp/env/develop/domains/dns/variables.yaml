@@ -1,0 +1,10 @@
+inputs:
+  dns:
+    name: tonghia-com
+    domain: tonghia.com.
+    recordsets:
+      - name: git
+        type: A
+        ttl: 5
+        records:
+          - 34.1.18.199
