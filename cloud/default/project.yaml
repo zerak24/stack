@@ -1,8 +1,8 @@
 project:
+  company: example
   env: default
   key_directory: ../../../../../../../../key/key-pair
   auth_file: key/auth/auth.yaml
-  company: example
 
 terraform_config:
   profile: learner
