@@ -11,7 +11,7 @@ metadata:
     konghq.com/protocols: "http,https"
     konghq.com/plugins: {{ include "app.kongpluginingress" $ }}
     configuration.konghq.com: {{ include "app.fullname" $ }}-kong-ingress-configuration-http-{{ $element.name }}
-    kubernetes.io/ingress.class: {{ default $.Values.kongIngress.class $element.kongClass }}
+    # kubernetes.io/ingress.class: {{ default $.Values.kongIngress.class $element.kongClass }}
   name: {{ include "app.fullname" $ }}-kong-ingress-http-{{ $element.name }}
   namespace: {{ $.Values.general.namespace }}
   labels:
@@ -20,6 +20,7 @@ spec:
 #   tls:
 #   - hosts:
 # {{ toYaml $.Values.kongIngressConfig.domains | indent 4 }}
+  ingressClassName: {{ default $.Values.kongIngress.class $element.kongClass }}
   rules:
   {{- range $.Values.kongIngressConfig.domains }}
   - host: {{ . }}

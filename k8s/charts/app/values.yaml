@@ -1,11 +1,8 @@
-chart:
-  version: v1
-  repository: app-chart
 general:
   namespace: default
 
 image:
-  repo: something
+  # repository: something
   image: apptest
   tag: v1
   pullPolicy: IfNotPresent
@@ -17,6 +14,20 @@ cronjobs:
     - date
 
 replicaCount: 1
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# startCommand:
+#   command:
+#     - sh
+#     - -c
+#   args:
+#     - bash
 
 nameOverride: ""
 fullnameOverride: ""
@@ -58,7 +69,7 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 2
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
 
 no_healthcheck: true
 
