@@ -1,0 +1,11 @@
+cdn:
+  name: web-bucket
+  enabled_ipv6: true
+  log_enable: true
+bucket:
+  name: web-bucket
+  cors:
+    origin: "*"
+    method: "*"
+    response_header: "*"
+    max_age_seconds: 86400
