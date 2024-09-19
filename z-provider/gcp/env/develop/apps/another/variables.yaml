@@ -1,9 +1,0 @@
-inputs:
-  app:
-    identity:
-      name: "another"
-      namespace: "default"
-      roles: []
-    pubsub: 
-      - topic: another-message
-        storage_name: pubsub-subscription

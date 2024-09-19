@@ -1,8 +1,0 @@
-inputs:
-  bucket:
-    - name: pubsub-subscription
-      iam_members: []
-      lifecycle_rules: []
-      cors: []
-      storage_class: STANDARD
-      versioning: false
