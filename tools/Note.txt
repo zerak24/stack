@@ -1,4 +1,4 @@
-# gcloud auth application-default login --disable-quota-project --no-launch-browser
 # gcloud auth activate-service-account --key-file auth.json
+# gcloud auth application-default login --disable-quota-project --no-launch-browser
 
 # REMOVE --insecure|--insecure-skip-tls-verify in command for k8s-infras.sh

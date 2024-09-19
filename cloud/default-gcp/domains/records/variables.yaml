@@ -1,0 +1,3 @@
+cloud_dns:
+  dumblearner.click:
+    recordsets: []

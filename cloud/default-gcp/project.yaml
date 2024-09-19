@@ -6,5 +6,5 @@ project:
 
 terraform_config:
   zone: us-east5
-  project: playground-s-11-1f9cef85
-  bucket: example-default-terraform-state-1
+  project: playground-s-11-90db4e78
+  bucket: example-default-terraform-state-something-happen

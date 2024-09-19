@@ -5,7 +5,7 @@ cdn:
 bucket:
   name: web-bucket
   cors:
-    origin: "*"
-    method: "*"
-    response_header: "*"
-    max_age_seconds: 86400
+    - origin: ["*"]
+      method: ["*"]
+      response_header: ["*"]
+      max_age_seconds: 86400
