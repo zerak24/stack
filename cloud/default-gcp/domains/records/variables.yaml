@@ -3,4 +3,5 @@ cloud_dns:
     recordsets:
       - name: web.dumblearner.click
         type: A
+        ttl: 300
         records: []
