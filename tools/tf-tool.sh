@@ -60,6 +60,8 @@ function terraform_check_and_convert_flag() {
   if [ "${action}" == "debug" ]
   then
     action="validate-inputs"
+    additional_arguments="${additional_arguments} --terragrunt-log-level debug --terragrunt-debug"
+    export TF_LOG=DEBUG
   fi
 
   if [ -z "${cluster}" ] || [ ! -d "${cluster_directory}" ]
@@ -80,7 +82,7 @@ function terraform_check_and_convert_flag() {
 
 # execute command
 function terraform_execute() {
-  action_command="TF_LOG=DEBUG terragrunt run-all ${action} ${additional_arguments}"
+  action_command="terragrunt run-all ${action} ${additional_arguments}"
 
   eval $action_command
 }
@@ -125,7 +127,7 @@ function terraform_main() {
   cluster_directory="${cloud_directory}/${cluster}"
   items_directory="${cluster_directory}/${part}"
   project_file="${cluster_directory}/project.yaml"
-  additional_arguments="--terragrunt-parallelism 3 --terragrunt-forward-tf-stdout --terragrunt-non-interactive --terragrunt-log-level debug --terragrunt-debug"
+  additional_arguments="--terragrunt-parallelism 3 --terragrunt-forward-tf-stdout --terragrunt-non-interactive"
 
   # function
 

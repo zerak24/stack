@@ -1,3 +1,6 @@
 cloud_dns:
   dumblearner.click:
-    recordsets: []
+    recordsets:
+      - name: web.dumblearner.click
+        type: A
+        records: []
