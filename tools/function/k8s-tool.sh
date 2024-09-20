@@ -1,50 +1,15 @@
 #! /bin/bash
 
-## tool's flag
-
-# while (( "$#" ))
-# do
-#   case "$1" in
-#     -h|--help)
-#       echo "
-# -a|--action               : action want to execute (plan, apply, destroy, push, debug)
-# -f|--file                 : .yaml file want to execute with action flags
-# -d|--directory (optional) : directory of helm charts want to execute with action flags if use helm repository please define in .yaml file
-#   |--ci        (optional) : auto yes every questions
-# "
-#       exit 0
-#       ;;
-#     -a|--action)
-#       action=$2
-#       shift 2
-#       ;;
-#     -f|--file)
-#       file=$2
-#       shift 2
-#       ;;
-#     -d|--directory)
-#       directory=$2
-#       shift 2
-#       ;;
-#     --ci)
-#       auto="true"
-#       shift 1
-#       ;;
-#   esac
-# done
-
-## setup function
-
+# setup
 function setup() {
-  source ${root_helm}/tools/setup.sh
+  source ${root_helm_directory}/tools/function/setup.sh
   
   install_yq
   install_helm3
   install_kubectl
 }
 
-## check syntax function
-
+# check syntax
 function check_flag() {
   if [ "${action}" != "plan" ] && [ "${action}" != "apply" ] && [ "${action}" != "destroy" ] && [ "${action}" != "debug" ] && [ "${action}" != "push" ]
   then
@@ -65,8 +30,7 @@ function check_flag() {
   fi
 }
 
-## helm function
-
+# check automation
 function check_automation() {
   if [ "${action}" == "apply" ] || [ "${action}" == "destroy" ] && [ -z ${auto} ]
   then
@@ -79,6 +43,7 @@ function check_automation() {
   fi
 }
 
+# load config
 function load_config() {
   chart_repo=${directory}
   if [ ! -z ${file} ]
@@ -103,6 +68,7 @@ function load_config() {
   repo_name=$(yq '.helm_auth.name' ${auth_file_path})
 }
 
+# add repo
 function add_helm_repo() {
 	if [ $(helm repo list | grep -E "${repo_name}" | wc -l) -eq 0 ]
   then
@@ -114,6 +80,7 @@ function add_helm_repo() {
   eval $command
 }
 
+# execute logic
 function helm_action() {
   helm_action=""
   helm_flag=""
@@ -155,16 +122,14 @@ function helm_action() {
   # echo $command
 }
 
-## main function
-
+# main function
 function k8s_main() {
+  
   # variables
-
-  root_helm="."
-  auth_file_path="$root_helm/key/auth/auth.yaml"
+  root_helm_directory=$root_directory
+  auth_file_path="${root_helm_directory}/key/auth/auth.yaml"
   
   # functions
-
   setup
   check_flag
   check_automation
@@ -172,5 +137,3 @@ function k8s_main() {
   # add_helm_repo
   helm_action
 }
-
-# k8s_main

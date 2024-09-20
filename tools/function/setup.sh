@@ -84,5 +84,3 @@ function install_kubectl() {
     sudo mv /tmp/kubectl /usr/local/bin/kubectl
   fi
 }
-
-install_terragrunt

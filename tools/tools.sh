@@ -1,7 +1,6 @@
 #! /bin/bash
 
-## tool's flag
-
+# tool's flag
 case "$1" in
   -h|--help)
     echo "
@@ -90,17 +89,21 @@ help menu for access subcommand
   esac
 done
 
+# variables
+root_directory="."
+
+# execute logic
 case "$subcommand" in
   cloud)
-    source tools/tf-tool.sh
+    source ${root_directory}/tools/function/tf-tool.sh
     terraform_main
     ;;
   k8s)
-    source tools/k8s-tool.sh
+    source ${root_directory}/tools/function/k8s-tool.sh
     k8s_main
     ;;
   access)
-    source tools/cluster-access.sh
+    source ${root_directory}/tools/function/cluster-access.sh
     cluster_main
     ;;
 esac
