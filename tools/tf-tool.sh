@@ -2,41 +2,41 @@
 
 ## tool's flag
 
-while (( "$#" ))
-do
-  case "$1" in
-    -h|--help)
-      echo "
--a|--action              : action want to execute (plan, apply, destroy, debug)
--c|--cluster             : .yaml file want to execute with action flags
--p|--part                : part of cloud want to execute with action flags (apps, domains, infras)
--i|--items    (optional) : list of items (separate with comma) want to execute with action flags if not define all items will be chosen
-  |--ci       (optional) : auto yes every questions
-"
-      exit 0
-      ;;
-    -a|--action)
-      action=$2
-      shift 2
-      ;;
-    -c|--cluster)
-      cluster=$2
-      shift 2
-      ;;
-    -p|--part)
-      part=$2
-      shift 2
-      ;;
-    -i|--items)
-      items=$2
-      shift 2
-      ;;
-    --ci)
-      auto="-auto-approve"
-      shift 1
-      ;;
-  esac
-done
+# while (( "$#" ))
+# do
+#   case "$1" in
+#     -h|--help)
+#       echo "
+# -a|--action              : action want to execute (plan, apply, destroy, debug)
+# -d|--directory           : directory store config that want to execute with action flags
+# -p|--part                : part of cloud want to execute with action flags (apps, domains, infras)
+# -i|--items    (optional) : list of items (separate with comma) want to execute with action flags if not define all items will be chosen
+#   |--ci       (optional) : auto yes every questions
+# "
+#       exit 0
+#       ;;
+#     -a|--action)
+#       action=$2
+#       shift 2
+#       ;;
+#     -d|--directory)
+#       directory=$2
+#       shift 2
+#       ;;
+#     -p|--part)
+#       part=$2
+#       shift 2
+#       ;;
+#     -i|--items)
+#       items=$2
+#       shift 2
+#       ;;
+#     --ci)
+#       auto="-auto-approve"
+#       shift 1
+#       ;;
+#   esac
+# done
 
 ## terraform function
 
@@ -64,9 +64,9 @@ function terraform_check_and_convert_flag() {
     export TF_LOG=DEBUG
   fi
 
-  if [ -z "${cluster}" ] || [ ! -d "${cluster_directory}" ]
+  if [ -z "${directory}" ] || [ ! -d "${cluster_directory}" ]
   then
-    echo "Cluster not existed"
+    echo "Directory not existed"
     exit 1
   fi
 
@@ -85,6 +85,7 @@ function terraform_execute() {
   action_command="terragrunt run-all ${action} ${additional_arguments}"
 
   eval $action_command
+  # echo $action_command
 }
 
 # check automation
@@ -124,12 +125,12 @@ function terraform_main() {
   action_list="plan apply destroy debug"
   root_cloud_directory="."
   cloud_directory="${root_cloud_directory}/cloud"
-  cluster_directory="${cloud_directory}/${cluster}"
+  cluster_directory="${cloud_directory}/${directory}"
   items_directory="${cluster_directory}/${part}"
   project_file="${cluster_directory}/project.yaml"
   additional_arguments="--terragrunt-parallelism 3 --terragrunt-forward-tf-stdout --terragrunt-non-interactive"
 
-  # function
+  # functions
 
   terraform_setup
   terraform_check_and_convert_flag
@@ -137,4 +138,4 @@ function terraform_main() {
   terraform_action
 }
 
-terraform_main
+# terraform_main

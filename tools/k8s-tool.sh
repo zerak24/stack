@@ -2,41 +2,36 @@
 
 ## tool's flag
 
-while (( "$#" ))
-do
-  case "$1" in
-    -h|--help)
-      echo "
--a|--action               : action want to execute (plan, apply, destroy, push, debug)
--f|--file                 : .yaml file want to execute with action flags
--d|--directory (optional) : directory of helm charts want to execute with action flags if use helm repository please define in .yaml file
-  |--ci        (optional) : auto yes every questions
-"
-      exit 0
-      ;;
-    -a|--action)
-      action=$2
-      shift 2
-      ;;
-    -f|--file)
-      file=$2
-      shift 2
-      ;;
-    -d|--directory)
-      directory=$2
-      shift 2
-      ;;
-    --ci)
-      auto="true"
-      shift 1
-      ;;
-  esac
-done
-
-## global variables
-
-root_helm="."
-auth_file_path="$root_helm/key/token/auth.yaml"
+# while (( "$#" ))
+# do
+#   case "$1" in
+#     -h|--help)
+#       echo "
+# -a|--action               : action want to execute (plan, apply, destroy, push, debug)
+# -f|--file                 : .yaml file want to execute with action flags
+# -d|--directory (optional) : directory of helm charts want to execute with action flags if use helm repository please define in .yaml file
+#   |--ci        (optional) : auto yes every questions
+# "
+#       exit 0
+#       ;;
+#     -a|--action)
+#       action=$2
+#       shift 2
+#       ;;
+#     -f|--file)
+#       file=$2
+#       shift 2
+#       ;;
+#     -d|--directory)
+#       directory=$2
+#       shift 2
+#       ;;
+#     --ci)
+#       auto="true"
+#       shift 1
+#       ;;
+#   esac
+# done
 
 ## setup function
 
@@ -86,17 +81,21 @@ function check_automation() {
 
 function load_config() {
   chart_repo=${directory}
-  if [ ! -z ${file} ]; then
+  if [ ! -z ${file} ]
+  then
     namespace=$(yq '.deploy_config.namespace' ${file})
     cluster=$(yq '.deploy_config.cluster' ${file})
-    if [ "${cluster}" == "null" ]; then
+    if [ "${cluster}" == "null" ]
+    then
       cluster=$(basename ${file} | cut -d"." -f1)
     fi
     release=$(yq '.deploy_config.name' ${file})
-    if [ "${release}" == "null" ]; then
+    if [ "${release}" == "null" ]
+    then
       release=$(basename $(dirname ${file}))
     fi
-    if [ -z $directory ]; then
+    if [ -z $directory ]
+    then
       chart_repo=$(yq '.chart.repository' ${file})
       chart_version=$(yq '.chart.version' ${file})
     fi
@@ -105,7 +104,8 @@ function load_config() {
 }
 
 function add_helm_repo() {
-	if [ $(helm repo list | grep -E "${repo_name}" | wc -l) -eq 0 ]; then
+	if [ $(helm repo list | grep -E "${repo_name}" | wc -l) -eq 0 ]
+  then
     repo_url=$(yq '.helm_auth.url' ${auth_file_path})
     repo_username=$(yq '.helm_auth.username' ${auth_file_path})
     repo_password=$(yq '.helm_auth.password' ${auth_file_path})
@@ -119,7 +119,8 @@ function helm_action() {
   helm_flag=""
   helm_plugins="secrets"
   update_helm_repositoy=""
-  if [ -z $directory ]; then
+  if [ -z $directory ]
+  then
     update_helm_repositoy="helm repo update ${repo_name}"
   fi
   case ${action} in
@@ -147,16 +148,29 @@ function helm_action() {
     helm_flag="${directory} ${repo_name} --insecure"
     ;;
   esac
+
   command="helm ${helm_plugins} ${helm_action} ${helm_flag}"
+  
   eval $command
+  # echo $command
 }
 
 ## main function
 
-setup
-check_flag
-check_automation
-load_config
-# add_helm_repo
-helm_action
+function k8s_main() {
+  # variables
 
+  root_helm="."
+  auth_file_path="$root_helm/key/auth/auth.yaml"
+  
+  # functions
+
+  setup
+  check_flag
+  check_automation
+  load_config
+  # add_helm_repo
+  helm_action
+}
+
+# k8s_main
