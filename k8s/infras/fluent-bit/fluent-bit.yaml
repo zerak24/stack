@@ -19,8 +19,10 @@ config:
         Path /var/log/containers/*.log
         multiline.parser docker, cri
         Tag kube.*
+        Exclude_Path *kube-system*
         Mem_Buf_Limit 5MB
         Skip_Long_Lines On
+        Read_from_Head True
 
     [INPUT]
         Name systemd
@@ -28,40 +30,44 @@ config:
         Systemd_Filter _SYSTEMD_UNIT=kubelet.service
         Read_From_Tail On
 
-    [INPUT]
-        Name tail
-        Path /var/run/cilium/tetragon/tetragon.log
-        Parser docker_no_time
-        Tag tetragon.*
-        Mem_Buf_Limit 5MB
-        Skip_Long_Lines On
+    # [INPUT]
+    #     Name tail
+    #     Path /var/run/cilium/tetragon/tetragon.log
+    #     Parser docker_no_time
+    #     Tag tetragon.*
+    #     Mem_Buf_Limit 5MB
+    #     Skip_Long_Lines On
 
   outputs: |
     [OUTPUT]
-        Name http
-        tls off
         Match kube.*
-        Host clickhouse.log.svc.cluster.local.
-        Port 8123
-        URI /?query=INSERT+INTO+fluentbit.kube+FORMAT+JSONEachRow
-        format json_stream
-        json_date_key timestamp
-        json_date_format epoch
-        http_user default
-        http_passwd cf13d373b2e8c30bb4216e63c549d71f8e784b62
+        Name stdout
 
-    [OUTPUT]
-        Name http
-        tls off
-        Match tetragon.*
-        Host clickhouse.log.svc.cluster.local.
-        Port 8123
-        URI /?query=INSERT+INTO+fluentbit.tetragon+FORMAT+JSONEachRow
-        format json_stream
-        json_date_key timestamp
-        json_date_format epoch
-        http_user default
-        http_passwd cf13d373b2e8c30bb4216e63c549d71f8e784b62
+    # [OUTPUT]
+    #     Name http
+    #     tls off
+    #     Match kube.*
+    #     Host clickhouse.log.svc.cluster.local.
+    #     Port 8123
+    #     URI /?query=INSERT+INTO+fluentbit.kube+FORMAT+JSONEachRow
+    #     format json_stream
+    #     json_date_key timestamp
+    #     json_date_format epoch
+    #     http_user default
+    #     http_passwd cf13d373b2e8c30bb4216e63c549d71f8e784b62
+
+    # [OUTPUT]
+    #     Name http
+    #     tls off
+    #     Match tetragon.*
+    #     Host clickhouse.log.svc.cluster.local.
+    #     Port 8123
+    #     URI /?query=INSERT+INTO+fluentbit.tetragon+FORMAT+JSONEachRow
+    #     format json_stream
+    #     json_date_key timestamp
+    #     json_date_format epoch
+    #     http_user default
+    #     http_passwd cf13d373b2e8c30bb4216e63c549d71f8e784b62
   filters: |
     [FILTER]
         Name kubernetes
@@ -84,11 +90,11 @@ config:
         script /fluent-bit/scripts/functions.lua
         call set_fields
 
-    [FILTER]
-        Name lua
-        Match tetragon.*
-        script /fluent-bit/scripts/functions.lua
-        call tetragon_set_fields
+    # [FILTER]
+    #     Name lua
+    #     Match tetragon.*
+    #     script /fluent-bit/scripts/functions.lua
+    #     call tetragon_set_fields
 
 luaScripts:
   functions.lua: |
