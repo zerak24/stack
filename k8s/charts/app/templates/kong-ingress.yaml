@@ -10,7 +10,7 @@ metadata:
     konghq.com/preserve_host: "true"
     konghq.com/protocols: "http,https"
     konghq.com/plugins: {{ include "app.kongpluginingress" $ }}
-    configuration.konghq.com: {{ include "app.fullname" $ }}-kong-ingress-configuration-http-{{ $element.name }}
+    # configuration.konghq.com: {{ include "app.fullname" $ }}-kong-ingress-configuration-http-{{ $element.name }}
     # kubernetes.io/ingress.class: {{ default $.Values.kongIngress.class $element.kongClass }}
   name: {{ include "app.fullname" $ }}-kong-ingress-http-{{ $element.name }}
   namespace: {{ $.Values.general.namespace }}
@@ -46,7 +46,7 @@ metadata:
     konghq.com/retries: "10"
     konghq.com/read_timeout: "10000"
     konghq.com/write_timeout: "10000"
-    configuration.konghq.com: {{ include "app.fullname" $ }}-kong-ingress-configuration-http-{{ $element.name }}
+    # configuration.konghq.com: {{ include "app.fullname" $ }}-kong-ingress-configuration-http-{{ $element.name }}
     ingress.kubernetes.io/service-upstream: "true"
 spec:
   type: ClusterIP
