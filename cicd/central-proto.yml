@@ -1,0 +1,15 @@
+image: build-gitlab-runner:v9
+
+update central proto:
+  stage: prepare
+  script:
+    - |
+      curl "http://gitops.tools/internal/create-release?repo_id=${CI_PROJECT_ID}&branch=master&ref=${CI_COMMIT_SHORT_SHA}&gitmode=trunk-base"
+  only:
+    refs:
+      - master
+  except:
+    - merge_requests
+  tags:
+    - build-runner
+  when: on_success

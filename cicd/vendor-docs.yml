@@ -1,0 +1,39 @@
+image: build-gitlab-runner:v9
+
+gen vendor-docs:
+  stage: prepare
+  image:  git-sync:v2
+  artifacts:
+    paths:
+    - docs/
+    expire_in: 1 hour
+  script:
+    - |
+      set -e
+      echo $SWAGGER_SSH_KEY | base64 -d > /tmp/id_rsa && chmod 0400 /tmp/id_rsa
+
+      TEMP_DOCS=docs-gen
+      SWAGGER_DOMAIN=docs.saladin.vn
+      mkdir TEMP_DOCS
+      for app in $(find docs/ -maxdepth 1 -type d | grep -vE "docs\/$" | sed 's/\.\///g')
+      do
+          for f in $(ls ${app}/)
+          do
+            swaggerDirectory=$(echo ${f} | cut -d "." -f 1)
+            mkdir -p $TEMP_DOCS/${app}/${swaggerDirectory}
+            python /swagger-to-html.py < ${app}/${f} > $TEMP_DOCS/${app}/${swaggerDirectory}/index.html
+            sed -i "s/cdn.bootcss.com/${SWAGGER_DOMAIN}/g" $TEMP_DOCS/${app}/${swaggerDirectory}/index.html
+          done
+      done
+
+      ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@vendor-docs.default mkdir -p /var/www/html/docs
+
+      rsync -av --delete -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /tmp/id_rsa" -d $TEMP_DOCS/docs/ root@vendor-docs.default:/var/www/html/docs/
+  only:
+    refs:
+      - master
+    changes:
+      - "docs/*/**.json"
+  tags:
+    - build-runner
+  when: on_success

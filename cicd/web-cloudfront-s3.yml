@@ -1,0 +1,162 @@
+image: internal-registry.kafefin.net/build-gitlab-runner:v11
+
+variables:
+  CI_REGISTRY: <registry_url>
+  CONTAINER_IMAGE: <registry_url>/${CI_PROJECT_NAME}
+  AWS_REGION: ap-southeast-1
+  PROJECT_NAME: ${CI_PROJECT_NAME}
+  PROJECT_GROUP: ${CI_PROJECT_NAMESPACE}
+
+.create_ecr_repo: &create_ecr_repo
+  - |
+    aws ecr create-repository \
+                            --repository-name ${CI_PROJECT_NAME} \
+                            --image-scanning-configuration scanOnPush=false \
+                            --region ${AWS_REGION} \
+                            --image-tag-mutability IMMUTABLE || true
+
+.build_builder_image: &build_builder_image
+  - |
+    dockerd &
+    sleep 2
+
+    source env/.env
+
+    echo $NETRC_READ | base64 -d > ~/.netrc
+
+    docker login -u AWS -p $(aws ecr get-login-password --region ${AWS_REGION}) ${CI_REGISTRY}
+
+    if [ ${ENV} == "releases" ]; then
+      if [ ! -z $S3_BUCKET_STAGING ] && [ $(echo ${CI_COMMIT_TAG} | grep prod | wc -l) -eq 0 ]; then
+        vault write -field=token auth/approle/login role_id=$VAULT_CI_PROD_ROLE_ID secret_id=$VAULT_CI_PROD_SECRET_ID | xargs -I {} envconsul -vault-renew-token=false -vault-token="{}" -vault-addr=$VAULT_ADDR -secret secret/cicd/release/ci/${PROJECT_GROUP}/${DOPPLER_PROJECT}/uat -pristine -once -no-prefix env > .env
+      else
+        SENTRY_TAG=$(echo ${CI_COMMIT_TAG} | cut -d "-" -f1)
+        BUILD_ARG="${BUILD_ARG} --build-arg=SENTRY_RELEASE=${SENTRY_TAG} "
+        vault write -field=token auth/approle/login role_id=$VAULT_CI_PROD_ROLE_ID secret_id=$VAULT_CI_PROD_SECRET_ID | xargs -I {} envconsul -vault-renew-token=false -vault-token="{}" -vault-addr=$VAULT_ADDR -secret secret/cicd/release/ci/${PROJECT_GROUP}/${DOPPLER_PROJECT}/secrets -pristine -once -no-prefix env > .env
+      fi
+    else
+      vault write -field=token auth/approle/login role_id=$VAULT_CI_DEVELOP_ROLE_ID secret_id=$VAULT_CI_DEVELOP_SECRET_ID | xargs -I {} envconsul -vault-renew-token=false -vault-token="{}" -vault-addr=$VAULT_ADDR -secret secret/cicd/master/ci/${PROJECT_GROUP}/${DOPPLER_PROJECT}/secrets -pristine -once -no-prefix env > .env
+    fi
+
+    docker  run \
+            --net=host \
+            --rm -v ~/.docker:/kaniko/.docker \
+            -v $(pwd):/workspace \
+            -v ~/.netrc:/root/.netrc  \
+            internal-registry.kafefin.net/kaniko-project/executor:debug \
+            --dockerfile=Dockerfile  \
+            --destination=${CONTAINER_IMAGE}:${DOCKER_TAG}  \
+            --cache=true \
+            --cache-repo ${CONTAINER_IMAGE} \
+            ${BUILD_ARG} \
+            --use-new-run
+
+.sync_static: &sync_static
+  - |
+    dockerd &
+    sleep 2
+
+    source env/.env
+
+    if [ -z "${DIR_BUILD}" ]; then 
+      DIR_BUILD="build"
+    fi
+
+    docker login -u AWS -p $(aws ecr get-login-password --region ${AWS_REGION}) ${CI_REGISTRY}
+
+    docker run --rm -i --entrypoint=/bin/sh -v $PWD/data:/tmp/data ${CONTAINER_IMAGE}:${DOCKER_TAG} -c "cp -r /app/${DIR_BUILD} /tmp/data/"
+
+    INFRAS_ENV=""
+
+    S3_ENV=""
+    CLOUDFRONT_ENV=""
+
+    if [ ${ENV} == "releases" ]; then
+      S3_ENV="master"
+      CLOUDFRONT_ENV="prod"
+      if [ ! -z $S3_BUCKET_STAGING ] && [ $(echo ${CI_COMMIT_TAG} | grep prod | wc -l) -eq 0 ]; then
+        S3_ENV="staging"
+        CLOUDFRONT_ENV="staging"
+      else
+        if [ $(echo ${CI_COMMIT_TAG} | grep prod | wc -l) -gt 0 ]; then
+          PREV_TAG=$(git tag -l --sort=creatordate '*-prod' | tail -2 | head -1)
+        else
+          PREV_TAG=$(git tag -l --sort=creatordate '*[0-9]' | tail -2 | head -1)
+        fi
+        git log --pretty=format:"[%h] %s" ${PREV_TAG}..${CI_COMMIT_TAG} > /tmp/message.txt
+        sed -i -e "s/^/+ /g" /tmp/message.txt
+        NOTI_MSG="python3 /noti/prepare_noti.py ${CI_PROJECT_NAMESPACE}/${CI_PROJECT_NAME} ${CI_COMMIT_TAG} $(echo ${CI_COMMIT_AUTHOR} | awk -F '[<>]' '{print $2}')"
+      fi
+    else
+      S3_ENV="develop"
+      CLOUDFRONT_ENV="develop"
+    fi
+
+    S3_BUCKET="S3_BUCKET_$(echo ${S3_ENV} | tr '[:lower:]' '[:upper:]')"
+
+    echo "S3_BUCKET is ${!S3_BUCKET}"
+
+    if [ -f "./data/${DIR_BUILD}/index.html" ]; then
+      ## Backup old data
+      mkdir /tmp/backup
+      aws s3 sync s3://${!S3_BUCKET}/ /tmp/backup/ --exclude "backup/*"
+
+      ## Sync new data
+      aws s3 sync --delete data/${DIR_BUILD}/ s3://${!S3_BUCKET}/
+
+      ## Copy backup to s3
+      aws s3 sync --delete /tmp/backup/ s3://${!S3_BUCKET}/backup/
+
+    else
+      echo "Missing index.html file"
+      ls ./data/${DIR_BUILD}
+      exit 1
+    fi
+
+    if [ ! -z "${NOTI_MSG}" ]; then
+      echo ${NOTI_MSG}
+      eval ${NOTI_MSG}
+      curl -H 'Content-Type: application/json' -d @/tmp/noti.json "${MSTEAM_HOOK}"
+    fi
+
+    echo "aws resourcegroupstaggingapi get-resources  \
+                        --tag-filters Key=Project,Values=${CLOUDFRONT_PROJECT} Key=Environment,Values=${CLOUDFRONT_ENV} \
+                        --resource-type-filters 'cloudfront'  \
+                        --region us-east-1 | jq -Mr '.ResourceTagMappingList[].ResourceARN' | rev | cut -d '/' -f1 | rev)"
+
+    CLOUDFRONT_DISTRIBUTION=$(aws resourcegroupstaggingapi get-resources --tag-filters \
+                                      Key=Project,Values=${CLOUDFRONT_PROJECT} \
+                                      Key=Environment,Values=${CLOUDFRONT_ENV} \
+                        --resource-type-filters 'cloudfront'  \
+                        --region us-east-1 | jq -Mr '.ResourceTagMappingList[].ResourceARN' | rev | cut -d '/' -f1 | rev)
+
+    aws cloudfront create-invalidation \
+                        --distribution-id ${CLOUDFRONT_DISTRIBUTION} \
+                        --paths "/*" 
+
+build:
+  stage: build
+  artifacts:
+    paths:
+    - env/
+    expire_in: 1 hour
+  script:
+    - *create_ecr_repo
+    - *build_builder_image
+  only:
+    refs:
+      - master
+      - tags
+  tags:
+    - build-runner
+
+sync_static:
+  stage: trigger
+  script:
+    - *sync_static
+  only:
+    refs:
+      - master
+      - tags
+  tags:
+    - cloud-runner

@@ -1,0 +1,207 @@
+image: build-gitlab-runner:v9
+
+variables:
+  INTERNAL_CACHE_REPO: internal-container-registry.default
+
+prepare:
+  stage: prepare
+  artifacts:
+    paths:
+    - env/
+    expire_in: 1 hour
+  script:
+    - |
+      mkdir -p env/
+
+      ENV=""
+      if [ $(echo "${CI_COMMIT_REF_NAME}" | egrep -e "^develop" | wc -l ) -eq 1 ]; then
+        ENV=develop
+      elif [ $(echo "${CI_COMMIT_REF_NAME}" | egrep -e "^master" | wc -l ) -eq 1 ]; then
+        ENV=master
+      elif [ $(echo "${CI_COMMIT_REF_NAME}" | egrep -e "^release" | wc -l ) -eq 1 ]; then
+        ENV=releases
+      elif [ $(echo "${CI_COMMIT_REF_NAME}" | egrep -e "^feature" | wc -l ) -eq 1 ]; then
+        ENV=develop
+      elif [ $(echo "${CI_COMMIT_REF_NAME}" | egrep -e "^hotfix" | wc -l ) -eq 1 ]; then
+        ENV=hotfix
+      elif [ ! -z "${CI_COMMIT_TAG}" ]; then
+        ENV=releases
+      else
+        ENV=develop
+      fi
+
+      if [ "${ENV}" == "master" ] || [ "${ENV}" == "develop" ]; then
+        export TAG="${ENV}"
+        export DOCKER_TAG=${ENV}-${CI_COMMIT_SHORT_SHA}
+      elif [ "${ENV}" == "hotfix" ]; then
+        export TAG=$(echo $CI_COMMIT_REF_NAME | cut -d '/' -f2)-"${ENV}"
+        export DOCKER_TAG=$(echo $CI_COMMIT_REF_NAME | cut -d '/' -f2)-"${ENV}"
+      else
+        export TAG=$(echo $CI_COMMIT_REF_NAME | cut -d '/' -f2)
+        export DOCKER_TAG=$(echo $CI_COMMIT_REF_NAME | cut -d '/' -f2)
+      fi
+      
+      typeset -p TAG >> env/.env
+      typeset -p ENV >> env/.env
+      typeset -p DOCKER_TAG >> env/.env
+  only:
+    refs:
+      - master
+      - tags
+      - /hotfix.*/
+  tags:
+    - build-runner
+
+collected:
+  stage: collected
+  artifacts:
+    paths:
+    - env_build/
+    - env/
+    expire_in: 1 hour
+  script:
+    - |
+      mkdir -p env_build/
+      echo ${CI_COMMIT_SHORT_SHA} > env_build/.jobid
+  only:
+    refs:
+      - master
+  tags:
+    - build-runner
+
+semver operation:
+  stage: prepare
+  script:
+    - |
+      curl "http://gitops.tools/internal/create-release?repo_id=${CI_PROJECT_ID}&branch=${CI_COMMIT_BRANCH}&ref=${CI_COMMIT_SHORT_SHA}"
+  only:
+    refs:
+      - /^release.*/
+      - /^hotfix\/\d+.\d+.x/
+  except:
+    - merge_requests
+  tags:
+    - build-runner
+  when: on_success
+
+trigger:
+  stage: trigger
+  artifacts:
+    paths:
+    - env/
+    expire_in: 1 hour
+  script:
+    - |
+      set -x
+      source env/.env
+
+      PROJECT_NAME_OVERRIDE="${CI_PROJECT_NAME}"
+      if [ ! -z "${CI_PROJECT_NAME_OVERRIDE}" ]; then
+        PROJECT_NAME_OVERRIDE=${CI_PROJECT_NAME_OVERRIDE}
+      fi
+
+      curl -X POST \
+         -F token=${CI_APPS_TRIGGER_TOKEN}  \
+         -F ref=master \
+         -F "variables[APP]=${PROJECT_NAME_OVERRIDE}" \
+         -F "variables[ENV]=${ENV}" \
+         -F "variables[TAG]=${DOCKER_TAG}" \
+         -F "variables[TRIGGER]=ci-update-version" \
+         -F "variables[LANGUAGE]=${LANGUAGE}" \
+         -F "variables[BRANCH]=${CI_COMMIT_REF_NAME}" \
+         https://git.kafefin.net/api/v4/projects/32/trigger/pipeline
+
+  only:
+    refs:
+      - master
+      - tags
+  except:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /#hotfix/
+      - $WEB_CLOUDFRONT_S3 == "true"
+      - $TRIGGER == "swagger"
+  tags:
+    - build-runner
+  when: on_success
+
+golang-central-pb:
+  stage: prepare
+  script:
+    - |
+      set -x
+      if [ -d "./pb" ]; then
+        git clone https://bot:${GITLAB_BOT_WRITER_TOKEN}@git.kafefin.net/backend/central-proto.git/ 2>&1 | sed "s/${GITLAB_BOT_WRITER_TOKEN}/xxxx/g" > /tmp/error 
+
+        if [ $(cat /tmp/error | grep "xxxx" | wc -l) -gt 0 ]; then
+            cat /tmp/error
+            exit 1
+        fi
+
+        _APP_NAME=$(echo ${CI_PROJECT_NAME} | sed 's/-/_/g')
+        if [ -d "central-proto/${_APP_NAME}/" ]; then
+          rm -rf central-proto/${_APP_NAME}/
+        fi
+        
+        mkdir -p central-proto/${_APP_NAME}/
+        sed -i "s/package [a-z_]+/package $_APP_NAME/g" pb/*pb*
+
+        cp -rpf pb/*pb* central-proto/${_APP_NAME}/
+        cd central-proto
+        
+        if [ $(git status -s | wc -l) -gt 0 ]; then
+          git config --global user.email "bot@tenxtenx.com" && git config --global user.name "bot" && \
+                                git add ${_APP_NAME} && \
+                                git commit -m "Update ${_APP_NAME} version ${TAG} from PROJECT ${CI_PROJECT_NAME} build tag ${CI_BUILD_TAG}" && \
+                                git push origin master 2>&1 | sed "s/${GITLAB_BOT_WRITER_TOKEN}/xxxx/g"
+        fi
+      fi
+  only:
+    refs:
+      - tags
+    variables:
+      - $EXPORT_PROTO == "true"
+  except:
+    - merge_requests
+  tags:
+    - proto-runner
+  allow_failure: true
+
+swagger:
+  stage: trigger
+  image:  internal-registry.kafefin.net/git-sync:v2
+  artifacts:
+    paths:
+    - env/
+    expire_in: 1 hour
+  variables:
+    BUILD_BUILDER: "true"
+  script:
+    - |
+      if [ -d "${CI_PROJECT_DIR}/docs" ]; then
+        echo $SWAGGER_SSH_KEY | base64 -d > /tmp/id_rsa && chmod 0400 /tmp/id_rsa
+
+        export SWAGGER_DOMAIN=swagger.kafefin.net
+
+        mkdir -p /var/www/html/${CI_PROJECT_NAME}
+      
+        for f in $(ls ${CI_PROJECT_DIR}/docs/)
+        do
+          swaggerDirectory=$(echo ${f} | cut -d "." -f 1)
+          mkdir -p /var/www/html/${CI_PROJECT_NAME}/${swaggerDirectory}
+          python /swagger-to-html.py  < ${CI_PROJECT_DIR}/docs/${f} > /var/www/html/${CI_PROJECT_NAME}/${swaggerDirectory}/index.html
+          sed -i "s/cdn.bootcss.com/${SWAGGER_DOMAIN}/g" /var/www/html/${CI_PROJECT_NAME}/${swaggerDirectory}/index.html
+        done
+
+        ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@swagger.default mkdir -p /var/www/html/${CI_PROJECT_NAME}
+
+        rsync -av --delete -e "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /tmp/id_rsa" -d /var/www/html/${CI_PROJECT_NAME}/ root@swagger.default:/var/www/html/${CI_PROJECT_NAME}/
+      fi
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      changes:
+        - docs/**.json
+    - if: $TRIGGER == "swagger"
+
+  tags:
+    - build-runner
+  allow_failure: true

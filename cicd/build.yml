@@ -1,0 +1,89 @@
+image: build-gitlab-runner:v9
+
+variables:
+  CI_REGISTRY: registry.dumblearner.click
+  CONTAINER_IMAGE: registry.dumblearner.click/${CI_PROJECT_NAME}
+  INTERNAL_CACHE_REPO: internal-container-registry.default
+  AWS_REGION: ap-southeast-1
+  PROJECT_NAME: ${CI_PROJECT_NAME}
+  PROJECT_GROUP: ${CI_PROJECT_NAMESPACE}
+
+.create_ecr_repo: &create_ecr_repo
+  - |
+    aws ecr create-repository \
+                            --repository-name ${CI_PROJECT_NAME} \
+                            --image-scanning-configuration scanOnPush=true \
+                            --region ${AWS_REGION} \
+                            --image-tag-mutability IMMUTABLE || true
+
+.build_builder_image: &build_builder_image
+  - |
+    mkdir /etc/docker/
+ 
+    dockerd &
+    sleep 2
+
+    source env/.env
+
+    echo $NETRC_READ | base64 -d > ~/.netrc
+
+    docker login -u AWS -p $(aws ecr get-login-password --region ${AWS_REGION}) ${CI_REGISTRY}
+
+    if [ "${LANGUAGE}" == "nodejs" ]; then
+
+      BUILD_ARG="${BUILD_ARG} --build-arg=FE_BUILD_TAG=${DOCKER_TAG} "
+      
+      if [ ${ENV} == "releases" ]; then
+        if [ "${CI_PROJECT_NAMESPACE}" == "frontend" ] && [ $( echo $CI_COMMIT_TAG | grep prod | wc -l ) -eq 0 ]; then
+          BUILD_ARG="${BUILD_ARG} --build-arg=FE_BUILD_ENV=staging "
+          vault write -field=token auth/approle/login role_id=$VAULT_CI_PROD_ROLE_ID secret_id=$VAULT_CI_PROD_SECRET_ID | xargs -I {} envconsul -vault-renew-token=false -vault-token="{}" -vault-addr=$VAULT_ADDR -secret secret/cicd/release/ci/${PROJECT_GROUP}/${DOPPLER_PROJECT}/uat -pristine -once -no-prefix env > .env
+        else
+          BUILD_ARG="${BUILD_ARG} --build-arg=FE_BUILD_ENV=production "
+          vault write -field=token auth/approle/login role_id=$VAULT_CI_PROD_ROLE_ID secret_id=$VAULT_CI_PROD_SECRET_ID | xargs -I {} envconsul -vault-renew-token=false -vault-token="{}" -vault-addr=$VAULT_ADDR -secret secret/cicd/release/ci/${PROJECT_GROUP}/${DOPPLER_PROJECT}/secrets -pristine -once -no-prefix env > .env
+        fi
+      else
+        BUILD_ARG="${BUILD_ARG} --build-arg=FE_BUILD_ENV=develop "
+        vault write -field=token auth/approle/login role_id=$VAULT_CI_DEVELOP_ROLE_ID secret_id=$VAULT_CI_DEVELOP_SECRET_ID | xargs -I {} envconsul -vault-renew-token=false -vault-token="{}" -vault-addr=$VAULT_ADDR -secret secret/cicd/master/ci/${PROJECT_GROUP}/${DOPPLER_PROJECT}/secrets -pristine -once -no-prefix env > .env
+      fi
+    fi
+
+    if [ "${LANGUAGE}" != "golang" ]; then
+      sed -i 's/builder$/builder\nENV GOPRIVATE=git.kafefin.net/g' Dockerfile
+      sed -i 's/builder$/builder\nENV GOPROXY=http:\/\/goproxy.default/g' Dockerfile
+      sed -i 's/builder$/builder\nENV GOSUMDB=off/g' Dockerfile
+    fi
+
+    docker  run \
+            --net=host \
+            --rm -v ~/.docker:/kaniko/.docker \
+            -v $(pwd):/workspace \
+            -v ~/.netrc:/root/.netrc  \
+            internal-registry.kafefin.net/kaniko-project/executor:debug \
+            --dockerfile=Dockerfile  \
+            --destination=${CONTAINER_IMAGE}:${DOCKER_TAG}  \
+            --cache=true \
+            --cache-repo ${INTERNAL_CACHE_REPO}/${CI_PROJECT_NAME}-${ENV} \
+            --skip-tls-verify-registry=${INTERNAL_CACHE_REPO} \
+            ${BUILD_ARG} \
+            --use-new-run 
+
+build:
+  stage: build
+  artifacts:
+    paths:
+    - env/
+    expire_in: 1 hour
+  script:
+    - *create_ecr_repo
+    - *build_builder_image
+  only:
+    refs:
+      - master
+      - tags
+      - /hotfix.*/
+  except:
+    variables:
+      - $TRIGGER == "swagger"
+  tags:
+    - build-runner
+
